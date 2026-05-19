@@ -4,6 +4,9 @@
   "description": "Bounded local AI agent harness scaffold for governance-ready evidence packs.",
   "type": "module",
   "private": true,
+  "bin": {
+    "guard-agent": "./dist/cli.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
