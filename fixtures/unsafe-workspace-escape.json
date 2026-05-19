@@ -1,0 +1,9 @@
+{
+  "task_id": "fixture-unsafe-workspace-escape",
+  "tool_name": "read_file",
+  "input": {
+    "path": "../outside.txt"
+  },
+  "expected_decision": "deny",
+  "expected_rule": "block-workspace-escape"
+}

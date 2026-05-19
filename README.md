@@ -48,7 +48,7 @@ The command creates:
   final-report.md
 ```
 
-PR 2 only initializes evidence. It does not execute tools, execute commands, run Guard CLI, call OpenAI, call external APIs, or perform real agent planning.
+This command only initializes task evidence. It does not execute tools, execute commands, run Guard CLI, call OpenAI, call external APIs, or perform real agent planning.
 
 ## PR 3: Tool Registry + Safe Tools
 
@@ -64,6 +64,14 @@ PR 3 introduces an internal Tool Registry and low-risk safe tools for local evid
 Successful tool calls append structured JSONL evidence to `.evidence/<task-id>/tool-calls.jsonl`. Tool evidence records use `policy_decision: "not_evaluated_in_pr3"` because the full Policy Gate is not implemented yet.
 
 The `run_command` tool is not implemented. General shell execution, Guard CLI integration, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+
+## PR 4: Policy Gate + Blocked Actions
+
+PR 4 introduces a hardcoded v0.1 Policy Gate for tool requests. Unsafe requests are denied before tool execution and recorded in `.evidence/<task-id>/blocked-actions.jsonl`.
+
+The current policy blocks `.env` reads, credential-like file reads, workspace escape attempts, protected commercial or production writes, destructive command requests, and `git push` command requests. Successful registry tool calls now record `policy_decision: "allow"` in `tool-calls.jsonl`.
+
+`run_command` execution is still not implemented. General shell execution, actual destructive command execution, actual git push execution, Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## v0.1 Intended Workflow
 

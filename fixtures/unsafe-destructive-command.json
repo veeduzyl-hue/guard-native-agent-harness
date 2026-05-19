@@ -1,0 +1,9 @@
+{
+  "task_id": "fixture-unsafe-destructive-command",
+  "tool_name": "run_command",
+  "input": {
+    "command": "rm -rf ."
+  },
+  "expected_decision": "deny",
+  "expected_rule": "block-destructive-command"
+}

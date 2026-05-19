@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 
-import { appendToolCallEvent } from "../evidence/writer.js";
+import { appendBlockedActionEvent, appendToolCallEvent } from "../evidence/writer.js";
 import type { ToolCallEvidenceEvent } from "../evidence/schema.js";
+import { createDefaultPolicyGate, type PolicyGate } from "../policy/gate.js";
 import { createReportTool } from "./create-report.js";
 import { gitDiffTool } from "./git-diff.js";
 import { gitStatusTool } from "./git-status.js";
@@ -20,6 +21,8 @@ import { writeFileTool } from "./write-file.js";
 
 export class ToolRegistry {
   private readonly tools = new Map<ToolName, ToolDefinition>();
+
+  constructor(private readonly policyGate: PolicyGate = createDefaultPolicyGate()) {}
 
   register(tool: ToolDefinition): void {
     this.tools.set(tool.metadata.name, tool);
@@ -50,6 +53,27 @@ export class ToolRegistry {
     const timestamp = options.now ?? new Date();
     const eventId = options.eventId ?? `event-${randomBytes(4).toString("hex")}`;
     const evidenceInput = summarizeToolInput(name, input);
+    const policyDecision = this.policyGate.evaluate({
+      taskId: context.taskId,
+      toolName: name,
+      input,
+      workspaceRoot: context.workspaceRoot
+    });
+
+    if (policyDecision.decision === "deny") {
+      await appendBlockedActionEvent(context.evidenceDirectory, {
+        event_id: eventId,
+        task_id: context.taskId,
+        timestamp: timestamp.toISOString(),
+        requested_tool: name,
+        requested_input: evidenceInput,
+        block_reason: policyDecision.reason,
+        matched_rule: policyDecision.matchedRule ?? "unknown-policy-rule",
+        severity: policyDecision.severity === "none" ? "low" : policyDecision.severity
+      });
+
+      throw new ToolExecutionError(policyDecision.reason);
+    }
 
     try {
       const result = await tool.execute(context, input);
@@ -60,7 +84,7 @@ export class ToolRegistry {
         tool_name: tool.metadata.name,
         input: evidenceInput,
         risk_level: tool.metadata.riskLevel,
-        policy_decision: "not_evaluated_in_pr3",
+        policy_decision: "allow",
         status: "success",
         output_summary: result.outputSummary,
         duration_ms: Date.now() - startedAt
@@ -75,7 +99,7 @@ export class ToolRegistry {
         tool_name: tool.metadata.name,
         input: evidenceInput,
         risk_level: tool.metadata.riskLevel,
-        policy_decision: "not_evaluated_in_pr3",
+        policy_decision: "allow",
         status: "error",
         error_summary: error instanceof Error ? error.message : String(error),
         duration_ms: Date.now() - startedAt

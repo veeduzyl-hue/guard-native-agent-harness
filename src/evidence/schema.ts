@@ -33,10 +33,13 @@ export interface EvidencePack {
   relativeFinalReportPath: string;
   toolCallsPath: string;
   relativeToolCallsPath: string;
+  blockedActionsPath: string;
+  relativeBlockedActionsPath: string;
 }
 
 export type ToolRiskLevel = "low" | "medium" | "high";
 export type ToolCallStatus = "success" | "error";
+export type ToolPolicyDecision = "allow" | "not_evaluated_in_pr3";
 
 export interface ToolCallEvidenceEvent {
   event_id: string;
@@ -45,9 +48,20 @@ export interface ToolCallEvidenceEvent {
   tool_name: string;
   input: Record<string, unknown>;
   risk_level: ToolRiskLevel;
-  policy_decision: "not_evaluated_in_pr3";
+  policy_decision: ToolPolicyDecision;
   status: ToolCallStatus;
   output_summary?: Record<string, unknown>;
   error_summary?: string;
   duration_ms: number;
+}
+
+export interface BlockedActionEvidenceEvent {
+  event_id: string;
+  task_id: string;
+  timestamp: string;
+  requested_tool: string;
+  requested_input: Record<string, unknown>;
+  block_reason: string;
+  matched_rule: string;
+  severity: "low" | "medium" | "high";
 }
