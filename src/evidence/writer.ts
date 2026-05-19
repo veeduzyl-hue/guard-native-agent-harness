@@ -1,8 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { renderFinalReport } from "./report.js";
-import type { EvidencePack, PlanEvidence, TaskEvidence } from "./schema.js";
+import type { EvidencePack, PlanEvidence, TaskEvidence, ToolCallEvidenceEvent } from "./schema.js";
 
 export async function writeEvidencePack(
   workspaceRoot: string,
@@ -20,6 +20,8 @@ export async function writeEvidencePack(
   const report = renderFinalReport(task, plan);
   const finalReportPath = path.join(evidenceDirectory, "final-report.md");
   await writeFile(finalReportPath, report, "utf8");
+  const toolCallsPath = path.join(evidenceDirectory, "tool-calls.jsonl");
+  await writeFile(toolCallsPath, "", { encoding: "utf8", flag: "a" });
 
   return {
     task,
@@ -27,10 +29,19 @@ export async function writeEvidencePack(
     evidenceDirectory,
     relativeEvidenceDirectory,
     finalReportPath,
-    relativeFinalReportPath: `${relativeEvidenceDirectory}/final-report.md`
+    relativeFinalReportPath: `${relativeEvidenceDirectory}/final-report.md`,
+    toolCallsPath,
+    relativeToolCallsPath: `${relativeEvidenceDirectory}/tool-calls.jsonl`
   };
 }
 
 async function writeJsonFile(filePath: string, value: unknown): Promise<void> {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+export async function appendToolCallEvent(
+  evidenceDirectory: string,
+  event: ToolCallEvidenceEvent
+): Promise<void> {
+  await appendFile(path.join(evidenceDirectory, "tool-calls.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
 }

@@ -21,7 +21,8 @@ describe("task runner evidence initialization", () => {
     expect(await readdir(result.evidenceDirectory)).toEqual([
       "final-report.md",
       "plan.json",
-      "task.json"
+      "task.json",
+      "tool-calls.jsonl"
     ]);
   });
 
@@ -99,7 +100,7 @@ describe("task runner evidence initialization", () => {
     expect(report).toContain("no external API was called");
   });
 
-  it("does not create evidence implying real tool execution or Guard execution", async () => {
+  it("initializes tool call evidence without implying real tool or Guard execution", async () => {
     const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-boundary-"));
 
     const result = await runTask("Create a safe README update proposal", {
@@ -109,8 +110,10 @@ describe("task runner evidence initialization", () => {
     });
 
     const files = await readdir(result.evidenceDirectory);
+    const toolCalls = await readFile(path.join(result.evidenceDirectory, "tool-calls.jsonl"), "utf8");
 
-    expect(files).not.toContain("tool-calls.jsonl");
+    expect(files).toContain("tool-calls.jsonl");
+    expect(toolCalls).toBe("");
     expect(files).not.toContain("command-results.jsonl");
     expect(files).not.toContain("guard-results.json");
   });
