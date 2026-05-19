@@ -2,7 +2,7 @@
 
 Guard-native Agent Harness is a bounded local AI agent harness for simple AI-assisted workflows through registered tools, tool-call evidence capture, lightweight policy gates, and governance-ready evidence packs that MindForge Guard can validate.
 
-The current implementation initializes local task evidence only. It does not implement the agent runtime, OpenAI integration, tool execution, Guard CLI integration, policy enforcement, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
+The current CLI initializes local task evidence only. PR 3 adds an internal Tool Registry with bounded safe tools, but the project still does not implement an autonomous agent runtime, OpenAI integration, general command execution, Guard CLI integration, policy enforcement, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
 
 ## Relationship To MindForge Guard
 
@@ -49,6 +49,21 @@ The command creates:
 ```
 
 PR 2 only initializes evidence. It does not execute tools, execute commands, run Guard CLI, call OpenAI, call external APIs, or perform real agent planning.
+
+## PR 3: Tool Registry + Safe Tools
+
+PR 3 introduces an internal Tool Registry and low-risk safe tools for local evidence-aware workflows:
+
+- `list_files`
+- `read_file`
+- `write_file`
+- `git_status`
+- `git_diff`
+- `create_report`
+
+Successful tool calls append structured JSONL evidence to `.evidence/<task-id>/tool-calls.jsonl`. Tool evidence records use `policy_decision: "not_evaluated_in_pr3"` because the full Policy Gate is not implemented yet.
+
+The `run_command` tool is not implemented. General shell execution, Guard CLI integration, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## v0.1 Intended Workflow
 
