@@ -107,6 +107,21 @@ All plan steps go through the Tool Registry and Policy Gate. Allowed tool calls 
 
 The mock planner is not autonomous and does not use an LLM. It does not generate arbitrary tools or commands, does not execute outside the existing allowlist, does not install or mutate Guard, and does not add OpenAI or external LLM integration.
 
+## v0.1 Acceptance
+
+Validate the v0.1 local harness with:
+
+```bash
+npm run build
+npm test
+npm run lint
+npm run verify:v0.1
+```
+
+`npm run verify:v0.1` runs both the safe README proposal workflow and the unsafe blocked-action workflow, then verifies the generated Evidence Packs and final reports.
+
+v0.1 remains local-first and deterministic. It uses the mock planner, does not require `OPENAI_API_KEY`, does not require a `.env` file, does not call external LLM providers, and treats Guard Adapter output as evidence only.
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
@@ -157,9 +172,9 @@ Future PRs may extend this structure with additional artifacts and hashes.
 
 - Autonomous or model-backed agent execution
 - OpenAI API calls
-- Tool execution or command execution
-- Guard CLI invocation
-- Policy enforcement implementation
+- Arbitrary tool execution or arbitrary command execution
+- Required Guard CLI installation
+- Policy authority outside the local harness boundary
 - SaaS, dashboard, API server, OAuth, or background daemon behavior
 - Pricing, checkout, license, entitlement, or License Hub changes
 - MindForge Guard runtime semantic changes

@@ -11,7 +11,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "verify:v0.1": "node scripts/verify_v0_1_acceptance.mjs"
   },
   "engines": {
     "node": ">=20"
