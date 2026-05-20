@@ -1,4 +1,5 @@
 import type { PlanEvidence } from "../evidence/schema.js";
+import type { PlannerProvider } from "./provider.js";
 import type { MockPlanEvidence, MockPlanStep } from "./types.js";
 
 export function createPlaceholderPlan(taskId: string): PlanEvidence {
@@ -143,10 +144,28 @@ export function createMockPlan(taskId: string, userPrompt: string): MockPlanEvid
   ]);
 }
 
+export const mockPlannerProvider: PlannerProvider = {
+  name: "mock",
+  kind: "local-deterministic",
+  available: true,
+  async createPlan(context) {
+    return {
+      provider: "mock",
+      model: null,
+      plan: createMockPlan(context.taskId, context.userPrompt),
+      rawProviderMetadata: {
+        deterministic: true
+      }
+    };
+  }
+};
+
 function createPlan(taskId: string, steps: MockPlanStep[]): MockPlanEvidence {
   return {
     task_id: taskId,
     planner: "mock",
+    provider: "mock",
+    model: null,
     steps,
     risk_notes: [
       "Mock planner uses deterministic templates only.",

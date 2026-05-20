@@ -67,7 +67,9 @@ describe("task runner evidence initialization", () => {
       workspace_root: workspaceRoot,
       harness_version: "0.0.0",
       mode: "local",
-      planner_type: "mock"
+      planner_type: "mock",
+      planner_provider: "mock",
+      planner_model: null
     });
   });
 
@@ -86,6 +88,8 @@ describe("task runner evidence initialization", () => {
 
     expect(plan.task_id).toBe("task-20260520-010203-abc123");
     expect(plan.planner).toBe("mock");
+    expect(plan.provider).toBe("mock");
+    expect(plan.model).toBeNull();
     expect(plan.steps.map((step) => step.tool)).toEqual([
       "list_files",
       "read_file",

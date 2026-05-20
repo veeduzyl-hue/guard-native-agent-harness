@@ -2,7 +2,7 @@
 
 ## v0.1: Local Evidence-first Harness
 
-Status: release candidate after PR 9B.
+Status: complete in `v0.1.0`.
 
 v0.1 establishes the local deterministic baseline:
 
@@ -18,7 +18,7 @@ v0.1 establishes the local deterministic baseline:
 
 ## v0.2: Optional Model-backed Planner
 
-v0.2 may explore an optional model-backed planner, but only with hard boundaries:
+v0.2 may explore optional model-backed planners, but only with hard boundaries:
 
 - Model proposes steps only.
 - Tool Registry remains mandatory.
@@ -28,8 +28,18 @@ v0.2 may explore an optional model-backed planner, but only with hard boundaries
 - No `.env` reading by the agent.
 - API key handling must be explicit, local, non-leaking, and optional.
 - The deterministic mock planner remains available.
+- The default provider remains `mock` until explicitly changed in a future release.
 
 v0.2 should not make OpenAI or any external LLM required for the v0.1 local workflow.
+
+Phased plan:
+
+- PR 10A: Planner Provider Interface.
+- PR 10B: Ollama Local Planner Provider.
+- PR 10C: OpenAI Planner Provider.
+- PR 10D: DeepSeek Planner Provider, optional.
+
+All providers remain optional.
 
 ## v0.3: External Runtime Trace Experiments
 

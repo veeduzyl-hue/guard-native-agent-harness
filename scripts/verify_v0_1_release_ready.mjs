@@ -45,8 +45,7 @@ async function main() {
   checks.push(".evidence/ is ignored and no generated evidence is tracked");
 
   const existingTag = await runCommand("git", ["tag", "--list", "v0.1.0"], repoRoot);
-  assert(existingTag.stdout.trim() === "", "v0.1.0 tag should not be created before this PR is merged");
-  checks.push("v0.1.0 tag has not been created locally");
+  checks.push(existingTag.stdout.trim() === "v0.1.0" ? "v0.1.0 tag exists locally" : "v0.1.0 tag is not present locally");
 
   console.log("v0.1 release readiness verification passed.");
   console.log("");
