@@ -2,7 +2,8 @@ import { randomBytes } from "node:crypto";
 
 import { createPlaceholderPlan } from "../agent/planner.js";
 import { HARNESS_VERSION } from "../index.js";
-import { writeEvidencePack } from "../evidence/writer.js";
+import { writeEvidencePack, writeGuardResults } from "../evidence/writer.js";
+import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
 import type { EvidencePack, TaskEvidence } from "../evidence/schema.js";
 
@@ -11,6 +12,7 @@ export interface RunTaskOptions {
   now?: Date;
   randomId?: string;
   harnessVersion?: string;
+  guardAdapter?: GuardAdapter;
 }
 
 export async function runTask(userPrompt: string, options: RunTaskOptions = {}): Promise<EvidencePack> {
@@ -30,7 +32,14 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
 
   const plan = createPlaceholderPlan(taskId);
 
-  return writeEvidencePack(workspaceRoot, task, plan);
+  const evidencePack = await writeEvidencePack(workspaceRoot, task, plan);
+  const guardResult = await (options.guardAdapter ?? createDefaultGuardAdapter()).collect();
+  await writeGuardResults(evidencePack.evidenceDirectory, guardResult);
+
+  return {
+    ...evidencePack,
+    guardAvailable: guardResult.guard_available
+  };
 }
 
 export function createTaskId(now = new Date(), randomId = randomBytes(4).toString("hex")): string {

@@ -29,17 +29,20 @@ ${riskNotes}
 
 ${evidenceFiles}
 
+## Guard Results
+
+Guard results are written to \`guard-results.json\`.
+
 ## Runtime Boundary
 
-PR 2 initializes evidence only. No real agent execution happened, no tool calls happened, no commands were executed, no Guard CLI commands were run, and no external API was called.
+This run initializes local evidence. No real agent execution happened, no autonomous tool calls happened, no external API was called, and Guard output does not grant execution authority.
 
 ## Limitations
 
 - The planner is a placeholder.
 - No real agent planner is implemented.
-- No tool registry is implemented.
-- No Policy Gate is implemented.
-- No Guard Adapter or Guard CLI integration is implemented.
+- Tool and command execution remain bounded by the Tool Registry and Policy Gate.
+- Guard Adapter output is recorded as evidence only.
 - No external LLM or model API is connected.
 `;
 }

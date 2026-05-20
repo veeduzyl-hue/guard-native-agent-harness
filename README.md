@@ -2,7 +2,7 @@
 
 Guard-native Agent Harness is a bounded local AI agent harness for simple AI-assisted workflows through registered tools, tool-call evidence capture, lightweight policy gates, and governance-ready evidence packs that MindForge Guard can validate.
 
-The current CLI initializes local task evidence only. The project includes an internal Tool Registry, bounded safe tools, a local Policy Gate, and a strictly allowlisted command sandbox, but it still does not implement an autonomous agent runtime, OpenAI integration, general shell execution, Guard CLI integration, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
+The current CLI initializes local task evidence and optional Guard Adapter evidence. The project includes an internal Tool Registry, bounded safe tools, a local Policy Gate, and a strictly allowlisted command sandbox, but it still does not implement an autonomous agent runtime, OpenAI integration, general shell execution, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
 
 ## Relationship To MindForge Guard
 
@@ -48,7 +48,7 @@ The command creates:
   final-report.md
 ```
 
-This command only initializes task evidence. It does not execute tools, execute commands, run Guard CLI, call OpenAI, call external APIs, or perform real agent planning.
+This command only initializes task evidence and optional Guard Adapter evidence. It does not execute tools, run allowlisted workflow commands, call OpenAI, call external APIs, or perform real agent planning.
 
 ## PR 3: Tool Registry + Safe Tools
 
@@ -63,7 +63,7 @@ PR 3 introduces an internal Tool Registry and low-risk safe tools for local evid
 
 Successful tool calls append structured JSONL evidence to `.evidence/<task-id>/tool-calls.jsonl`. Tool evidence records use `policy_decision: "not_evaluated_in_pr3"` because the full Policy Gate is not implemented yet.
 
-PR 3 did not add `run_command`; PR 5 below describes the later allowlisted command sandbox. General shell execution, Guard CLI integration, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+PR 3 did not add `run_command`; PR 5 below describes the later allowlisted command sandbox. General shell execution, Guard execution authority, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## PR 4: Policy Gate + Blocked Actions
 
@@ -71,7 +71,7 @@ PR 4 introduces a hardcoded v0.1 Policy Gate for tool requests. Unsafe requests 
 
 The current policy blocks `.env` reads, credential-like file reads, workspace escape attempts, protected commercial or production writes, destructive command requests, and `git push` command requests. Successful registry tool calls now record `policy_decision: "allow"` in `tool-calls.jsonl`.
 
-PR 4 did not add command execution; PR 5 below describes the later allowlisted `run_command` sandbox. General shell execution, actual destructive command execution, actual git push execution, Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+PR 4 did not add command execution; PR 5 below describes the later allowlisted `run_command` sandbox. General shell execution, actual destructive command execution, actual git push execution, Guard execution authority, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## PR 5: Run Command + Sandbox Rules
 
@@ -79,7 +79,15 @@ PR 5 introduces a `run_command` tool for explicitly allowlisted local validation
 
 Allowed command results are written to `.evidence/<task-id>/command-results.jsonl`, and the corresponding tool events are written to `tool-calls.jsonl` with `policy_decision: "allow"`. Denied commands are not executed and are written to `blocked-actions.jsonl`.
 
-The command allowlist is limited to `git status --short`, `git diff`, `npm test`, `npm run build`, `node --version`, and `node -v`. Destructive commands, `git push`, deployment commands, network commands, package publishing, package installation, and arbitrary shell execution remain blocked. Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+The command allowlist is limited to `git status --short`, `git diff`, `npm test`, `npm run build`, `node --version`, and `node -v`. Destructive commands, `git push`, deployment commands, network commands, package publishing, package installation, and arbitrary shell execution remain blocked. Guard execution authority, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+
+## PR 6: Guard Adapter
+
+PR 6 introduces an optional Guard Adapter. When a local `guard` CLI is available, the harness attempts `guard status --json`, `guard audit --json`, and `guard drift status --json`, then writes bounded command summaries and parsed JSON, when valid, to `.evidence/<task-id>/guard-results.json`.
+
+The Guard CLI is optional. If it is missing, the run still succeeds and `guard-results.json` records `guard_available: false` with reason `Guard CLI not found`.
+
+Guard output is evidence only. It does not grant execution authority, bypass the Policy Gate, install or configure Guard, modify Guard policy or source, or change MindForge Guard runtime semantics. OpenAI or external LLM integration is still not implemented, and final report rendering will be improved in a later PR.
 
 ## v0.1 Intended Workflow
 

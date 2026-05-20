@@ -2,6 +2,7 @@ import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { renderFinalReport } from "./report.js";
+import type { GuardAdapterResult } from "../guard/types.js";
 import type {
   BlockedActionEvidenceEvent,
   CommandResultEvidenceEvent,
@@ -33,6 +34,7 @@ export async function writeEvidencePack(
   await writeFile(blockedActionsPath, "", { encoding: "utf8", flag: "a" });
   const commandResultsPath = path.join(evidenceDirectory, "command-results.jsonl");
   await writeFile(commandResultsPath, "", { encoding: "utf8", flag: "a" });
+  const guardResultsPath = path.join(evidenceDirectory, "guard-results.json");
 
   return {
     task,
@@ -46,7 +48,10 @@ export async function writeEvidencePack(
     blockedActionsPath,
     relativeBlockedActionsPath: `${relativeEvidenceDirectory}/blocked-actions.jsonl`,
     commandResultsPath,
-    relativeCommandResultsPath: `${relativeEvidenceDirectory}/command-results.jsonl`
+    relativeCommandResultsPath: `${relativeEvidenceDirectory}/command-results.jsonl`,
+    guardResultsPath,
+    relativeGuardResultsPath: `${relativeEvidenceDirectory}/guard-results.json`,
+    guardAvailable: false
   };
 }
 
@@ -73,4 +78,11 @@ export async function appendCommandResultEvent(
   event: CommandResultEvidenceEvent
 ): Promise<void> {
   await appendFile(path.join(evidenceDirectory, "command-results.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
+}
+
+export async function writeGuardResults(
+  evidenceDirectory: string,
+  result: GuardAdapterResult
+): Promise<void> {
+  await writeFile(path.join(evidenceDirectory, "guard-results.json"), `${JSON.stringify(result, null, 2)}\n`, "utf8");
 }

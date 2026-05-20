@@ -24,6 +24,7 @@ program
       console.log(`Task ID: ${result.task.task_id}`);
       console.log(`Evidence Pack: ${result.relativeEvidenceDirectory}`);
       console.log(`Final report: ${result.relativeFinalReportPath}`);
+      console.log(`Guard available: ${result.guardAvailable}`);
     } catch (error) {
       console.error(`${PROJECT_NAME}: failed to initialize task evidence`);
       console.error(error instanceof Error ? error.message : String(error));
