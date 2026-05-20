@@ -6,3 +6,4 @@ dist/
 .env
 .env.*
 *.log
+examples/readme-update/README_UPDATE_PROPOSAL.md

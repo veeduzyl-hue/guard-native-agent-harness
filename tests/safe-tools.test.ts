@@ -16,7 +16,8 @@ async function createToolHarness(prefix: string): Promise<{
   const pack = await runTask("test safe tool execution", {
     workspaceRoot,
     now: new Date("2026-05-20T01:02:03.000Z"),
-    randomId: "safe123"
+    randomId: "safe123",
+    executePlan: false
   });
 
   return {

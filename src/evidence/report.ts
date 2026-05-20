@@ -136,7 +136,7 @@ function renderPlanSummary(plan: PlanEvidence | null, status: string): string {
     `- Step count: ${plan.steps.length}`,
     "",
     "Steps:",
-    ...plan.steps.map((step) => `- ${step.id}: ${step.description}`),
+    ...plan.steps.map((step) => `- ${step.id}${step.tool ? ` (${step.tool})` : ""}: ${step.description}`),
     "",
     "Risk notes:",
     ...(plan.risk_notes.length > 0 ? plan.risk_notes.map((note) => `- ${note}`) : ["- None recorded."]),

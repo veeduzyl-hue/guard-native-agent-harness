@@ -17,7 +17,8 @@ async function createCommandHarness(prefix: string): Promise<{
   const pack = await runTask("test run command", {
     workspaceRoot,
     now: new Date("2026-05-20T03:02:03.000Z"),
-    randomId: "command123"
+    randomId: "command123",
+    executePlan: false
   });
 
   return {

@@ -49,7 +49,13 @@ export async function writeEvidencePack(
     relativeCommandResultsPath: `${relativeEvidenceDirectory}/command-results.jsonl`,
     guardResultsPath,
     relativeGuardResultsPath: `${relativeEvidenceDirectory}/guard-results.json`,
-    guardAvailable: false
+    guardAvailable: false,
+    executionSummary: {
+      steps_planned: 0,
+      steps_completed: 0,
+      steps_blocked: 0,
+      steps_failed: 0
+    }
   };
 }
 
