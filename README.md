@@ -153,9 +153,29 @@ The default planner provider is `mock`:
 npx guard-agent run "Create a safe README update proposal" --planner mock
 ```
 
-PR 10A adds the planner provider interface and local plan validation only. Model-backed providers such as `ollama`, `openai`, and `deepseek` are recognized as future provider names but are not implemented yet.
+PR 10A added the planner provider interface and local plan validation. PR 10B adds optional local Ollama planning. OpenAI and DeepSeek remain future optional providers.
 
-No API key is required, no `.env` file is loaded, and no external model call is made in PR 10A.
+No API key is required and no `.env` file is loaded.
+
+## Ollama Planner Provider
+
+Example:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
+```
+
+Notes:
+
+- Ollama must already be running locally.
+- The model must already be available locally.
+- The harness does not install Ollama.
+- The harness does not pull models.
+- The harness does not run shell commands to manage Ollama.
+- Ollama proposes a plan only.
+- All plan steps are validated before execution.
+- Tool Registry and Policy Gate remain mandatory.
+- Evidence capture remains unchanged.
 
 ## v0.1 Intended Workflow
 

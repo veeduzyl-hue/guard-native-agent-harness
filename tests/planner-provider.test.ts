@@ -28,6 +28,16 @@ describe("planner provider registry", () => {
     });
   });
 
+  it("registers ollama as an available optional local model provider", () => {
+    const registry = createDefaultPlannerProviderRegistry();
+
+    expect(registry.get("ollama")).toMatchObject({
+      name: "ollama",
+      kind: "local-model",
+      available: true
+    });
+  });
+
   it("rejects unknown provider names", () => {
     const registry = createDefaultPlannerProviderRegistry();
 
@@ -35,14 +45,14 @@ describe("planner provider registry", () => {
     expect(() => registry.get("missing-provider")).toThrow("Unknown planner provider: missing-provider");
   });
 
-  it.each(["ollama", "openai", "deepseek"])(
-    "recognizes %s as unimplemented in PR 10A",
+  it.each(["openai", "deepseek"])(
+    "recognizes %s as unimplemented",
     (providerName) => {
       const registry = createDefaultPlannerProviderRegistry();
 
       expect(() => registry.get(providerName)).toThrow(PlannerProviderNotImplementedError);
       expect(() => registry.get(providerName)).toThrow(
-        `Planner provider "${providerName}" is recognized but not implemented in PR 10A.`
+        `Planner provider "${providerName}" is recognized but not implemented.`
       );
     }
   );
@@ -85,7 +95,7 @@ describe("planner provider selection", () => {
     expect(result.plan.model).toBeNull();
   });
 
-  it.each(["ollama", "openai", "deepseek"])(
+  it.each(["openai", "deepseek"])(
     "fails with a controlled error for unimplemented provider %s",
     async (providerName) => {
       const workspaceRoot = await mkdtemp(path.join(tmpdir(), `guard-agent-provider-${providerName}-`));
@@ -97,7 +107,7 @@ describe("planner provider selection", () => {
           plannerModel: "future-model",
           guardAdapter: unavailableGuardAdapter
         })
-      ).rejects.toThrow(`Planner provider "${providerName}" is recognized but not implemented in PR 10A.`);
+      ).rejects.toThrow(`Planner provider "${providerName}" is recognized but not implemented.`);
     }
   );
 });

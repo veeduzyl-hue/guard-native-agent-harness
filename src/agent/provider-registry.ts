@@ -1,7 +1,8 @@
+import { createOllamaPlannerProvider } from "./ollama-provider.js";
 import { mockPlannerProvider } from "./planner.js";
 import type { PlannerProvider, PlannerProviderName } from "./provider.js";
 
-const futureProviderNames = new Set<PlannerProviderName>(["ollama", "openai", "deepseek"]);
+const futureProviderNames = new Set<PlannerProviderName>(["openai", "deepseek"]);
 
 export class PlannerProviderRegistry {
   private readonly providers = new Map<PlannerProviderName, PlannerProvider>();
@@ -20,7 +21,7 @@ export class PlannerProviderRegistry {
 
       if (futureProviderNames.has(name)) {
         throw new PlannerProviderNotImplementedError(
-          `Planner provider "${name}" is recognized but not implemented in PR 10A.`
+          `Planner provider "${name}" is recognized but not implemented.`
         );
       }
     }
@@ -50,6 +51,7 @@ export class PlannerProviderNotImplementedError extends Error {
 export function createDefaultPlannerProviderRegistry(): PlannerProviderRegistry {
   const registry = new PlannerProviderRegistry();
   registry.register(mockPlannerProvider);
+  registry.register(createOllamaPlannerProvider());
 
   return registry;
 }

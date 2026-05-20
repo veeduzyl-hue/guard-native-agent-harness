@@ -37,7 +37,8 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
     taskId,
     userPrompt,
     workspaceRoot,
-    harnessVersion
+    harnessVersion,
+    requestedModel: options.plannerModel ?? null
   });
   const planValidation = validatePlan(plannerResult.plan, options.toolRegistry);
 

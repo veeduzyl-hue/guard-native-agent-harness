@@ -2,9 +2,9 @@
 
 ## Purpose
 
-PR 10A introduces the planner provider interface so future providers can propose plans without changing the v0.1 execution boundary.
+PR 10A introduced the planner provider interface so future providers can propose plans without changing the v0.1 execution boundary. PR 10B adds the first optional model-backed provider for local Ollama.
 
-This PR only adds the interface, registry, mock provider implementation, provider selection plumbing, and plan validation. It does not add any model API integration.
+Ollama support is local-only, explicitly selected, and still produces only a proposed plan. It does not change tool execution, Policy Gate, evidence capture, or Guard Adapter semantics.
 
 ## Provider Interface
 
@@ -31,11 +31,32 @@ The known provider names are:
 ## Current Implementation Status
 
 - `mock`: implemented and available.
-- `ollama`: recognized but not implemented in PR 10A.
-- `openai`: recognized but not implemented in PR 10A.
-- `deepseek`: recognized but not implemented in PR 10A.
+- `ollama`: implemented as an optional local-model provider in PR 10B.
+- `openai`: recognized but not implemented.
+- `deepseek`: recognized but not implemented.
 
 The default provider remains `mock`.
+
+## Ollama Planner Provider
+
+Example:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
+```
+
+Notes:
+
+- Ollama must already be running locally.
+- The model must already be available locally.
+- The harness calls only `http://localhost:11434/api/generate`.
+- The harness does not install Ollama.
+- The harness does not pull models.
+- The harness does not run shell commands to manage Ollama.
+- Ollama proposes a plan only.
+- All plan steps are validated before execution.
+- Tool Registry and Policy Gate remain mandatory.
+- Evidence capture remains unchanged.
 
 ## Execution Boundary
 
@@ -59,13 +80,13 @@ If validation fails, the plan is not executed.
 
 ## Evidence Boundary
 
-Task and plan evidence record the selected provider and model metadata. PR 10A records `mock` as the provider and `null` as the model.
+Task and plan evidence record the selected provider and model metadata. `mock` records `null` as the model. `ollama` records the explicitly requested local model name.
 
-No external prompt or model response evidence is produced in PR 10A because no external provider is implemented.
+PR 10B does not store full raw model responses. Provider output is parsed into a bounded plan shape before validation and evidence writing.
 
 ## API Key Boundary
 
-PR 10A introduces no API key handling, no `.env` loading, and no external model credentials.
+PR 10A and PR 10B introduce no API key handling, no `.env` loading, and no external model credentials.
 
 Future provider work must handle API keys explicitly and avoid leaking keys into evidence, logs, final reports, or provider metadata.
 
@@ -91,7 +112,7 @@ Future provider work must handle API keys explicitly and avoid leaking keys into
 
 ## Future Provider Roadmap
 
-- PR 10B may add an optional Ollama local planner provider.
+- PR 10B adds an optional Ollama local planner provider.
 - PR 10C may add an optional OpenAI planner provider.
 - PR 10D may add an optional DeepSeek planner provider.
 
