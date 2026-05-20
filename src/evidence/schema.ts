@@ -37,6 +37,9 @@ export interface EvidencePack {
   relativeBlockedActionsPath: string;
   commandResultsPath: string;
   relativeCommandResultsPath: string;
+  guardResultsPath: string;
+  relativeGuardResultsPath: string;
+  guardAvailable: boolean;
 }
 
 export type ToolRiskLevel = "low" | "medium" | "high";

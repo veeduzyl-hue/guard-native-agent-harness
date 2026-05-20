@@ -6,6 +6,22 @@ import { describe, expect, it } from "vitest";
 
 import { runTask } from "../src/task/runner.js";
 import type { PlanEvidence, TaskEvidence } from "../src/evidence/schema.js";
+import { GuardAdapter } from "../src/guard/adapter.js";
+import type { GuardAdapterResult } from "../src/guard/types.js";
+
+const unavailableGuardResult: GuardAdapterResult = {
+  guard_available: false,
+  reason: "Guard CLI not found",
+  commands_attempted: [],
+  status_result: null,
+  audit_result: null,
+  drift_result: null,
+  errors: []
+};
+
+const unavailableGuardAdapter = new GuardAdapter(async () => {
+  throw Object.assign(new Error("guard not found"), { code: "ENOENT" });
+});
 
 describe("task runner evidence initialization", () => {
   it("creates the evidence directory and required files", async () => {
@@ -14,7 +30,8 @@ describe("task runner evidence initialization", () => {
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
-      randomId: "abc123"
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter
     });
 
     expect(result.relativeEvidenceDirectory).toBe(".evidence/task-20260520-010203-abc123");
@@ -22,6 +39,7 @@ describe("task runner evidence initialization", () => {
       "blocked-actions.jsonl",
       "command-results.jsonl",
       "final-report.md",
+      "guard-results.json",
       "plan.json",
       "task.json",
       "tool-calls.jsonl"
@@ -34,7 +52,8 @@ describe("task runner evidence initialization", () => {
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
-      randomId: "abc123"
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter
     });
 
     const task = JSON.parse(await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")) as TaskEvidence;
@@ -56,7 +75,8 @@ describe("task runner evidence initialization", () => {
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
-      randomId: "abc123"
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter
     });
 
     const plan = JSON.parse(await readFile(path.join(result.evidenceDirectory, "plan.json"), "utf8")) as PlanEvidence;
@@ -84,7 +104,8 @@ describe("task runner evidence initialization", () => {
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
-      randomId: "abc123"
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter
     });
 
     const report = await readFile(path.join(result.evidenceDirectory, "final-report.md"), "utf8");
@@ -96,9 +117,8 @@ describe("task runner evidence initialization", () => {
     expect(report).toContain("## Runtime Boundary");
     expect(report).toContain("## Limitations");
     expect(report).toContain("No real agent execution happened");
-    expect(report).toContain("no tool calls happened");
-    expect(report).toContain("no commands were executed");
-    expect(report).toContain("no Guard CLI commands were run");
+    expect(report).toContain("no autonomous tool calls happened");
+    expect(report).toContain("Guard output does not grant execution authority");
     expect(report).toContain("no external API was called");
   });
 
@@ -108,20 +128,25 @@ describe("task runner evidence initialization", () => {
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
-      randomId: "abc123"
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter
     });
 
     const files = await readdir(result.evidenceDirectory);
     const blockedActions = await readFile(path.join(result.evidenceDirectory, "blocked-actions.jsonl"), "utf8");
     const commandResults = await readFile(path.join(result.evidenceDirectory, "command-results.jsonl"), "utf8");
+    const guardResults = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "guard-results.json"), "utf8")
+    ) as GuardAdapterResult;
     const toolCalls = await readFile(path.join(result.evidenceDirectory, "tool-calls.jsonl"), "utf8");
 
     expect(files).toContain("blocked-actions.jsonl");
     expect(blockedActions).toBe("");
     expect(files).toContain("command-results.jsonl");
     expect(commandResults).toBe("");
+    expect(files).toContain("guard-results.json");
+    expect(guardResults).toEqual(unavailableGuardResult);
     expect(files).toContain("tool-calls.jsonl");
     expect(toolCalls).toBe("");
-    expect(files).not.toContain("guard-results.json");
   });
 });
