@@ -8,6 +8,7 @@ import { gitDiffTool } from "./git-diff.js";
 import { gitStatusTool } from "./git-status.js";
 import { listFilesTool } from "./list-files.js";
 import { readFileTool } from "./read-file.js";
+import { runCommandTool } from "./run-command.js";
 import type {
   ToolDefinition,
   ToolExecutionContext,
@@ -76,7 +77,10 @@ export class ToolRegistry {
     }
 
     try {
-      const result = await tool.execute(context, input);
+      const result = await tool.execute(context, input, {
+        eventId,
+        timestamp
+      });
       await appendToolCallEvent(context.evidenceDirectory, {
         event_id: eventId,
         task_id: context.taskId,
@@ -85,7 +89,7 @@ export class ToolRegistry {
         input: evidenceInput,
         risk_level: tool.metadata.riskLevel,
         policy_decision: "allow",
-        status: "success",
+        status: result.status ?? "success",
         output_summary: result.outputSummary,
         duration_ms: Date.now() - startedAt
       });
@@ -139,6 +143,7 @@ export function createDefaultToolRegistry(): ToolRegistry {
   registry.register(gitStatusTool);
   registry.register(gitDiffTool);
   registry.register(createReportTool);
+  registry.register(runCommandTool);
 
   return registry;
 }

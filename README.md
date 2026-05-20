@@ -2,7 +2,7 @@
 
 Guard-native Agent Harness is a bounded local AI agent harness for simple AI-assisted workflows through registered tools, tool-call evidence capture, lightweight policy gates, and governance-ready evidence packs that MindForge Guard can validate.
 
-The current CLI initializes local task evidence only. PR 3 adds an internal Tool Registry with bounded safe tools, but the project still does not implement an autonomous agent runtime, OpenAI integration, general command execution, Guard CLI integration, policy enforcement, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
+The current CLI initializes local task evidence only. The project includes an internal Tool Registry, bounded safe tools, a local Policy Gate, and a strictly allowlisted command sandbox, but it still does not implement an autonomous agent runtime, OpenAI integration, general shell execution, Guard CLI integration, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
 
 ## Relationship To MindForge Guard
 
@@ -63,7 +63,7 @@ PR 3 introduces an internal Tool Registry and low-risk safe tools for local evid
 
 Successful tool calls append structured JSONL evidence to `.evidence/<task-id>/tool-calls.jsonl`. Tool evidence records use `policy_decision: "not_evaluated_in_pr3"` because the full Policy Gate is not implemented yet.
 
-The `run_command` tool is not implemented. General shell execution, Guard CLI integration, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+PR 3 did not add `run_command`; PR 5 below describes the later allowlisted command sandbox. General shell execution, Guard CLI integration, OpenAI or external model APIs, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## PR 4: Policy Gate + Blocked Actions
 
@@ -71,7 +71,15 @@ PR 4 introduces a hardcoded v0.1 Policy Gate for tool requests. Unsafe requests 
 
 The current policy blocks `.env` reads, credential-like file reads, workspace escape attempts, protected commercial or production writes, destructive command requests, and `git push` command requests. Successful registry tool calls now record `policy_decision: "allow"` in `tool-calls.jsonl`.
 
-`run_command` execution is still not implemented. General shell execution, actual destructive command execution, actual git push execution, Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+PR 4 did not add command execution; PR 5 below describes the later allowlisted `run_command` sandbox. General shell execution, actual destructive command execution, actual git push execution, Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
+
+## PR 5: Run Command + Sandbox Rules
+
+PR 5 introduces a `run_command` tool for explicitly allowlisted local validation and inspection commands. Allowed commands run inside the workspace sandbox with `shell: false`, bounded output capture, timeouts, and command-result evidence.
+
+Allowed command results are written to `.evidence/<task-id>/command-results.jsonl`, and the corresponding tool events are written to `tool-calls.jsonl` with `policy_decision: "allow"`. Denied commands are not executed and are written to `blocked-actions.jsonl`.
+
+The command allowlist is limited to `git status --short`, `git diff`, `npm test`, `npm run build`, `node --version`, and `node -v`. Destructive commands, `git push`, deployment commands, network commands, package publishing, package installation, and arbitrary shell execution remain blocked. Guard CLI integration, OpenAI or external LLM integration, autonomous planning, SaaS, dashboards, OAuth, and background agent behavior remain out of scope.
 
 ## v0.1 Intended Workflow
 

@@ -7,7 +7,8 @@ export type ToolName =
   | "write_file"
   | "git_status"
   | "git_diff"
-  | "create_report";
+  | "create_report"
+  | "run_command";
 
 export interface ToolMetadata {
   name: ToolName;
@@ -33,11 +34,17 @@ export interface ToolExecutionOptions {
 export interface ToolExecutionResult {
   output: unknown;
   outputSummary: Record<string, unknown>;
+  status?: "success" | "error";
+}
+
+export interface ToolInvocation {
+  eventId: string;
+  timestamp: Date;
 }
 
 export interface ToolDefinition<TInput extends Record<string, unknown> = Record<string, unknown>> {
   metadata: ToolMetadata;
-  execute(context: ToolExecutionContext, input: TInput): Promise<ToolExecutionResult>;
+  execute(context: ToolExecutionContext, input: TInput, invocation: ToolInvocation): Promise<ToolExecutionResult>;
 }
 
 export class ToolExecutionError extends Error {

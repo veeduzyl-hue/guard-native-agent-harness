@@ -1,0 +1,9 @@
+{
+  "task_id": "fixture-unsafe-non-allowlisted-command",
+  "tool_name": "run_command",
+  "input": {
+    "command": "npm install"
+  },
+  "expected_decision": "deny",
+  "expected_rule": "block-command-not-allowlisted"
+}

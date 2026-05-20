@@ -295,11 +295,17 @@ describe("safe tools", () => {
     expect(JSON.stringify(events[0])).not.toContain("Only a local evidence artifact.");
   });
 
-  it("does not register run_command", () => {
+  it("registers run_command with medium risk and evidence requirements", () => {
     const registry = createDefaultToolRegistry();
-    const names = registry.list().map((metadata) => metadata.name as string);
+    const metadata = registry.get("run_command").metadata;
 
-    expect(names).not.toContain("run_command");
+    expect(metadata).toMatchObject({
+      name: "run_command",
+      riskLevel: "medium",
+      requiresApproval: false,
+      pathPolicy: "workspace_only",
+      evidenceRequired: true
+    });
   });
 
   it.each<ToolName>(["list_files", "read_file", "write_file"])(

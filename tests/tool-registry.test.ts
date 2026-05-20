@@ -9,7 +9,8 @@ const expectedToolNames: ToolName[] = [
   "write_file",
   "git_status",
   "git_diff",
-  "create_report"
+  "create_report",
+  "run_command"
 ];
 
 describe("tool registry", () => {
@@ -23,7 +24,7 @@ describe("tool registry", () => {
   it("returns a clear error for unknown tools", () => {
     const registry = createDefaultToolRegistry();
 
-    expect(() => registry.get("run_command" as ToolName)).toThrow("Unknown tool: run_command");
+    expect(() => registry.get("missing_tool" as ToolName)).toThrow("Unknown tool: missing_tool");
   });
 
   it("exposes metadata for every registered tool", () => {

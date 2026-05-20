@@ -1,0 +1,9 @@
+{
+  "task_id": "fixture-unsafe-git-push-command",
+  "tool_name": "run_command",
+  "input": {
+    "command": "git push origin main"
+  },
+  "expected_decision": "deny",
+  "expected_rule": "block-git-push"
+}

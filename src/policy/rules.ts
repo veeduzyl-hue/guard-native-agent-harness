@@ -1,11 +1,12 @@
 import path from "node:path";
 
+import { isAllowlistedCommand } from "../sandbox/command.js";
 import { resolveWorkspacePath, WorkspaceBoundaryError } from "../sandbox/workspace.js";
 import type { PolicyDecision, PolicyRequest } from "./types.js";
 
 const allowDecision: PolicyDecision = {
   decision: "allow",
-  reason: "Tool request is within the PR 4 policy boundary.",
+  reason: "Tool request is within the policy boundary.",
   matchedRule: null,
   severity: "none"
 };
@@ -55,7 +56,16 @@ const destructiveCommandPatterns = [
 
 export function evaluatePolicyRules(request: PolicyRequest): PolicyDecision {
   const command = getStringInput(request, "command");
-  if (request.toolName === "run_command" && command) {
+  if (request.toolName === "run_command") {
+    if (!command) {
+      return {
+        decision: "deny",
+        reason: "Command is not in the PR 5 allowlist.",
+        matchedRule: "block-command-not-allowlisted",
+        severity: "medium"
+      };
+    }
+
     const normalizedCommand = command.toLowerCase();
 
     if (destructiveCommandPatterns.some((pattern) => normalizedCommand.includes(pattern))) {
@@ -64,6 +74,15 @@ export function evaluatePolicyRules(request: PolicyRequest): PolicyDecision {
 
     if (normalizedCommand.includes("git push")) {
       return deny("Git push command requests are blocked.", "block-git-push");
+    }
+
+    if (!isAllowlistedCommand(command)) {
+      return {
+        decision: "deny",
+        reason: "Command is not in the PR 5 allowlist.",
+        matchedRule: "block-command-not-allowlisted",
+        severity: "medium"
+      };
     }
   }
 
