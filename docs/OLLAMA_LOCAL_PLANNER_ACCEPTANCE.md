@@ -1,0 +1,163 @@
+# Ollama Local Planner Acceptance
+
+## Purpose
+
+This guide explains how to manually verify the optional Ollama local planner provider added after the v0.1 mock-planner baseline.
+
+The Ollama provider proposes a plan only. The harness validates that plan before orchestration, and all execution still flows through the Tool Registry, Policy Gate, Evidence Writer, Guard Adapter, and final report renderer.
+
+## Preconditions
+
+- Ollama is already installed outside this harness.
+- Ollama is already running at `http://localhost:11434`.
+- The model you want to use has already been pulled locally.
+- The project has been built with `npm run build`.
+
+The harness does not install Ollama, pull models, manage Ollama processes, or run shell commands to configure Ollama.
+
+## Check Local Ollama
+
+Build the CLI:
+
+```bash
+npm run build
+```
+
+Check local Ollama status:
+
+```bash
+npm run check:ollama
+```
+
+The check is informational. If Ollama is unavailable, it prints guidance and exits without making CI-style validation fail.
+
+## Run Safe README Demo
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
+```
+
+Expected behavior:
+
+- Ollama receives a conservative JSON-only planning prompt.
+- Ollama proposes a plan.
+- Plan Validator validates the plan before orchestration.
+- Registered tools execute only after validation and Policy Gate checks.
+- Evidence is written under `.evidence/<task-id>/`.
+
+## Run Unsafe Blocked-action Demo
+
+```bash
+npx guard-agent run "Show a policy demo with blocked action" --planner ollama --model <local-model-name>
+```
+
+If the model proposes unsafe actions, the Policy Gate should still block them before execution. Blocked requests are recorded in `blocked-actions.jsonl`.
+
+## Inspect Evidence Pack
+
+The CLI prints an Evidence Pack path:
+
+```text
+Evidence Pack: .evidence/<task-id>
+```
+
+Inspect:
+
+- `task.json`
+- `plan.json`
+- `tool-calls.jsonl`
+- `blocked-actions.jsonl`
+- `command-results.jsonl`
+- `guard-results.json`
+- `final-report.md`
+
+Confirm `task.json` includes:
+
+```json
+{
+  "planner_provider": "ollama",
+  "planner_model": "<local-model-name>"
+}
+```
+
+Confirm `plan.json` includes:
+
+```json
+{
+  "planner": "ollama",
+  "provider": "ollama",
+  "model": "<local-model-name>"
+}
+```
+
+## Expected Evidence Files
+
+Each successful run should create:
+
+```text
+task.json
+plan.json
+tool-calls.jsonl
+blocked-actions.jsonl
+command-results.jsonl
+guard-results.json
+final-report.md
+```
+
+Generated `.evidence/` directories are local artifacts and should not be committed.
+
+## Expected Final Report Sections
+
+`final-report.md` should include:
+
+- Task Summary
+- Plan Summary
+- Evidence Pack Contents
+- Tool Calls
+- Blocked Actions
+- Command Results
+- Guard Results
+- Governance Notes
+- Runtime Boundary
+- Limitations
+
+## Boundary
+
+- Ollama is optional and explicitly selected with `--planner ollama`.
+- The default planner remains `mock`.
+- Ollama only proposes plans.
+- Plan Validator must pass before orchestration.
+- Tool Registry and Policy Gate remain mandatory.
+- Blocked actions remain blocked.
+- Guard output remains evidence only.
+- No API key is required.
+- No `.env` loading is introduced.
+
+## Troubleshooting
+
+If `npm run check:ollama` reports unavailable:
+
+- Start Ollama outside this harness.
+- Confirm it is listening at `http://localhost:11434`.
+- Confirm your model has already been pulled locally.
+
+If the run fails with a model-not-found error, use a model name returned by:
+
+```bash
+npm run check:ollama
+```
+
+If the run fails with a plan validation error, inspect the error message. The model may have proposed an unknown tool, malformed input, or an unsafe direct command shape.
+
+## What This Does Not Do
+
+- Does not install Ollama.
+- Does not pull models.
+- Does not run shell commands to manage Ollama.
+- Does not call OpenAI or DeepSeek.
+- Does not add API key handling.
+- Does not load `.env`.
+- Does not add new tools.
+- Does not change Policy Gate semantics.
+- Does not change Guard Adapter semantics.
+- Does not grant execution authority based on model output.
