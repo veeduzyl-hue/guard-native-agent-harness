@@ -2,7 +2,13 @@ import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { renderFinalReport } from "./report.js";
-import type { EvidencePack, PlanEvidence, TaskEvidence, ToolCallEvidenceEvent } from "./schema.js";
+import type {
+  BlockedActionEvidenceEvent,
+  EvidencePack,
+  PlanEvidence,
+  TaskEvidence,
+  ToolCallEvidenceEvent
+} from "./schema.js";
 
 export async function writeEvidencePack(
   workspaceRoot: string,
@@ -22,6 +28,8 @@ export async function writeEvidencePack(
   await writeFile(finalReportPath, report, "utf8");
   const toolCallsPath = path.join(evidenceDirectory, "tool-calls.jsonl");
   await writeFile(toolCallsPath, "", { encoding: "utf8", flag: "a" });
+  const blockedActionsPath = path.join(evidenceDirectory, "blocked-actions.jsonl");
+  await writeFile(blockedActionsPath, "", { encoding: "utf8", flag: "a" });
 
   return {
     task,
@@ -31,7 +39,9 @@ export async function writeEvidencePack(
     finalReportPath,
     relativeFinalReportPath: `${relativeEvidenceDirectory}/final-report.md`,
     toolCallsPath,
-    relativeToolCallsPath: `${relativeEvidenceDirectory}/tool-calls.jsonl`
+    relativeToolCallsPath: `${relativeEvidenceDirectory}/tool-calls.jsonl`,
+    blockedActionsPath,
+    relativeBlockedActionsPath: `${relativeEvidenceDirectory}/blocked-actions.jsonl`
   };
 }
 
@@ -44,4 +54,11 @@ export async function appendToolCallEvent(
   event: ToolCallEvidenceEvent
 ): Promise<void> {
   await appendFile(path.join(evidenceDirectory, "tool-calls.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
+}
+
+export async function appendBlockedActionEvent(
+  evidenceDirectory: string,
+  event: BlockedActionEvidenceEvent
+): Promise<void> {
+  await appendFile(path.join(evidenceDirectory, "blocked-actions.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
 }

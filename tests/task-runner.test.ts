@@ -19,6 +19,7 @@ describe("task runner evidence initialization", () => {
 
     expect(result.relativeEvidenceDirectory).toBe(".evidence/task-20260520-010203-abc123");
     expect(await readdir(result.evidenceDirectory)).toEqual([
+      "blocked-actions.jsonl",
       "final-report.md",
       "plan.json",
       "task.json",
@@ -110,8 +111,11 @@ describe("task runner evidence initialization", () => {
     });
 
     const files = await readdir(result.evidenceDirectory);
+    const blockedActions = await readFile(path.join(result.evidenceDirectory, "blocked-actions.jsonl"), "utf8");
     const toolCalls = await readFile(path.join(result.evidenceDirectory, "tool-calls.jsonl"), "utf8");
 
+    expect(files).toContain("blocked-actions.jsonl");
+    expect(blockedActions).toBe("");
     expect(files).toContain("tool-calls.jsonl");
     expect(toolCalls).toBe("");
     expect(files).not.toContain("command-results.jsonl");

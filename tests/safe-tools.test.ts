@@ -38,6 +38,14 @@ async function readToolEvents(evidenceDirectory: string): Promise<Record<string,
     .map((line) => JSON.parse(line) as Record<string, unknown>);
 }
 
+async function readBlockedEvents(evidenceDirectory: string): Promise<Record<string, unknown>[]> {
+  const content = await readFile(path.join(evidenceDirectory, "blocked-actions.jsonl"), "utf8");
+  return content
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as Record<string, unknown>);
+}
+
 describe("safe tools", () => {
   it("list_files lists files inside the workspace and appends success evidence", async () => {
     const { context } = await createToolHarness("guard-agent-list-");
@@ -68,7 +76,7 @@ describe("safe tools", () => {
       tool_name: "list_files",
       input: { path: "." },
       risk_level: "low",
-      policy_decision: "not_evaluated_in_pr3",
+      policy_decision: "allow",
       status: "success",
       output_summary: { path: ".", entries_count: 2 }
     });
@@ -97,6 +105,7 @@ describe("safe tools", () => {
     expect(rawEvidence).not.toContain("safe content");
     expect(JSON.parse(rawEvidence)).toMatchObject({
       tool_name: "read_file",
+      policy_decision: "allow",
       status: "success",
       output_summary: {
         path: "README.md",
@@ -130,6 +139,7 @@ describe("safe tools", () => {
     expect(events[0]).toMatchObject({
       tool_name: "write_file",
       risk_level: "medium",
+      policy_decision: "allow",
       status: "success",
       output_summary: {
         path: "examples/readme-update/README_UPDATE_PROPOSAL.md",
@@ -151,13 +161,21 @@ describe("safe tools", () => {
         { path: "../escape.md", content: "nope" },
         { now: new Date("2026-05-20T01:03:00.000Z"), eventId: "event-write-escape" }
       )
-    ).rejects.toThrow("Path escapes workspace");
+    ).rejects.toThrow("Workspace escape is blocked.");
 
-    const events = await readToolEvents(context.evidenceDirectory);
-    expect(events[0]).toMatchObject({
-      tool_name: "write_file",
-      status: "error",
-      error_summary: "Path escapes workspace: ../escape.md"
+    const toolEvents = await readToolEvents(context.evidenceDirectory);
+    const blockedEvents = await readBlockedEvents(context.evidenceDirectory);
+    expect(toolEvents).toEqual([]);
+    expect(blockedEvents[0]).toMatchObject({
+      requested_tool: "write_file",
+      requested_input: {
+        path: "../escape.md",
+        content_bytes: 4,
+        content_characters: 4
+      },
+      block_reason: "Workspace escape is blocked.",
+      matched_rule: "block-workspace-escape",
+      severity: "high"
     });
   });
 
@@ -172,13 +190,17 @@ describe("safe tools", () => {
         { path: "../outside.md" },
         { now: new Date("2026-05-20T01:03:00.000Z"), eventId: "event-read-escape" }
       )
-    ).rejects.toThrow("Path escapes workspace");
+    ).rejects.toThrow("Workspace escape is blocked.");
 
-    const events = await readToolEvents(context.evidenceDirectory);
-    expect(events[0]).toMatchObject({
-      tool_name: "read_file",
-      status: "error",
-      error_summary: "Path escapes workspace: ../outside.md"
+    const toolEvents = await readToolEvents(context.evidenceDirectory);
+    const blockedEvents = await readBlockedEvents(context.evidenceDirectory);
+    expect(toolEvents).toEqual([]);
+    expect(blockedEvents[0]).toMatchObject({
+      requested_tool: "read_file",
+      requested_input: { path: "../outside.md" },
+      block_reason: "Workspace escape is blocked.",
+      matched_rule: "block-workspace-escape",
+      severity: "high"
     });
   });
 
@@ -204,6 +226,7 @@ describe("safe tools", () => {
     expect(events[0]).toMatchObject({
       tool_name: "git_status",
       risk_level: "low",
+      policy_decision: "allow",
       status: "error"
     });
   });
@@ -230,6 +253,7 @@ describe("safe tools", () => {
     expect(events[0]).toMatchObject({
       tool_name: "git_diff",
       risk_level: "low",
+      policy_decision: "allow",
       status: "error"
     });
   });
@@ -260,6 +284,7 @@ describe("safe tools", () => {
     const events = await readToolEvents(context.evidenceDirectory);
     expect(events[0]).toMatchObject({
       tool_name: "create_report",
+      policy_decision: "allow",
       status: "success",
       output_summary: {
         path: `${context.relativeEvidenceDirectory}/tool-report.md`,
