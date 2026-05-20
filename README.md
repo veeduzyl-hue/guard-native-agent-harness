@@ -89,6 +89,12 @@ The Guard CLI is optional. If it is missing, the run still succeeds and `guard-r
 
 Guard output is evidence only. It does not grant execution authority, bypass the Policy Gate, install or configure Guard, modify Guard policy or source, or change MindForge Guard runtime semantics. OpenAI or external LLM integration is still not implemented, and final report rendering will be improved in a later PR.
 
+## PR 7: Final Report Renderer
+
+PR 7 upgrades `final-report.md` into a deterministic governance report generated from local evidence files. The report summarizes task metadata, plan details, Evidence Pack contents, tool calls, blocked actions, command results, Guard results, file changes, governance notes, runtime boundaries, and limitations.
+
+The report is generated from local JSON, JSONL, and diff evidence. It does not use an LLM, does not invent evidence, does not grant execution authority, and treats Guard output as evidence only. OpenAI or external LLM integration is still not implemented.
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
