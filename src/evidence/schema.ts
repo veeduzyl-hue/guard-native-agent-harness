@@ -1,4 +1,4 @@
-export type PlannerType = "placeholder" | "mock";
+export type PlannerType = "placeholder" | "mock" | "ollama" | "openai" | "deepseek";
 
 export interface TaskEvidence {
   task_id: string;
@@ -8,6 +8,8 @@ export interface TaskEvidence {
   harness_version: string;
   mode: "local";
   planner_type: PlannerType;
+  planner_provider?: PlannerType;
+  planner_model?: string | null;
 }
 
 export interface PlanStep {
@@ -21,6 +23,8 @@ export interface PlanStep {
 export interface PlanEvidence {
   task_id: string;
   planner: PlannerType;
+  provider?: PlannerType;
+  model?: string | null;
   steps: PlanStep[];
   risk_notes: string[];
   expected_outputs: string[];

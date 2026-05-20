@@ -145,6 +145,18 @@ Release readiness docs:
 
 v0.1 is mock-planner based. It does not use OpenAI or external LLMs, is not SaaS, is not a dashboard, and does not change MindForge Guard semantics. Actual `v0.1.0` tag creation happens only after the release preparation PR is reviewed and merged.
 
+## Planner Providers
+
+The default planner provider is `mock`:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner mock
+```
+
+PR 10A adds the planner provider interface and local plan validation only. Model-backed providers such as `ollama`, `openai`, and `deepseek` are recognized as future provider names but are not implemented yet.
+
+No API key is required, no `.env` file is loaded, and no external model call is made in PR 10A.
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:

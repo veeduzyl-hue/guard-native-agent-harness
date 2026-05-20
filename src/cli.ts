@@ -14,16 +14,23 @@ program
 program
   .command("run")
   .argument("<task>", "task prompt to initialize evidence for")
+  .option("--planner <provider>", "planner provider to use", "mock")
+  .option("--model <model>", "planner model metadata for future provider compatibility")
   .description("initialize a local evidence pack for a task")
-  .action(async (task: string) => {
+  .action(async (task: string, options: { planner: string; model?: string }) => {
     try {
-      const result = await runTask(task);
+      const result = await runTask(task, {
+        plannerProvider: options.planner,
+        plannerModel: options.model ?? null
+      });
 
       console.log("Task completed.");
       console.log("");
       console.log(`Task ID: ${result.task.task_id}`);
       console.log(`Evidence Pack: ${result.relativeEvidenceDirectory}`);
       console.log(`Final report: ${result.relativeFinalReportPath}`);
+      console.log(`Planner provider: ${result.task.planner_provider}`);
+      console.log(`Planner model: ${result.task.planner_model ?? "none"}`);
       console.log(`Guard available: ${result.guardAvailable}`);
       console.log(`Steps planned: ${result.executionSummary.steps_planned}`);
       console.log(`Steps completed: ${result.executionSummary.steps_completed}`);

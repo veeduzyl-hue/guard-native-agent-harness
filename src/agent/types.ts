@@ -8,6 +8,8 @@ export interface MockPlanStep extends PlanStep {
 
 export interface MockPlanEvidence extends PlanEvidence {
   planner: "mock";
+  provider: "mock";
+  model: null;
   steps: MockPlanStep[];
 }
 

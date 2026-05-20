@@ -122,7 +122,9 @@ function renderTaskSummary(task: TaskEvidence | null): string {
     `- Workspace root: ${task.workspace_root}`,
     `- Harness version: ${task.harness_version}`,
     `- Mode: ${task.mode}`,
-    `- Planner type: ${task.planner_type}`
+    `- Planner type: ${task.planner_type}`,
+    `- Planner provider: ${task.planner_provider ?? task.planner_type}`,
+    `- Planner model: ${task.planner_model ?? "none"}`
   ].join("\n");
 }
 
@@ -133,6 +135,8 @@ function renderPlanSummary(plan: PlanEvidence | null, status: string): string {
 
   return [
     `- Planner: ${plan.planner}`,
+    `- Provider: ${plan.provider ?? plan.planner}`,
+    `- Model: ${plan.model ?? "none"}`,
     `- Step count: ${plan.steps.length}`,
     "",
     "Steps:",
