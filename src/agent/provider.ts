@@ -9,6 +9,7 @@ export interface PlannerProviderContext {
   userPrompt: string;
   workspaceRoot: string;
   harnessVersion: string;
+  requestedModel?: string | null;
 }
 
 export interface PlannerProviderResult {

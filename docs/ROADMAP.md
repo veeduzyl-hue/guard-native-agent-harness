@@ -35,7 +35,7 @@ v0.2 should not make OpenAI or any external LLM required for the v0.1 local work
 Phased plan:
 
 - PR 10A: Planner Provider Interface.
-- PR 10B: Ollama Local Planner Provider.
+- PR 10B: Ollama Local Planner Provider. Implemented as optional local-only planning.
 - PR 10C: OpenAI Planner Provider.
 - PR 10D: DeepSeek Planner Provider, optional.
 
