@@ -111,15 +111,13 @@ describe("task runner evidence initialization", () => {
     const report = await readFile(path.join(result.evidenceDirectory, "final-report.md"), "utf8");
 
     expect(report).toContain("# Guard-native Agent Harness Report");
-    expect(report).toContain("## Task Summary");
-    expect(report).toContain("## Plan Summary");
-    expect(report).toContain("## Evidence Files Created");
-    expect(report).toContain("## Runtime Boundary");
-    expect(report).toContain("## Limitations");
-    expect(report).toContain("No real agent execution happened");
-    expect(report).toContain("no autonomous tool calls happened");
-    expect(report).toContain("Guard output does not grant execution authority");
-    expect(report).toContain("no external API was called");
+    expect(report).toContain("## 1. Task Summary");
+    expect(report).toContain("## 2. Plan Summary");
+    expect(report).toContain("## 3. Evidence Pack Contents");
+    expect(report).toContain("## 10. Runtime Boundary");
+    expect(report).toContain("## 11. Limitations");
+    expect(report).toContain("Guard results are recorded as evidence only. They do not grant execution authority.");
+    expect(report).toContain("- No OpenAI or external LLM integration in the current phase.");
   });
 
   it("initializes tool call evidence without implying real tool or Guard execution", async () => {

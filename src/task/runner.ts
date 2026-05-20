@@ -2,7 +2,8 @@ import { randomBytes } from "node:crypto";
 
 import { createPlaceholderPlan } from "../agent/planner.js";
 import { HARNESS_VERSION } from "../index.js";
-import { writeEvidencePack, writeGuardResults } from "../evidence/writer.js";
+import { renderFinalReportFromEvidence } from "../evidence/report.js";
+import { writeEvidencePack, writeFinalReport, writeGuardResults } from "../evidence/writer.js";
 import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
 import type { EvidencePack, TaskEvidence } from "../evidence/schema.js";
@@ -35,6 +36,7 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
   const evidencePack = await writeEvidencePack(workspaceRoot, task, plan);
   const guardResult = await (options.guardAdapter ?? createDefaultGuardAdapter()).collect();
   await writeGuardResults(evidencePack.evidenceDirectory, guardResult);
+  await writeFinalReport(evidencePack.evidenceDirectory, await renderFinalReportFromEvidence(evidencePack.evidenceDirectory));
 
   return {
     ...evidencePack,
