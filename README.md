@@ -159,6 +159,12 @@ No API key is required and no `.env` file is loaded.
 
 ## Ollama Planner Provider
 
+Check local Ollama status:
+
+```bash
+npm run check:ollama
+```
+
 Example:
 
 ```bash
@@ -176,6 +182,8 @@ Notes:
 - All plan steps are validated before execution.
 - Tool Registry and Policy Gate remain mandatory.
 - Evidence capture remains unchanged.
+
+Manual acceptance guide: [Ollama Local Planner Acceptance](docs/OLLAMA_LOCAL_PLANNER_ACCEPTANCE.md)
 
 ## v0.1 Intended Workflow
 
