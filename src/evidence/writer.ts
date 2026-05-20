@@ -4,6 +4,7 @@ import path from "node:path";
 import { renderFinalReport } from "./report.js";
 import type {
   BlockedActionEvidenceEvent,
+  CommandResultEvidenceEvent,
   EvidencePack,
   PlanEvidence,
   TaskEvidence,
@@ -30,6 +31,8 @@ export async function writeEvidencePack(
   await writeFile(toolCallsPath, "", { encoding: "utf8", flag: "a" });
   const blockedActionsPath = path.join(evidenceDirectory, "blocked-actions.jsonl");
   await writeFile(blockedActionsPath, "", { encoding: "utf8", flag: "a" });
+  const commandResultsPath = path.join(evidenceDirectory, "command-results.jsonl");
+  await writeFile(commandResultsPath, "", { encoding: "utf8", flag: "a" });
 
   return {
     task,
@@ -41,7 +44,9 @@ export async function writeEvidencePack(
     toolCallsPath,
     relativeToolCallsPath: `${relativeEvidenceDirectory}/tool-calls.jsonl`,
     blockedActionsPath,
-    relativeBlockedActionsPath: `${relativeEvidenceDirectory}/blocked-actions.jsonl`
+    relativeBlockedActionsPath: `${relativeEvidenceDirectory}/blocked-actions.jsonl`,
+    commandResultsPath,
+    relativeCommandResultsPath: `${relativeEvidenceDirectory}/command-results.jsonl`
   };
 }
 
@@ -61,4 +66,11 @@ export async function appendBlockedActionEvent(
   event: BlockedActionEvidenceEvent
 ): Promise<void> {
   await appendFile(path.join(evidenceDirectory, "blocked-actions.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
+}
+
+export async function appendCommandResultEvent(
+  evidenceDirectory: string,
+  event: CommandResultEvidenceEvent
+): Promise<void> {
+  await appendFile(path.join(evidenceDirectory, "command-results.jsonl"), `${JSON.stringify(event)}\n`, "utf8");
 }

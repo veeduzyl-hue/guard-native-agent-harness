@@ -38,7 +38,7 @@ describe("policy gate", () => {
 
     expect(decision).toEqual({
       decision: "allow",
-      reason: "Tool request is within the PR 4 policy boundary.",
+      reason: "Tool request is within the policy boundary.",
       matchedRule: null,
       severity: "none"
     });
@@ -129,6 +129,8 @@ describe("policy gate", () => {
   it.each([
     "unsafe-env-read.json",
     "unsafe-destructive-command.json",
+    "unsafe-git-push-command.json",
+    "unsafe-non-allowlisted-command.json",
     "unsafe-workspace-escape.json"
   ])("matches unsafe fixture %s", async (fixtureName) => {
     const fixture = JSON.parse(await readFile(path.join("fixtures", fixtureName), "utf8")) as UnsafeFixture;

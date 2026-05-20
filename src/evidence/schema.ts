@@ -35,6 +35,8 @@ export interface EvidencePack {
   relativeToolCallsPath: string;
   blockedActionsPath: string;
   relativeBlockedActionsPath: string;
+  commandResultsPath: string;
+  relativeCommandResultsPath: string;
 }
 
 export type ToolRiskLevel = "low" | "medium" | "high";
@@ -64,4 +66,19 @@ export interface BlockedActionEvidenceEvent {
   block_reason: string;
   matched_rule: string;
   severity: "low" | "medium" | "high";
+}
+
+export type CommandResultStatus = "success" | "error" | "timeout";
+
+export interface CommandResultEvidenceEvent {
+  event_id: string;
+  task_id: string;
+  timestamp: string;
+  command: string;
+  cwd: string;
+  exit_code: number | null;
+  stdout_summary: string;
+  stderr_summary: string;
+  duration_ms: number;
+  status: CommandResultStatus;
 }
