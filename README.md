@@ -122,6 +122,29 @@ npm run verify:v0.1
 
 v0.1 remains local-first and deterministic. It uses the mock planner, does not require `OPENAI_API_KEY`, does not require a `.env` file, does not call external LLM providers, and treats Guard Adapter output as evidence only.
 
+## v0.1 Release Readiness
+
+Before tagging v0.1, run:
+
+```bash
+npm install
+npm run build
+npm test
+npm run lint
+npm run verify:v0.1
+npm run verify:v0.1:release
+```
+
+Release readiness docs:
+
+- [v0.1 Acceptance](docs/V0_1_ACCEPTANCE.md)
+- [v0.1 Release Notes](docs/RELEASE_NOTES_v0.1.md)
+- [v0.1 Baseline](docs/V0_1_BASELINE.md)
+- [v0.1 Tag Preparation](docs/V0_1_TAG_PREP.md)
+- [Roadmap](docs/ROADMAP.md)
+
+v0.1 is mock-planner based. It does not use OpenAI or external LLMs, is not SaaS, is not a dashboard, and does not change MindForge Guard semantics. Actual `v0.1.0` tag creation happens only after the release preparation PR is reviewed and merged.
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
