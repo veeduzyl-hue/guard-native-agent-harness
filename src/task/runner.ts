@@ -1,12 +1,14 @@
 import { randomBytes } from "node:crypto";
 
-import { createPlaceholderPlan } from "../agent/planner.js";
+import { executePlan } from "../agent/orchestrator.js";
+import { createMockPlan } from "../agent/planner.js";
 import { HARNESS_VERSION } from "../index.js";
 import { renderFinalReportFromEvidence } from "../evidence/report.js";
 import { writeEvidencePack, writeFinalReport, writeGuardResults } from "../evidence/writer.js";
 import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
 import type { EvidencePack, TaskEvidence } from "../evidence/schema.js";
+import type { ToolRegistry } from "../tools/registry.js";
 
 export interface RunTaskOptions {
   workspaceRoot?: string;
@@ -14,6 +16,8 @@ export interface RunTaskOptions {
   randomId?: string;
   harnessVersion?: string;
   guardAdapter?: GuardAdapter;
+  toolRegistry?: ToolRegistry;
+  executePlan?: boolean;
 }
 
 export async function runTask(userPrompt: string, options: RunTaskOptions = {}): Promise<EvidencePack> {
@@ -28,19 +32,33 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
     workspace_root: workspaceRoot,
     harness_version: options.harnessVersion ?? HARNESS_VERSION,
     mode: "local",
-    planner_type: "placeholder"
+    planner_type: "mock"
   };
 
-  const plan = createPlaceholderPlan(taskId);
+  const plan = createMockPlan(taskId, userPrompt);
 
   const evidencePack = await writeEvidencePack(workspaceRoot, task, plan);
+  const executionSummary =
+    options.executePlan === false
+      ? evidencePack.executionSummary
+      : await executePlan(
+          plan,
+          {
+            taskId,
+            workspaceRoot,
+            evidenceDirectory: evidencePack.evidenceDirectory,
+            relativeEvidenceDirectory: evidencePack.relativeEvidenceDirectory
+          },
+          { registry: options.toolRegistry }
+        );
   const guardResult = await (options.guardAdapter ?? createDefaultGuardAdapter()).collect();
   await writeGuardResults(evidencePack.evidenceDirectory, guardResult);
   await writeFinalReport(evidencePack.evidenceDirectory, await renderFinalReportFromEvidence(evidencePack.evidenceDirectory));
 
   return {
     ...evidencePack,
-    guardAvailable: guardResult.guard_available
+    guardAvailable: guardResult.guard_available,
+    executionSummary
   };
 }
 

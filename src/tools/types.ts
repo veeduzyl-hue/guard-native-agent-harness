@@ -53,3 +53,10 @@ export class ToolExecutionError extends Error {
     this.name = "ToolExecutionError";
   }
 }
+
+export class ToolBlockedError extends ToolExecutionError {
+  constructor(message: string) {
+    super(message);
+    this.name = "ToolBlockedError";
+  }
+}

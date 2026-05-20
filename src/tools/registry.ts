@@ -17,7 +17,7 @@ import type {
   ToolMetadata,
   ToolName
 } from "./types.js";
-import { ToolExecutionError } from "./types.js";
+import { ToolBlockedError, ToolExecutionError } from "./types.js";
 import { writeFileTool } from "./write-file.js";
 
 export class ToolRegistry {
@@ -73,7 +73,7 @@ export class ToolRegistry {
         severity: policyDecision.severity === "none" ? "low" : policyDecision.severity
       });
 
-      throw new ToolExecutionError(policyDecision.reason);
+      throw new ToolBlockedError(policyDecision.reason);
     }
 
     try {

@@ -31,7 +31,8 @@ describe("task runner evidence initialization", () => {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
       randomId: "abc123",
-      guardAdapter: unavailableGuardAdapter
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
     });
 
     expect(result.relativeEvidenceDirectory).toBe(".evidence/task-20260520-010203-abc123");
@@ -46,14 +47,15 @@ describe("task runner evidence initialization", () => {
     ]);
   });
 
-  it("writes task.json with local placeholder task metadata", async () => {
+  it("writes task.json with local mock task metadata", async () => {
     const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-task-"));
 
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
       randomId: "abc123",
-      guardAdapter: unavailableGuardAdapter
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
     });
 
     const task = JSON.parse(await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")) as TaskEvidence;
@@ -65,37 +67,35 @@ describe("task runner evidence initialization", () => {
       workspace_root: workspaceRoot,
       harness_version: "0.0.0",
       mode: "local",
-      planner_type: "placeholder"
+      planner_type: "mock"
     });
   });
 
-  it("writes plan.json with a placeholder-only plan", async () => {
+  it("writes plan.json with a deterministic mock plan", async () => {
     const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-plan-"));
 
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
       randomId: "abc123",
-      guardAdapter: unavailableGuardAdapter
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
     });
 
     const plan = JSON.parse(await readFile(path.join(result.evidenceDirectory, "plan.json"), "utf8")) as PlanEvidence;
 
-    expect(plan).toEqual({
-      task_id: "task-20260520-010203-abc123",
-      planner: "placeholder",
-      steps: [
-        {
-          id: "step-1",
-          type: "placeholder",
-          description: "No real agent or tool execution is implemented in PR 2."
-        }
-      ],
-      risk_notes: [
-        "PR 2 initializes evidence only. No files are read, written, or modified by agent tools."
-      ],
-      expected_outputs: ["task.json", "plan.json", "final-report.md"]
-    });
+    expect(plan.task_id).toBe("task-20260520-010203-abc123");
+    expect(plan.planner).toBe("mock");
+    expect(plan.steps.map((step) => step.tool)).toEqual([
+      "list_files",
+      "read_file",
+      "git_status",
+      "git_diff",
+      "write_file",
+      "create_report"
+    ]);
+    expect(plan.risk_notes).toContain("Mock planner uses deterministic templates only.");
+    expect(plan.expected_outputs).toContain("final-report.md");
   });
 
   it("writes a human-readable final report with runtime boundaries", async () => {
@@ -105,7 +105,8 @@ describe("task runner evidence initialization", () => {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
       randomId: "abc123",
-      guardAdapter: unavailableGuardAdapter
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
     });
 
     const report = await readFile(path.join(result.evidenceDirectory, "final-report.md"), "utf8");
@@ -120,14 +121,15 @@ describe("task runner evidence initialization", () => {
     expect(report).toContain("- No OpenAI or external LLM integration in the current phase.");
   });
 
-  it("initializes tool call evidence without implying real tool or Guard execution", async () => {
+  it("can initialize evidence without executing the mock plan when requested", async () => {
     const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-boundary-"));
 
     const result = await runTask("Create a safe README update proposal", {
       workspaceRoot,
       now: new Date("2026-05-20T01:02:03.000Z"),
       randomId: "abc123",
-      guardAdapter: unavailableGuardAdapter
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
     });
 
     const files = await readdir(result.evidenceDirectory);

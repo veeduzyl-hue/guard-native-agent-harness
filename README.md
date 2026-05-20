@@ -2,7 +2,7 @@
 
 Guard-native Agent Harness is a bounded local AI agent harness for simple AI-assisted workflows through registered tools, tool-call evidence capture, lightweight policy gates, and governance-ready evidence packs that MindForge Guard can validate.
 
-The current CLI initializes local task evidence and optional Guard Adapter evidence. The project includes an internal Tool Registry, bounded safe tools, a local Policy Gate, and a strictly allowlisted command sandbox, but it still does not implement an autonomous agent runtime, OpenAI integration, general shell execution, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
+The current CLI runs a deterministic mock workflow through the local Tool Registry, Policy Gate, evidence writer, optional Guard Adapter, and final report renderer. It still does not implement autonomous planning, OpenAI integration, general shell execution, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
 
 ## Relationship To MindForge Guard
 
@@ -19,14 +19,14 @@ This repository currently contains:
 - TypeScript project metadata
 - Build, test, lint, and format scripts
 - README, PRD, architecture, and governance boundary documentation
-- A minimal `guard-agent run` command that creates local placeholder evidence
+- A `guard-agent run` command that executes deterministic mock workflow templates
 - Tests for scaffold and evidence initialization
 
-No actual agent execution exists yet.
+No autonomous or model-backed agent execution exists yet.
 
 ## Current Runnable Command
 
-Build the CLI and initialize a placeholder Evidence Pack:
+Build the CLI and run the bounded README proposal demo:
 
 ```bash
 npm run build
@@ -45,10 +45,14 @@ The command creates:
 .evidence/<task-id>/
   task.json
   plan.json
+  tool-calls.jsonl
+  blocked-actions.jsonl
+  command-results.jsonl
+  guard-results.json
   final-report.md
 ```
 
-This command only initializes task evidence and optional Guard Adapter evidence. It does not execute tools, run allowlisted workflow commands, call OpenAI, call external APIs, or perform real agent planning.
+This command uses a deterministic mock planner and registered tools. It does not call OpenAI, call external APIs, perform autonomous planning, bypass the Policy Gate, or grant execution authority from Guard output.
 
 ## PR 3: Tool Registry + Safe Tools
 
@@ -95,6 +99,14 @@ PR 7 upgrades `final-report.md` into a deterministic governance report generated
 
 The report is generated from local JSON, JSONL, and diff evidence. It does not use an LLM, does not invent evidence, does not grant execution authority, and treats Guard output as evidence only. OpenAI or external LLM integration is still not implemented.
 
+## PR 8: Mock Agent Planner + End-to-End Demo
+
+PR 8 introduces a deterministic mock planner and a small orchestrator for bounded demo workflows. The CLI now selects fixed templates for README update proposals, repository review, unsafe policy demonstrations, and a safe default workflow.
+
+All plan steps go through the Tool Registry and Policy Gate. Allowed tool calls are written to `tool-calls.jsonl`, denied requests are written to `blocked-actions.jsonl`, allowlisted command results are written to `command-results.jsonl`, Guard results are written to `guard-results.json`, and `final-report.md` summarizes the Evidence Pack.
+
+The mock planner is not autonomous and does not use an LLM. It does not generate arbitrary tools or commands, does not execute outside the existing allowlist, does not install or mutate Guard, and does not add OpenAI or external LLM integration.
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
@@ -106,11 +118,11 @@ The intended v0.1 workflow is:
 5. A Guard Adapter prepares the Evidence Pack for MindForge Guard validation.
 6. MindForge Guard validates evidence without executing tools or expanding authority.
 
-This workflow is directional. PR 2 implements only the initial evidence creation step with a placeholder plan.
+PR 8 implements this workflow with deterministic mock templates only. Model-backed or autonomous planning remains out of scope.
 
 ## Boundary Statement
 
-The harness is allowed to become a bounded local executor in later PRs, but MindForge Guard remains non-executing and recommendation-only. PR 2 creates no real execution path, no command runner, no tool runtime, no policy engine, and no Guard CLI child process integration.
+The harness can execute only bounded local workflow steps through registered tools, the local Policy Gate, and the command allowlist. MindForge Guard remains non-executing and recommendation-only, and Guard output is evidence rather than execution authority.
 
 ## Planned Evidence Pack Structure
 
@@ -121,25 +133,29 @@ Evidence output is planned to be filesystem-first, using JSONL, JSON, and Markdo
   <task-id>/
     task.json
     plan.json
+    tool-calls.jsonl
+    blocked-actions.jsonl
+    command-results.jsonl
+    guard-results.json
     final-report.md
 ```
 
-Future PRs may extend this structure with JSONL event streams, artifacts, hashes, and Guard Adapter output.
+Future PRs may extend this structure with additional artifacts and hashes.
 
 ## Planned PR Sequence
 
 1. Project scaffold and docs
 2. Evidence writer and task runner scaffold
-3. Workflow and evidence schema definitions
-4. Tool registry interfaces without execution
-5. Policy Gate model and dry-run evaluation
-6. Guard Adapter preview output
-7. Bounded command execution pilot behind explicit allowlists
-8. End-to-end local workflow demo
+3. Tool Registry and safe tools
+4. Policy Gate and blocked actions
+5. Bounded command execution behind explicit allowlists
+6. Guard Adapter evidence capture
+7. Deterministic final report renderer
+8. Mock planner end-to-end local workflow demo
 
 ## Non-goals
 
-- Real agent execution
+- Autonomous or model-backed agent execution
 - OpenAI API calls
 - Tool execution or command execution
 - Guard CLI invocation

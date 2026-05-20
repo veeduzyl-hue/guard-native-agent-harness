@@ -19,12 +19,16 @@ program
     try {
       const result = await runTask(task);
 
-      console.log("Task initialized.");
+      console.log("Task completed.");
       console.log("");
       console.log(`Task ID: ${result.task.task_id}`);
       console.log(`Evidence Pack: ${result.relativeEvidenceDirectory}`);
       console.log(`Final report: ${result.relativeFinalReportPath}`);
       console.log(`Guard available: ${result.guardAvailable}`);
+      console.log(`Steps planned: ${result.executionSummary.steps_planned}`);
+      console.log(`Steps completed: ${result.executionSummary.steps_completed}`);
+      console.log(`Steps blocked: ${result.executionSummary.steps_blocked}`);
+      console.log(`Steps failed: ${result.executionSummary.steps_failed}`);
     } catch (error) {
       console.error(`${PROJECT_NAME}: failed to initialize task evidence`);
       console.error(error instanceof Error ? error.message : String(error));

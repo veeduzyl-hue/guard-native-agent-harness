@@ -16,7 +16,8 @@ async function createBlockedHarness(prefix: string): Promise<{
   const pack = await runTask("test blocked actions", {
     workspaceRoot,
     now: new Date("2026-05-20T02:02:03.000Z"),
-    randomId: "blocked123"
+    randomId: "blocked123",
+    executePlan: false
   });
 
   return {

@@ -1,4 +1,4 @@
-export type PlannerType = "placeholder";
+export type PlannerType = "placeholder" | "mock";
 
 export interface TaskEvidence {
   task_id: string;
@@ -12,7 +12,9 @@ export interface TaskEvidence {
 
 export interface PlanStep {
   id: string;
-  type: "placeholder";
+  type?: "placeholder";
+  tool?: string;
+  input?: Record<string, unknown>;
   description: string;
 }
 
@@ -40,6 +42,14 @@ export interface EvidencePack {
   guardResultsPath: string;
   relativeGuardResultsPath: string;
   guardAvailable: boolean;
+  executionSummary: ExecutionSummary;
+}
+
+export interface ExecutionSummary {
+  steps_planned: number;
+  steps_completed: number;
+  steps_blocked: number;
+  steps_failed: number;
 }
 
 export type ToolRiskLevel = "low" | "medium" | "high";
