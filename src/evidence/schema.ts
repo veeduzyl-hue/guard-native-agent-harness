@@ -28,6 +28,14 @@ export interface PlanEvidence {
   steps: PlanStep[];
   risk_notes: string[];
   expected_outputs: string[];
+  provider_diagnostics?: PlanProviderDiagnostics;
+}
+
+export interface PlanProviderDiagnostics {
+  normalization_applied: boolean;
+  normalization_changes: string[];
+  normalization_warnings: string[];
+  plan_validated: boolean;
 }
 
 export interface EvidencePack {

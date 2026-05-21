@@ -36,7 +36,13 @@ async function writeCompleteEvidence(evidenceDirectory: string): Promise<void> {
       }
     ],
     risk_notes: ["No autonomous execution."],
-    expected_outputs: ["task.json", "plan.json", "final-report.md"]
+    expected_outputs: ["task.json", "plan.json", "final-report.md"],
+    provider_diagnostics: {
+      normalization_applied: true,
+      normalization_changes: ["added missing step id for step index 0"],
+      normalization_warnings: [],
+      plan_validated: true
+    }
   });
   await writeFile(
     path.join(evidenceDirectory, "tool-calls.jsonl"),
@@ -93,7 +99,11 @@ async function writeCompleteEvidence(evidenceDirectory: string): Promise<void> {
     drift_result: null,
     errors: []
   });
-  await writeFile(path.join(evidenceDirectory, "file-changes.diff"), "diff --git a/README.md b/README.md\n", "utf8");
+  await writeFile(
+    path.join(evidenceDirectory, "file-changes.diff"),
+    "diff --git a/README.md b/README.md\n",
+    "utf8"
+  );
   await writeFile(path.join(evidenceDirectory, "final-report.md"), "", "utf8");
 }
 
@@ -118,12 +128,19 @@ describe("final report renderer", () => {
     expect(report).toContain("## 11. Limitations");
     expect(report).toContain("- Task ID: task-report-1");
     expect(report).toContain("- Step count: 1");
+    expect(report).toContain("Provider diagnostics:");
+    expect(report).toContain("- Normalization applied: yes");
+    expect(report).toContain("- Plan validated: yes");
     expect(report).toContain("- Total tool calls: 1");
     expect(report).toContain("- Total blocked actions: 1");
     expect(report).toContain("- Total command executions: 1");
-    expect(report).toContain("Guard CLI was not available. The run completed with graceful fallback.");
+    expect(report).toContain(
+      "Guard CLI was not available. The run completed with graceful fallback."
+    );
     expect(report).toContain("File diff summary:");
-    expect(report).toContain("Guard results are recorded as evidence only. They do not grant execution authority.");
+    expect(report).toContain(
+      "Guard results are recorded as evidence only. They do not grant execution authority."
+    );
   });
 
   it("reports empty JSONL files clearly", async () => {
@@ -185,17 +202,24 @@ describe("final report renderer", () => {
     const report = await renderFinalReportFromEvidence(evidenceDirectory);
 
     expect(report).toContain("Warning: tool-calls.jsonl contains malformed JSONL lines: 2.");
-    expect(report).toContain("Parse warnings: tool-calls.jsonl contains malformed JSONL at line 2.");
+    expect(report).toContain(
+      "Parse warnings: tool-calls.jsonl contains malformed JSONL at line 2."
+    );
   });
 
   it("writes final-report.md with the Guard evidence-only boundary statement", async () => {
     const evidenceDirectory = await makeEvidenceDirectory("guard-agent-report-write-");
     await writeCompleteEvidence(evidenceDirectory);
 
-    await writeFinalReport(evidenceDirectory, await renderFinalReportFromEvidence(evidenceDirectory));
+    await writeFinalReport(
+      evidenceDirectory,
+      await renderFinalReportFromEvidence(evidenceDirectory)
+    );
     const report = await readFile(path.join(evidenceDirectory, "final-report.md"), "utf8");
 
-    expect(report).toContain("Guard results are recorded as evidence only. They do not grant execution authority.");
+    expect(report).toContain(
+      "Guard results are recorded as evidence only. They do not grant execution authority."
+    );
     expect(report).not.toContain("execution_authority_granted: true");
   });
 });

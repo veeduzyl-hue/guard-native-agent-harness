@@ -24,13 +24,27 @@ const diffMaxLength = 8000;
 export async function renderFinalReportFromEvidence(evidenceDirectory: string): Promise<string> {
   const task = await readJsonFile<TaskEvidence>(evidenceDirectory, "task.json");
   const plan = await readJsonFile<PlanEvidence>(evidenceDirectory, "plan.json");
-  const toolCalls = await readJsonlFile<ToolCallEvidenceEvent>(evidenceDirectory, "tool-calls.jsonl");
-  const blockedActions = await readJsonlFile<BlockedActionEvidenceEvent>(evidenceDirectory, "blocked-actions.jsonl");
-  const commandResults = await readJsonlFile<CommandResultEvidenceEvent>(evidenceDirectory, "command-results.jsonl");
-  const guardResults = await readJsonFile<GuardAdapterResult>(evidenceDirectory, "guard-results.json");
+  const toolCalls = await readJsonlFile<ToolCallEvidenceEvent>(
+    evidenceDirectory,
+    "tool-calls.jsonl"
+  );
+  const blockedActions = await readJsonlFile<BlockedActionEvidenceEvent>(
+    evidenceDirectory,
+    "blocked-actions.jsonl"
+  );
+  const commandResults = await readJsonlFile<CommandResultEvidenceEvent>(
+    evidenceDirectory,
+    "command-results.jsonl"
+  );
+  const guardResults = await readJsonFile<GuardAdapterResult>(
+    evidenceDirectory,
+    "guard-results.json"
+  );
   const fileChanges = await readTextFile(evidenceDirectory, "file-changes.diff");
   const fileStatuses = await Promise.all(
-    expectedEvidenceFiles.map(async (fileName) => [fileName, await evidenceFileStatus(evidenceDirectory, fileName)] as const)
+    expectedEvidenceFiles.map(
+      async (fileName) => [fileName, await evidenceFileStatus(evidenceDirectory, fileName)] as const
+    )
   );
 
   const warnings = [
@@ -82,12 +96,12 @@ ${renderFileChanges(fileChanges.value, fileChanges.status)}
 ## 9. Governance Notes
 
 ${renderGovernanceNotes({
-    blockedActions: blockedActions.value ?? [],
-    commandResults: commandResults.value ?? [],
-    guardResults: guardResults.value,
-    fileStatuses,
-    warnings
-  })}
+  blockedActions: blockedActions.value ?? [],
+  commandResults: commandResults.value ?? [],
+  guardResults: guardResults.value,
+  fileStatuses,
+  warnings
+})}
 
 ## 10. Runtime Boundary
 
@@ -140,17 +154,50 @@ function renderPlanSummary(plan: PlanEvidence | null, status: string): string {
     `- Step count: ${plan.steps.length}`,
     "",
     "Steps:",
-    ...plan.steps.map((step) => `- ${step.id}${step.tool ? ` (${step.tool})` : ""}: ${step.description}`),
+    ...plan.steps.map(
+      (step) => `- ${step.id}${step.tool ? ` (${step.tool})` : ""}: ${step.description}`
+    ),
     "",
     "Risk notes:",
-    ...(plan.risk_notes.length > 0 ? plan.risk_notes.map((note) => `- ${note}`) : ["- None recorded."]),
+    ...(plan.risk_notes.length > 0
+      ? plan.risk_notes.map((note) => `- ${note}`)
+      : ["- None recorded."]),
     "",
     "Expected outputs:",
-    ...(plan.expected_outputs.length > 0 ? plan.expected_outputs.map((output) => `- ${output}`) : ["- None recorded."])
+    ...(plan.expected_outputs.length > 0
+      ? plan.expected_outputs.map((output) => `- ${output}`)
+      : ["- None recorded."]),
+    "",
+    "Provider diagnostics:",
+    ...renderProviderDiagnostics(plan)
   ].join("\n");
 }
 
-function renderEvidenceContents(fileStatuses: Array<readonly [string, "present" | "missing"]>): string {
+function renderProviderDiagnostics(plan: PlanEvidence): string[] {
+  if (!plan.provider_diagnostics) {
+    return ["- None recorded."];
+  }
+
+  const diagnostics = plan.provider_diagnostics;
+  return [
+    `- Normalization applied: ${diagnostics.normalization_applied ? "yes" : "no"}`,
+    `- Plan validated: ${diagnostics.plan_validated ? "yes" : "no"}`,
+    `- Normalization changes: ${
+      diagnostics.normalization_changes.length > 0
+        ? diagnostics.normalization_changes.join("; ")
+        : "none"
+    }`,
+    `- Normalization warnings: ${
+      diagnostics.normalization_warnings.length > 0
+        ? diagnostics.normalization_warnings.join("; ")
+        : "none"
+    }`
+  ];
+}
+
+function renderEvidenceContents(
+  fileStatuses: Array<readonly [string, "present" | "missing"]>
+): string {
   return [
     "| File | Status |",
     "|---|---|",
@@ -178,15 +225,19 @@ function renderToolCalls(events: ToolCallEvidenceEvent[], malformedLines: number
     "",
     "| Time | Tool | Policy | Status | Summary |",
     "|---|---|---|---|---|",
-    ...events.map((event) =>
-      `| ${event.timestamp} | ${event.tool_name} | ${event.policy_decision} | ${event.status} | ${summarizeRecord(
-        event.output_summary ?? event.error_summary ?? {}
-      )} |`
+    ...events.map(
+      (event) =>
+        `| ${event.timestamp} | ${event.tool_name} | ${event.policy_decision} | ${event.status} | ${summarizeRecord(
+          event.output_summary ?? event.error_summary ?? {}
+        )} |`
     )
   ].join("\n");
 }
 
-function renderBlockedActions(events: BlockedActionEvidenceEvent[], malformedLines: number[]): string {
+function renderBlockedActions(
+  events: BlockedActionEvidenceEvent[],
+  malformedLines: number[]
+): string {
   const lines = renderMalformedWarning("blocked-actions.jsonl", malformedLines);
   if (events.length === 0) {
     return [...lines, "No blocked actions were recorded."].join("\n");
@@ -207,7 +258,10 @@ function renderBlockedActions(events: BlockedActionEvidenceEvent[], malformedLin
   ].join("\n");
 }
 
-function renderCommandResults(events: CommandResultEvidenceEvent[], malformedLines: number[]): string {
+function renderCommandResults(
+  events: CommandResultEvidenceEvent[],
+  malformedLines: number[]
+): string {
   const lines = renderMalformedWarning("command-results.jsonl", malformedLines);
   if (events.length === 0) {
     return [...lines, "No command executions were recorded."].join("\n");
@@ -223,7 +277,8 @@ function renderCommandResults(events: CommandResultEvidenceEvent[], malformedLin
     "| Time | Command | Exit Code | Status | Duration |",
     "|---|---|---:|---|---:|",
     ...events.map(
-      (event) => `| ${event.timestamp} | ${event.command} | ${event.exit_code ?? "null"} | ${event.status} | ${event.duration_ms} ms |`
+      (event) =>
+        `| ${event.timestamp} | ${event.command} | ${event.exit_code ?? "null"} | ${event.status} | ${event.duration_ms} ms |`
     )
   ].join("\n");
 }
@@ -260,9 +315,15 @@ function renderFileChanges(diff: string | null, status: string): string {
     return ["File diff summary:", "", "```diff", diff.trimEnd(), "```"].join("\n");
   }
 
-  return ["File diff summary (truncated):", "", "```diff", diff.slice(0, diffMaxLength).trimEnd(), "```", "", "Diff output was truncated."].join(
-    "\n"
-  );
+  return [
+    "File diff summary (truncated):",
+    "",
+    "```diff",
+    diff.slice(0, diffMaxLength).trimEnd(),
+    "```",
+    "",
+    "Diff output was truncated."
+  ].join("\n");
 }
 
 function renderGovernanceNotes(input: {
@@ -272,8 +333,12 @@ function renderGovernanceNotes(input: {
   fileStatuses: Array<readonly [string, "present" | "missing"]>;
   warnings: string[];
 }): string {
-  const missingFiles = input.fileStatuses.filter(([, status]) => status === "missing").map(([fileName]) => fileName);
-  const highSeverityBlocks = input.blockedActions.filter((event) => event.severity === "high").length;
+  const missingFiles = input.fileStatuses
+    .filter(([, status]) => status === "missing")
+    .map(([fileName]) => fileName);
+  const highSeverityBlocks = input.blockedActions.filter(
+    (event) => event.severity === "high"
+  ).length;
   const failedCommands = input.commandResults.filter((event) => event.status !== "success").length;
 
   return [
@@ -289,7 +354,9 @@ function renderGovernanceNotes(input: {
 }
 
 function renderMalformedWarning(fileName: string, malformedLines: number[]): string[] {
-  return malformedLines.length > 0 ? [`Warning: ${fileName} contains malformed JSONL lines: ${malformedLines.join(", ")}.`] : [];
+  return malformedLines.length > 0
+    ? [`Warning: ${fileName} contains malformed JSONL lines: ${malformedLines.join(", ")}.`]
+    : [];
 }
 
 function summarizeGuardCommand(command: GuardAdapterResult["status_result"]): string {

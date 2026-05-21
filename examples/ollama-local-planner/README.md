@@ -57,6 +57,12 @@ In `plan.json`, confirm:
 
 Both files should record the selected local model name.
 
+## Confirm Normalization Boundary
+
+Ollama plans may be normalized only for safe structural fields, such as missing step IDs or provider metadata. Unknown tools, unsafe paths, and unsafe commands are not rewritten or removed.
+
+Plan Validator still runs after normalization. Policy Gate still evaluates tool execution. If validation fails, no plan steps are executed.
+
 ## Confirm Final Report
 
 Open `final-report.md` and confirm it includes:
