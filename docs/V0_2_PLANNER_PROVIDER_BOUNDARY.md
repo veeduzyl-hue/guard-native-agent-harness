@@ -45,11 +45,18 @@ Example:
 npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
 ```
 
+Longer local model runs can use an explicit timeout:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
+```
+
 Notes:
 
 - Ollama must already be running locally.
 - The model must already be available locally.
 - The harness calls only `http://localhost:11434/api/generate`.
+- Timeout diagnostics include the provider, model, timeout value, and endpoint.
 - The harness does not install Ollama.
 - The harness does not pull models.
 - The harness does not run shell commands to manage Ollama.

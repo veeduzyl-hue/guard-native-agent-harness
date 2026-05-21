@@ -10,6 +10,7 @@ export interface PlannerProviderContext {
   workspaceRoot: string;
   harnessVersion: string;
   requestedModel?: string | null;
+  requestedTimeoutMs?: number | null;
 }
 
 export interface PlannerProviderResult {

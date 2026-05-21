@@ -10,6 +10,13 @@ npm run check:ollama
 npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
 ```
 
+For larger local models, check the exact model name and use a longer planner timeout:
+
+```bash
+npm run check:ollama -- --model <local-model-name>
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
+```
+
 ## Evidence Directory
 
 The CLI prints:

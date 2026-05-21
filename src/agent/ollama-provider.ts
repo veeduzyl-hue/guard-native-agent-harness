@@ -46,6 +46,7 @@ export function createOllamaPlannerProvider(options: OllamaProviderOptions = {})
     available: true,
     async createPlan(context) {
       const model = normalizeModel(context.requestedModel);
+      const requestTimeoutMs = normalizeTimeoutMs(context.requestedTimeoutMs, timeoutMs);
 
       if (!model) {
         throw new OllamaPlannerError("Ollama planner requires --model <model-name> in PR 10B.");
@@ -53,7 +54,7 @@ export function createOllamaPlannerProvider(options: OllamaProviderOptions = {})
 
       const response = await requestOllamaPlan({
         endpoint,
-        timeoutMs,
+        timeoutMs: requestTimeoutMs,
         fetchFn,
         model,
         prompt: buildOllamaPlannerPrompt(context.userPrompt)
@@ -113,7 +114,9 @@ async function requestOllamaPlan(input: {
     return response.json();
   } catch (error) {
     if (isAbortError(error)) {
-      throw new OllamaPlannerError("Ollama planner request timed out.");
+      throw new OllamaPlannerError(
+        `Ollama planner request timed out after ${input.timeoutMs}ms for model ${input.model} at ${input.endpoint}.`
+      );
     }
 
     if (error instanceof OllamaPlannerError) {
@@ -151,7 +154,9 @@ function normalizeOllamaPlan(value: unknown, taskId: string, model: string): Pla
     provider: "ollama",
     model,
     steps: Array.isArray(value.steps) ? value.steps.map(normalizeStep) : [],
-    risk_notes: normalizeStringArray(value.risk_notes, ["Model-generated plan must be validated before execution."]),
+    risk_notes: normalizeStringArray(value.risk_notes, [
+      "Model-generated plan must be validated before execution."
+    ]),
     expected_outputs: normalizeStringArray(value.expected_outputs, [
       "tool-calls.jsonl",
       "blocked-actions.jsonl",
@@ -211,8 +216,14 @@ function normalizeModel(value: string | null | undefined): string | null {
   return value.trim();
 }
 
+function normalizeTimeoutMs(value: number | null | undefined, fallback: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
 function normalizeStringArray(value: unknown, fallback: string[]): string[] {
-  return Array.isArray(value) && value.every((entry) => typeof entry === "string") ? value : fallback;
+  return Array.isArray(value) && value.every((entry) => typeof entry === "string")
+    ? value
+    : fallback;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

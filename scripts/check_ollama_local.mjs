@@ -5,6 +5,7 @@ const OLLAMA_TAGS_URL = "http://localhost:11434/api/tags";
 const TIMEOUT_MS = 5000;
 
 async function main() {
+  const requestedModel = parseRequestedModel(process.argv.slice(2));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -35,10 +36,27 @@ async function main() {
     for (const modelName of modelNames) {
       console.log(`- ${modelName}`);
     }
+
+    if (requestedModel) {
+      console.log("");
+      if (modelNames.includes(requestedModel)) {
+        console.log(`Requested model check: ${requestedModel} is available locally.`);
+      } else {
+        console.log(`Requested model check: ${requestedModel} was not reported by /api/tags.`);
+        console.log("The harness will not pull models automatically.");
+      }
+    }
+
     console.log("");
     console.log("Example command:");
+    const exampleModel =
+      requestedModel && modelNames.includes(requestedModel) ? requestedModel : modelNames[0];
     console.log(
-      `npx guard-agent run "Create a safe README update proposal" --planner ollama --model ${modelNames[0]}`
+      `npx guard-agent run "Create a safe README update proposal" --planner ollama --model ${exampleModel} --planner-timeout-ms 120000`
+    );
+    console.log("");
+    console.log(
+      "Large local models can need a longer planner timeout while loading or generating."
     );
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -48,10 +66,29 @@ async function main() {
     }
 
     console.log("This is informational only. CI validation does not require local Ollama.");
-    console.log("The harness does not install Ollama, pull models, or run shell commands to manage Ollama.");
+    console.log(
+      "The harness does not install Ollama, pull models, or run shell commands to manage Ollama."
+    );
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function parseRequestedModel(args) {
+  const modelFlagIndex = args.indexOf("--model");
+  if (modelFlagIndex >= 0) {
+    return normalizeModelName(args[modelFlagIndex + 1]);
+  }
+
+  if (args.length === 1 && !args[0].startsWith("-")) {
+    return normalizeModelName(args[0]);
+  }
+
+  return null;
+}
+
+function normalizeModelName(value) {
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
 }
 
 function extractModelNames(value) {

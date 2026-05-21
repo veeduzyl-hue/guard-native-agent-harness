@@ -134,7 +134,9 @@ describe("ollama planner provider", () => {
       timeoutMs: 1,
       fetchFn: async (_url, init) =>
         new Promise((_, reject) => {
-          init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" })));
+          init.signal.addEventListener("abort", () =>
+            reject(Object.assign(new Error("aborted"), { name: "AbortError" }))
+          );
         })
     });
 
@@ -146,7 +148,59 @@ describe("ollama planner provider", () => {
         harnessVersion: "0.1.0",
         requestedModel: "test-model"
       })
-    ).rejects.toThrow("Ollama planner request timed out.");
+    ).rejects.toThrow(
+      "Ollama planner request timed out after 1ms for model test-model at http://localhost:11434."
+    );
+  });
+
+  it("uses the requested timeout from provider context", async () => {
+    const provider = createOllamaPlannerProvider({
+      timeoutMs: 5000,
+      fetchFn: async (_url, init) =>
+        new Promise((_, reject) => {
+          init.signal.addEventListener("abort", () =>
+            reject(Object.assign(new Error("aborted"), { name: "AbortError" }))
+          );
+        })
+    });
+
+    await expect(
+      provider.createPlan({
+        taskId: "task-custom-timeout",
+        userPrompt: "Create a safe README update proposal",
+        workspaceRoot: "workspace",
+        harnessVersion: "0.1.0",
+        requestedModel: "test-model",
+        requestedTimeoutMs: 1
+      })
+    ).rejects.toThrow(
+      "Ollama planner request timed out after 1ms for model test-model at http://localhost:11434."
+    );
+  });
+
+  it("returns a controlled HTTP error for a missing local model response", async () => {
+    const provider = createOllamaPlannerProvider({
+      fetchFn: async () => ({
+        ok: false,
+        status: 404,
+        async json() {
+          return {};
+        },
+        async text() {
+          return "model not found";
+        }
+      })
+    });
+
+    await expect(
+      provider.createPlan({
+        taskId: "task-model-missing",
+        userPrompt: "Create a safe README update proposal",
+        workspaceRoot: "workspace",
+        harnessVersion: "0.1.0",
+        requestedModel: "missing-model"
+      })
+    ).rejects.toThrow("Ollama planner provider returned HTTP 404: model not found");
   });
 
   it("runs through task runner with mocked Ollama response and records provider metadata", async () => {
@@ -169,6 +223,7 @@ describe("ollama planner provider", () => {
       workspaceRoot,
       plannerProvider: "ollama",
       plannerModel: "test-model",
+      plannerTimeoutMs: 120000,
       plannerRegistry: registry,
       guardAdapter: unavailableGuardAdapter,
       executePlan: false
@@ -181,7 +236,9 @@ describe("ollama planner provider", () => {
   });
 });
 
-function createOllamaRegistry(fetchFn: Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"]): PlannerProviderRegistry {
+function createOllamaRegistry(
+  fetchFn: Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"]
+): PlannerProviderRegistry {
   const registry = new PlannerProviderRegistry();
   registry.register(mockPlannerProvider);
   registry.register(createOllamaPlannerProvider({ fetchFn }));
@@ -189,11 +246,15 @@ function createOllamaRegistry(fetchFn: Parameters<typeof createOllamaPlannerProv
   return registry;
 }
 
-function createOllamaFetch(plan: Partial<Record<string, unknown>>): Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"] {
+function createOllamaFetch(
+  plan: Partial<Record<string, unknown>>
+): Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"] {
   return createRawOllamaFetch(JSON.stringify(plan));
 }
 
-function createRawOllamaFetch(response: string): Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"] {
+function createRawOllamaFetch(
+  response: string
+): Parameters<typeof createOllamaPlannerProvider>[0]["fetchFn"] {
   return async () => ({
     ok: true,
     status: 200,
