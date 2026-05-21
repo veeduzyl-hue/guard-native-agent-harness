@@ -2,7 +2,10 @@ import { randomBytes } from "node:crypto";
 
 import { executePlan } from "../agent/orchestrator.js";
 import { validatePlan, PlanValidationError } from "../agent/plan-validator.js";
-import { createDefaultPlannerProviderRegistry, type PlannerProviderRegistry } from "../agent/provider-registry.js";
+import {
+  createDefaultPlannerProviderRegistry,
+  type PlannerProviderRegistry
+} from "../agent/provider-registry.js";
 import { HARNESS_VERSION } from "../index.js";
 import { renderFinalReportFromEvidence } from "../evidence/report.js";
 import { writeEvidencePack, writeFinalReport, writeGuardResults } from "../evidence/writer.js";
@@ -21,10 +24,14 @@ export interface RunTaskOptions {
   executePlan?: boolean;
   plannerProvider?: string;
   plannerModel?: string | null;
+  plannerTimeoutMs?: number | null;
   plannerRegistry?: PlannerProviderRegistry;
 }
 
-export async function runTask(userPrompt: string, options: RunTaskOptions = {}): Promise<EvidencePack> {
+export async function runTask(
+  userPrompt: string,
+  options: RunTaskOptions = {}
+): Promise<EvidencePack> {
   const workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
   const createdAt = options.now ?? new Date();
   const taskId = createTaskId(createdAt, options.randomId);
@@ -38,7 +45,8 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
     userPrompt,
     workspaceRoot,
     harnessVersion,
-    requestedModel: options.plannerModel ?? null
+    requestedModel: options.plannerModel ?? null,
+    requestedTimeoutMs: options.plannerTimeoutMs ?? null
   });
   const planValidation = validatePlan(plannerResult.plan, options.toolRegistry);
 
@@ -76,7 +84,10 @@ export async function runTask(userPrompt: string, options: RunTaskOptions = {}):
         );
   const guardResult = await (options.guardAdapter ?? createDefaultGuardAdapter()).collect();
   await writeGuardResults(evidencePack.evidenceDirectory, guardResult);
-  await writeFinalReport(evidencePack.evidenceDirectory, await renderFinalReportFromEvidence(evidencePack.evidenceDirectory));
+  await writeFinalReport(
+    evidencePack.evidenceDirectory,
+    await renderFinalReportFromEvidence(evidencePack.evidenceDirectory)
+  );
 
   return {
     ...evidencePack,

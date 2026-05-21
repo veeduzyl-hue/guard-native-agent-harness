@@ -42,20 +42,19 @@ describe("planner provider registry", () => {
     const registry = createDefaultPlannerProviderRegistry();
 
     expect(() => registry.get("missing-provider")).toThrow(UnknownPlannerProviderError);
-    expect(() => registry.get("missing-provider")).toThrow("Unknown planner provider: missing-provider");
+    expect(() => registry.get("missing-provider")).toThrow(
+      "Unknown planner provider: missing-provider"
+    );
   });
 
-  it.each(["openai", "deepseek"])(
-    "recognizes %s as unimplemented",
-    (providerName) => {
-      const registry = createDefaultPlannerProviderRegistry();
+  it.each(["openai", "deepseek"])("recognizes %s as unimplemented", (providerName) => {
+    const registry = createDefaultPlannerProviderRegistry();
 
-      expect(() => registry.get(providerName)).toThrow(PlannerProviderNotImplementedError);
-      expect(() => registry.get(providerName)).toThrow(
-        `Planner provider "${providerName}" is recognized but not implemented.`
-      );
-    }
-  );
+    expect(() => registry.get(providerName)).toThrow(PlannerProviderNotImplementedError);
+    expect(() => registry.get(providerName)).toThrow(
+      `Planner provider "${providerName}" is recognized but not implemented.`
+    );
+  });
 });
 
 describe("planner provider selection", () => {
@@ -85,7 +84,9 @@ describe("planner provider selection", () => {
       executePlan: false
     });
 
-    const task = JSON.parse(await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")) as {
+    const task = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")
+    ) as {
       planner_provider: string;
       planner_model: string | null;
     };
@@ -95,10 +96,29 @@ describe("planner provider selection", () => {
     expect(result.plan.model).toBeNull();
   });
 
+  it("keeps mock behavior unchanged when planner timeout metadata is provided", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-provider-mock-timeout-"));
+    await writeFile(path.join(workspaceRoot, "README.md"), "# Demo\n", "utf8");
+
+    const result = await runTask("Create a safe README update proposal", {
+      workspaceRoot,
+      plannerProvider: "mock",
+      plannerTimeoutMs: 120000,
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
+    });
+
+    expect(result.task.planner_provider).toBe("mock");
+    expect(result.task.planner_model).toBeNull();
+    expect(result.plan.provider).toBe("mock");
+  });
+
   it.each(["openai", "deepseek"])(
     "fails with a controlled error for unimplemented provider %s",
     async (providerName) => {
-      const workspaceRoot = await mkdtemp(path.join(tmpdir(), `guard-agent-provider-${providerName}-`));
+      const workspaceRoot = await mkdtemp(
+        path.join(tmpdir(), `guard-agent-provider-${providerName}-`)
+      );
 
       await expect(
         runTask("Create a safe README update proposal", {

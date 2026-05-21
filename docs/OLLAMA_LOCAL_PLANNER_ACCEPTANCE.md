@@ -29,12 +29,24 @@ Check local Ollama status:
 npm run check:ollama
 ```
 
+Check a specific local model name:
+
+```bash
+npm run check:ollama -- --model <local-model-name>
+```
+
 The check is informational. If Ollama is unavailable, it prints guidance and exits without making CI-style validation fail.
 
 ## Run Safe README Demo
 
 ```bash
 npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name>
+```
+
+If the selected local model is large or still loading, use a longer planner timeout:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
 ```
 
 Expected behavior:
@@ -145,6 +157,12 @@ If the run fails with a model-not-found error, use a model name returned by:
 
 ```bash
 npm run check:ollama
+```
+
+If the run times out, the error includes the provider, model, endpoint, and timeout value. Try a smaller already-loaded local model, or increase the planner timeout:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
 ```
 
 If the run fails with a plan validation error, inspect the error message. The model may have proposed an unknown tool, malformed input, or an unsafe direct command shape.
