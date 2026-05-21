@@ -17,6 +17,14 @@ npm run check:ollama -- --model <local-model-name>
 npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
 ```
 
+Validated local path:
+
+```bash
+npm run verify:ollama:e2e -- --model qwen2.5-coder:7b
+```
+
+This helper is optional and local-only. It is not required by v0.1 validation.
+
 ## Evidence Directory
 
 The CLI prints:
@@ -56,6 +64,15 @@ In `plan.json`, confirm:
 ```
 
 Both files should record the selected local model name.
+
+For `qwen2.5-coder:7b`, check:
+
+```json
+{
+  "planner_provider": "ollama",
+  "planner_model": "qwen2.5-coder:7b"
+}
+```
 
 ## Confirm Normalization Boundary
 

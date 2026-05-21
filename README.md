@@ -199,6 +199,26 @@ Notes:
 
 Manual acceptance guide: [Ollama Local Planner Acceptance](docs/OLLAMA_LOCAL_PLANNER_ACCEPTANCE.md)
 
+## Ollama E2E Local Acceptance
+
+The local Ollama planner path has an optional end-to-end acceptance flow. It is local-only and requires an already-running Ollama instance with the model already available locally.
+
+```bash
+npm run build
+npm run check:ollama
+npx guard-agent run "Create a safe README update proposal" --planner ollama --model qwen2.5-coder:7b --planner-timeout-ms 120000
+```
+
+Optional verifier:
+
+```bash
+npm run verify:ollama:e2e -- --model qwen2.5-coder:7b
+```
+
+This does not change the default provider. `mock` remains the default, and `npm run verify:v0.1` remains mock-based.
+
+Guide: [Ollama Local Planner E2E Acceptance](docs/OLLAMA_E2E_ACCEPTANCE.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
