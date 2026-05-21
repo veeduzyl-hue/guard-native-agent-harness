@@ -1,7 +1,11 @@
 import { randomBytes } from "node:crypto";
 
 import { executePlan } from "../agent/orchestrator.js";
-import { validatePlan, PlanValidationError } from "../agent/plan-validator.js";
+import {
+  validatePlan,
+  PlanValidationError,
+  type PlanValidationResult
+} from "../agent/plan-validator.js";
 import {
   createDefaultPlannerProviderRegistry,
   type PlannerProviderRegistry
@@ -11,7 +15,7 @@ import { renderFinalReportFromEvidence } from "../evidence/report.js";
 import { writeEvidencePack, writeFinalReport, writeGuardResults } from "../evidence/writer.js";
 import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
-import type { EvidencePack, TaskEvidence } from "../evidence/schema.js";
+import type { EvidencePack, PlanEvidence, TaskEvidence } from "../evidence/schema.js";
 import type { ToolRegistry } from "../tools/registry.js";
 
 export interface RunTaskOptions {
@@ -51,7 +55,16 @@ export async function runTask(
   const planValidation = validatePlan(plannerResult.plan, options.toolRegistry);
 
   if (!planValidation.valid) {
-    throw new PlanValidationError(planValidation);
+    throw createPlannerValidationError(
+      plannerResult.provider,
+      plannerResult.model ?? null,
+      plannerResult.plan,
+      planValidation
+    );
+  }
+
+  if (plannerResult.plan.provider_diagnostics) {
+    plannerResult.plan.provider_diagnostics.plan_validated = true;
   }
 
   const task: TaskEvidence = {
@@ -113,4 +126,29 @@ function formatTaskTimestamp(now: Date): string {
 
 function pad2(value: number): string {
   return String(value).padStart(2, "0");
+}
+
+function createPlannerValidationError(
+  provider: string,
+  model: string | null,
+  plan: PlanEvidence,
+  result: PlanValidationResult
+): PlanValidationError {
+  const baseError = new PlanValidationError(result);
+  const diagnostics = plan.provider_diagnostics;
+  const normalizationAttempted = diagnostics ? "yes" : "no";
+  const changes =
+    diagnostics && diagnostics.normalization_changes.length > 0
+      ? diagnostics.normalization_changes.join("; ")
+      : "none";
+
+  baseError.message = [
+    `Planner provider "${provider}"${model ? ` with model "${model}"` : ""} returned a plan that failed validation.`,
+    "No plan steps were executed.",
+    `Normalization attempted: ${normalizationAttempted}.`,
+    `Normalization changes: ${changes}.`,
+    `Validator errors: ${result.errors.join("; ")}`
+  ].join(" ");
+
+  return baseError;
 }

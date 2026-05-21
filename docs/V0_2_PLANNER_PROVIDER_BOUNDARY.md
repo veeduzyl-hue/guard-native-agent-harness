@@ -61,8 +61,12 @@ Notes:
 - The harness does not pull models.
 - The harness does not run shell commands to manage Ollama.
 - Ollama proposes a plan only.
+- Ollama plans may be normalized only for safe structural fields, such as missing step IDs, planner metadata, or default expected outputs.
+- Unknown tools, unsafe paths, unsafe file reads, `git push`, and destructive commands are not rewritten or removed.
 - All plan steps are validated before execution.
 - Tool Registry and Policy Gate remain mandatory.
+- If validation fails after normalization, no plan steps execute.
+- Normalization does not grant execution authority.
 - Evidence capture remains unchanged.
 
 ## Execution Boundary
@@ -84,6 +88,8 @@ Plans are validated before orchestration. The validator checks that:
 - direct command-shaped input is only allowed through `run_command`
 
 If validation fails, the plan is not executed.
+
+For model-backed plans, the harness may apply bounded structural normalization before validation. This normalization is deterministic and does not change semantic intent. It does not make unsafe plans safe; it only makes structurally incomplete plans easier for the validator to evaluate.
 
 ## Evidence Boundary
 

@@ -53,6 +53,8 @@ Expected behavior:
 
 - Ollama receives a conservative JSON-only planning prompt.
 - Ollama proposes a plan.
+- The harness may normalize safe structural fields, such as missing step IDs or missing provider metadata.
+- The harness does not rewrite unknown tools, unsafe paths, or unsafe commands.
 - Plan Validator validates the plan before orchestration.
 - Registered tools execute only after validation and Policy Gate checks.
 - Evidence is written under `.evidence/<task-id>/`.
@@ -138,9 +140,13 @@ Generated `.evidence/` directories are local artifacts and should not be committ
 - Ollama is optional and explicitly selected with `--planner ollama`.
 - The default planner remains `mock`.
 - Ollama only proposes plans.
+- Plan normalization is limited to deterministic structural fields.
+- Unknown tools, unsafe paths, and unsafe commands are preserved for validation and policy evaluation.
 - Plan Validator must pass before orchestration.
 - Tool Registry and Policy Gate remain mandatory.
 - Blocked actions remain blocked.
+- Failed plan validation means no plan steps are executed.
+- Normalization does not grant authority.
 - Guard output remains evidence only.
 - No API key is required.
 - No `.env` loading is introduced.
@@ -166,6 +172,8 @@ npx guard-agent run "Create a safe README update proposal" --planner ollama --mo
 ```
 
 If the run fails with a plan validation error, inspect the error message. The model may have proposed an unknown tool, malformed input, or an unsafe direct command shape.
+
+The validation error should identify the provider and model, note whether normalization was attempted, and confirm that no plan steps were executed.
 
 ## What This Does Not Do
 

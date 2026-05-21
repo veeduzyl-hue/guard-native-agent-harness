@@ -1,11 +1,11 @@
-import { mkdtemp, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import { createOllamaPlannerProvider } from "../src/agent/ollama-provider.js";
-import { PlanValidationError, validatePlan } from "../src/agent/plan-validator.js";
+import { validatePlan } from "../src/agent/plan-validator.js";
 import { mockPlannerProvider } from "../src/agent/planner.js";
 import { PlannerProviderRegistry } from "../src/agent/provider-registry.js";
 import { GuardAdapter } from "../src/guard/adapter.js";
@@ -51,6 +51,80 @@ describe("ollama planner provider", () => {
     expect(validatePlan(result.plan).valid).toBe(true);
   });
 
+  it("normalizes missing step ids before validation", async () => {
+    const provider = createOllamaPlannerProvider({
+      fetchFn: createOllamaFetch({
+        steps: [
+          {
+            tool: "list_files",
+            input: { path: "." },
+            description: "List workspace files."
+          }
+        ]
+      })
+    });
+
+    const result = await provider.createPlan({
+      taskId: "task-missing-ids",
+      userPrompt: "Create a safe README update proposal",
+      workspaceRoot: "workspace",
+      harnessVersion: "0.1.0",
+      requestedModel: "test-model"
+    });
+
+    expect(result.plan.steps[0]?.id).toBe("step-1");
+    expect(result.plan.provider_diagnostics).toMatchObject({
+      normalization_applied: true,
+      normalization_changes: expect.arrayContaining(["added missing step id for step index 0"]),
+      plan_validated: true
+    });
+    expect(validatePlan(result.plan).valid).toBe(true);
+  });
+
+  it("sends a strict JSON schema prompt to Ollama", async () => {
+    let requestBody: Record<string, unknown> | null = null;
+    const provider = createOllamaPlannerProvider({
+      fetchFn: async (_url, init) => {
+        requestBody = JSON.parse(init.body) as Record<string, unknown>;
+        return {
+          ok: true,
+          status: 200,
+          async json() {
+            return {
+              response: JSON.stringify({
+                steps: [
+                  {
+                    id: "step-1",
+                    tool: "list_files",
+                    input: { path: "." },
+                    description: "List files."
+                  }
+                ]
+              })
+            };
+          },
+          async text() {
+            return "";
+          }
+        };
+      }
+    });
+
+    await provider.createPlan({
+      taskId: "task-prompt",
+      userPrompt: "Create a safe README update proposal",
+      workspaceRoot: "workspace",
+      harnessVersion: "0.1.0",
+      requestedModel: "test-model"
+    });
+
+    expect(String(requestBody?.prompt)).toContain(
+      "Each step must include id, tool, input, and description."
+    );
+    expect(String(requestBody?.prompt)).toContain("Step ids must be step-1, step-2, step-3");
+    expect(String(requestBody?.prompt)).toContain("Do not request .env files");
+  });
+
   it("fails before execution when Ollama returns malformed JSON", async () => {
     const provider = createOllamaPlannerProvider({
       fetchFn: createRawOllamaFetch("not-json")
@@ -90,8 +164,79 @@ describe("ollama planner provider", () => {
         plannerRegistry: registry,
         guardAdapter: unavailableGuardAdapter
       })
-    ).rejects.toThrow(PlanValidationError);
+    ).rejects.toThrow(
+      /Ollama planner returned a plan that failed validation after normalization\..*Provider: ollama\..*Model: test-model\..*Validator errors: Step 1 uses unknown tool "invented_tool"\./
+    );
     await expect(stat(path.join(workspaceRoot, ".evidence"))).rejects.toThrow();
+  });
+
+  it("does not remove unsafe .env reads and lets Policy Gate block them", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-ollama-env-block-"));
+    const registry = createOllamaRegistry(
+      createOllamaFetch({
+        steps: [
+          {
+            tool: "read_file",
+            input: { path: ".env" },
+            description: "Unsafe env read should remain visible to policy."
+          }
+        ]
+      })
+    );
+
+    const result = await runTask("Show a policy demo with blocked action", {
+      workspaceRoot,
+      plannerProvider: "ollama",
+      plannerModel: "test-model",
+      plannerRegistry: registry,
+      guardAdapter: unavailableGuardAdapter
+    });
+
+    const blockedActions = await readFile(
+      path.join(result.evidenceDirectory, "blocked-actions.jsonl"),
+      "utf8"
+    );
+    const toolCalls = await readFile(
+      path.join(result.evidenceDirectory, "tool-calls.jsonl"),
+      "utf8"
+    );
+
+    expect(result.plan.steps[0]?.input).toEqual({ path: ".env" });
+    expect(result.executionSummary.steps_blocked).toBe(1);
+    expect(blockedActions).toContain("block-env-read");
+    expect(toolCalls.trim()).toBe("");
+  });
+
+  it("does not remove destructive commands and lets Policy Gate block them", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-ollama-command-block-"));
+    const registry = createOllamaRegistry(
+      createOllamaFetch({
+        steps: [
+          {
+            tool: "run_command",
+            input: { command: "rm -rf ." },
+            description: "Unsafe command should remain visible to policy."
+          }
+        ]
+      })
+    );
+
+    const result = await runTask("Show a policy demo with blocked action", {
+      workspaceRoot,
+      plannerProvider: "ollama",
+      plannerModel: "test-model",
+      plannerRegistry: registry,
+      guardAdapter: unavailableGuardAdapter
+    });
+
+    const blockedActions = await readFile(
+      path.join(result.evidenceDirectory, "blocked-actions.jsonl"),
+      "utf8"
+    );
+
+    expect(result.plan.steps[0]?.input).toEqual({ command: "rm -rf ." });
+    expect(result.executionSummary.steps_blocked).toBe(1);
+    expect(blockedActions).toContain("block-destructive-command");
   });
 
   it("requires an explicit model", async () => {
@@ -233,6 +378,10 @@ describe("ollama planner provider", () => {
     expect(result.task.planner_model).toBe("test-model");
     expect(result.plan.provider).toBe("ollama");
     expect(result.plan.model).toBe("test-model");
+    expect(result.plan.provider_diagnostics).toMatchObject({
+      normalization_applied: true,
+      plan_validated: true
+    });
   });
 });
 

@@ -186,8 +186,12 @@ Notes:
 - The harness does not pull models.
 - The harness does not run shell commands to manage Ollama.
 - Ollama proposes a plan only.
+- Ollama plans are normalized only for safe structural fields such as missing step IDs or metadata.
+- Unknown tools, unsafe paths, and unsafe commands are not rewritten or removed.
 - All plan steps are validated before execution.
 - Tool Registry and Policy Gate remain mandatory.
+- Failed plan validation means no plan steps execute.
+- Normalization does not grant execution authority.
 - Evidence capture remains unchanged.
 
 Manual acceptance guide: [Ollama Local Planner Acceptance](docs/OLLAMA_LOCAL_PLANNER_ACCEPTANCE.md)

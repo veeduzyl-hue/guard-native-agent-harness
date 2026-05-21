@@ -1,5 +1,6 @@
-import type { PlanEvidence } from "../evidence/schema.js";
 import { createDefaultToolRegistry } from "../tools/registry.js";
+import { normalizeProviderPlan } from "./plan-normalizer.js";
+import { validatePlan } from "./plan-validator.js";
 import type { PlannerProvider } from "./provider.js";
 
 export const DEFAULT_OLLAMA_ENDPOINT = "http://localhost:11434";
@@ -60,7 +61,34 @@ export function createOllamaPlannerProvider(options: OllamaProviderOptions = {})
         prompt: buildOllamaPlannerPrompt(context.userPrompt)
       });
       const parsed = parseOllamaPlanResponse(response);
-      const plan = normalizeOllamaPlan(parsed, context.taskId, model);
+      const {
+        normalizedPlan: plan,
+        changes,
+        warnings
+      } = normalizeProviderPlan(parsed, {
+        taskId: context.taskId,
+        provider: "ollama",
+        model
+      });
+      const validation = validatePlan(plan);
+
+      if (!validation.valid) {
+        throw new OllamaPlannerError(
+          [
+            "Ollama planner returned a plan that failed validation after normalization.",
+            "No plan steps were executed.",
+            `Provider: ollama.`,
+            `Model: ${model}.`,
+            `Normalization attempted: yes.`,
+            `Normalization changes: ${changes.length > 0 ? changes.join("; ") : "none"}.`,
+            `Validator errors: ${validation.errors.join("; ")}`
+          ].join(" ")
+        );
+      }
+
+      if (plan.provider_diagnostics) {
+        plan.provider_diagnostics.plan_validated = true;
+      }
 
       return {
         provider: "ollama",
@@ -69,7 +97,10 @@ export function createOllamaPlannerProvider(options: OllamaProviderOptions = {})
         rawProviderMetadata: {
           provider: "ollama",
           model,
-          response_json_valid: true
+          response_json_valid: true,
+          normalization_applied: changes.length > 0,
+          normalization_changes: changes,
+          normalization_warnings: warnings
         }
       };
     }
@@ -143,47 +174,6 @@ function parseOllamaPlanResponse(response: unknown): unknown {
   }
 }
 
-function normalizeOllamaPlan(value: unknown, taskId: string, model: string): PlanEvidence {
-  if (!isRecord(value)) {
-    throw new OllamaPlannerError("Ollama planner JSON must be an object.");
-  }
-
-  return {
-    task_id: taskId,
-    planner: "ollama",
-    provider: "ollama",
-    model,
-    steps: Array.isArray(value.steps) ? value.steps.map(normalizeStep) : [],
-    risk_notes: normalizeStringArray(value.risk_notes, [
-      "Model-generated plan must be validated before execution."
-    ]),
-    expected_outputs: normalizeStringArray(value.expected_outputs, [
-      "tool-calls.jsonl",
-      "blocked-actions.jsonl",
-      "guard-results.json",
-      "final-report.md"
-    ])
-  };
-}
-
-function normalizeStep(value: unknown): PlanEvidence["steps"][number] {
-  if (!isRecord(value)) {
-    return {
-      id: "",
-      tool: "",
-      input: {},
-      description: ""
-    };
-  }
-
-  return {
-    id: typeof value.id === "string" ? value.id : "",
-    tool: typeof value.tool === "string" ? value.tool : "",
-    input: isRecord(value.input) ? value.input : {},
-    description: typeof value.description === "string" ? value.description : ""
-  };
-}
-
 function buildOllamaPlannerPrompt(userPrompt: string): string {
   const toolNames = createDefaultToolRegistry()
     .list()
@@ -192,15 +182,42 @@ function buildOllamaPlannerPrompt(userPrompt: string): string {
 
   return [
     "You are the planner for Guard-native Agent Harness.",
-    "Output JSON only. Do not include markdown, prose, or code fences.",
+    "Output JSON only. Do not include markdown, comments, prose, code fences, or explanations outside JSON.",
     `User task: ${userPrompt}`,
     `Allowed tool names: ${toolNames}`,
     "Use only registered tool names. Do not invent tools.",
+    "Each step must include id, tool, input, and description.",
+    "Step ids must be step-1, step-2, step-3, and so on in order.",
+    "Each tool must be one of the allowed tool names.",
+    "Each input must be a JSON object.",
     "Do not execute tools. Do not read files directly. Do not run commands directly.",
     "Do not include shell commands unless using the run_command tool.",
     "Do not request .env files, secrets, keys, tokens, private keys, git push, or destructive commands.",
     "Propose safe local plan steps only.",
-    "Return a JSON object with planner, provider, model, steps, risk_notes, and expected_outputs."
+    "Return a JSON object with planner, provider, model, steps, risk_notes, and expected_outputs.",
+    "Example JSON:",
+    JSON.stringify({
+      planner: "ollama",
+      provider: "ollama",
+      model: "<model-name>",
+      steps: [
+        {
+          id: "step-1",
+          tool: "list_files",
+          input: {
+            path: "."
+          },
+          description: "List workspace files."
+        }
+      ],
+      risk_notes: ["Model-generated plan must be validated before execution."],
+      expected_outputs: [
+        "tool-calls.jsonl",
+        "blocked-actions.jsonl",
+        "guard-results.json",
+        "final-report.md"
+      ]
+    })
   ].join("\n");
 }
 
@@ -218,12 +235,6 @@ function normalizeModel(value: string | null | undefined): string | null {
 
 function normalizeTimeoutMs(value: number | null | undefined, fallback: number): number {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : fallback;
-}
-
-function normalizeStringArray(value: unknown, fallback: string[]): string[] {
-  return Array.isArray(value) && value.every((entry) => typeof entry === "string")
-    ? value
-    : fallback;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
