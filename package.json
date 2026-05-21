@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "verify:v0.1": "node scripts/verify_v0_1_acceptance.mjs",
     "verify:v0.1:release": "node scripts/verify_v0_1_release_ready.mjs",
-    "check:ollama": "node scripts/check_ollama_local.mjs"
+    "check:ollama": "node scripts/check_ollama_local.mjs",
+    "verify:ollama:e2e": "node scripts/verify_ollama_e2e_local.mjs"
   },
   "engines": {
     "node": ">=20"

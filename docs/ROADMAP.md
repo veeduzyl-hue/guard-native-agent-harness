@@ -36,10 +36,11 @@ Phased plan:
 
 - PR 10A: Planner Provider Interface.
 - PR 10B: Ollama Local Planner Provider. Implemented as optional local-only planning.
+- PR 10B.5: Ollama Local Planner E2E Acceptance. Optional local acceptance guide and verifier for the Ollama path.
 - PR 10C: OpenAI Planner Provider.
 - PR 10D: DeepSeek Planner Provider, optional.
 
-All providers remain optional.
+All providers remain optional. The default provider remains `mock`, v0.1 verification remains mock-based, and no default provider switch has occurred.
 
 ## v0.3: External Runtime Trace Experiments
 
