@@ -14,7 +14,13 @@ export const listFilesTool: ToolDefinition<ListFilesInput> = {
     riskLevel: "low",
     requiresApproval: false,
     pathPolicy: "workspace_only",
-    evidenceRequired: true
+    evidenceRequired: true,
+    inputSchemaHint: {
+      path: "workspace-relative directory path string"
+    },
+    inputExample: {
+      path: "."
+    }
   },
   async execute(context, input) {
     const requestedPath = input.path ?? ".";

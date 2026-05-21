@@ -14,7 +14,13 @@ export const runCommandTool: ToolDefinition<RunCommandInput> = {
     riskLevel: "medium",
     requiresApproval: false,
     pathPolicy: "workspace_only",
-    evidenceRequired: true
+    evidenceRequired: true,
+    inputSchemaHint: {
+      command: "exact allowlisted command string only"
+    },
+    inputExample: {
+      command: "git status --short"
+    }
   },
   async execute(context, input, invocation) {
     const timeoutMs = normalizeTimeout(input.timeout_ms);

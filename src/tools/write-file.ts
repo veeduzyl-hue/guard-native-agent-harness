@@ -16,7 +16,15 @@ export const writeFileTool: ToolDefinition<WriteFileInput> = {
     riskLevel: "medium",
     requiresApproval: false,
     pathPolicy: "workspace_only",
-    evidenceRequired: true
+    evidenceRequired: true,
+    inputSchemaHint: {
+      path: "workspace-relative output file path string",
+      content: "UTF-8 text content string"
+    },
+    inputExample: {
+      path: "examples/readme-update/README_UPDATE_PROPOSAL.md",
+      content: "markdown text"
+    }
   },
   async execute(context, input) {
     const absolutePath = resolveWorkspacePath(context.workspaceRoot, input.path);

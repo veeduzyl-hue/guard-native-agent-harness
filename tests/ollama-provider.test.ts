@@ -122,7 +122,16 @@ describe("ollama planner provider", () => {
       "Each step must include id, tool, input, and description."
     );
     expect(String(requestBody?.prompt)).toContain("Step ids must be step-1, step-2, step-3");
+    expect(String(requestBody?.prompt)).toContain("- read_file");
+    expect(String(requestBody?.prompt)).toContain(
+      'input: {"path":"workspace-relative file path string"}'
+    );
+    expect(String(requestBody?.prompt)).toContain("Each input must be a JSON object.");
+    expect(String(requestBody?.prompt)).toContain(
+      "Invalid input shapes fail validation and do not execute."
+    );
     expect(String(requestBody?.prompt)).toContain("Do not request .env files");
+    expect(String(requestBody?.prompt)).not.toContain("OPENAI_API_KEY");
   });
 
   it("fails before execution when Ollama returns malformed JSON", async () => {
@@ -165,8 +174,62 @@ describe("ollama planner provider", () => {
         guardAdapter: unavailableGuardAdapter
       })
     ).rejects.toThrow(
-      /Ollama planner returned a plan that failed validation after normalization\..*Provider: ollama\..*Model: test-model\..*Validator errors: Step 1 uses unknown tool "invented_tool"\./
+      /Ollama planner returned a plan that failed validation after normalization\..*Provider: ollama\..*Model: test-model\..*Validator errors: Step step-1 uses unknown tool "invented_tool"\./
     );
+    await expect(stat(path.join(workspaceRoot, ".evidence"))).rejects.toThrow();
+  });
+
+  it("fails validation before execution when tool input is a string", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-ollama-string-input-"));
+    const registry = createOllamaRegistry(
+      createOllamaFetch({
+        steps: [
+          {
+            tool: "read_file",
+            input: "README.md",
+            description: "String input should be rejected."
+          }
+        ]
+      })
+    );
+
+    await expect(
+      runTask("Create a safe README update proposal", {
+        workspaceRoot,
+        plannerProvider: "ollama",
+        plannerModel: "test-model",
+        plannerRegistry: registry,
+        guardAdapter: unavailableGuardAdapter
+      })
+    ).rejects.toThrow(
+      'Step step-1 for tool read_file must use input object shape {"path":"workspace-relative file path string"}.'
+    );
+    await expect(stat(path.join(workspaceRoot, ".evidence"))).rejects.toThrow();
+  });
+
+  it("fails validation before execution when a required input field is missing", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-ollama-missing-field-"));
+    const registry = createOllamaRegistry(
+      createOllamaFetch({
+        steps: [
+          {
+            tool: "read_file",
+            input: {},
+            description: "Missing path should be rejected."
+          }
+        ]
+      })
+    );
+
+    await expect(
+      runTask("Create a safe README update proposal", {
+        workspaceRoot,
+        plannerProvider: "ollama",
+        plannerModel: "test-model",
+        plannerRegistry: registry,
+        guardAdapter: unavailableGuardAdapter
+      })
+    ).rejects.toThrow('Step step-1 for tool read_file is missing required input field "path".');
     await expect(stat(path.join(workspaceRoot, ".evidence"))).rejects.toThrow();
   });
 

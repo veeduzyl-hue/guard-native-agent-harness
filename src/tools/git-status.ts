@@ -12,7 +12,9 @@ export const gitStatusTool: ToolDefinition = {
     riskLevel: "low",
     requiresApproval: false,
     pathPolicy: "workspace_only",
-    evidenceRequired: true
+    evidenceRequired: true,
+    inputSchemaHint: {},
+    inputExample: {}
   },
   async execute(context) {
     const { stdout } = await execFileAsync("git", ["status", "--short"], {
