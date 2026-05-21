@@ -46,4 +46,29 @@ describe("tool registry", () => {
 
     expect(registry.list().every((metadata) => metadata.evidenceRequired === true)).toBe(true);
   });
+
+  it("exposes input schema hints and examples for every registered tool", () => {
+    const registry = createDefaultToolRegistry();
+
+    for (const metadata of registry.list()) {
+      expect(metadata.inputSchemaHint).toBeDefined();
+      expect(typeof metadata.inputSchemaHint).toBe("object");
+      expect(Array.isArray(metadata.inputSchemaHint)).toBe(false);
+      expect(metadata.inputExample).toBeDefined();
+      expect(typeof metadata.inputExample).toBe("object");
+      expect(Array.isArray(metadata.inputExample)).toBe(false);
+    }
+  });
+
+  it("keeps run_command schema hint limited to the existing command field", () => {
+    const registry = createDefaultToolRegistry();
+    const metadata = registry.get("run_command").metadata;
+
+    expect(metadata.inputSchemaHint).toEqual({
+      command: "exact allowlisted command string only"
+    });
+    expect(metadata.inputExample).toEqual({
+      command: "git status --short"
+    });
+  });
 });

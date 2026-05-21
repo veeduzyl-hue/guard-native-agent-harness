@@ -17,6 +17,8 @@ export interface ToolMetadata {
   requiresApproval: boolean;
   pathPolicy?: ToolPathPolicy;
   evidenceRequired: true;
+  inputSchemaHint: Record<string, string>;
+  inputExample: Record<string, unknown>;
 }
 
 export interface ToolExecutionContext {
@@ -44,7 +46,11 @@ export interface ToolInvocation {
 
 export interface ToolDefinition<TInput extends Record<string, unknown> = Record<string, unknown>> {
   metadata: ToolMetadata;
-  execute(context: ToolExecutionContext, input: TInput, invocation: ToolInvocation): Promise<ToolExecutionResult>;
+  execute(
+    context: ToolExecutionContext,
+    input: TInput,
+    invocation: ToolInvocation
+  ): Promise<ToolExecutionResult>;
 }
 
 export class ToolExecutionError extends Error {

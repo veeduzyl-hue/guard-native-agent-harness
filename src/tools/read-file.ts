@@ -14,7 +14,13 @@ export const readFileTool: ToolDefinition<ReadFileInput> = {
     riskLevel: "low",
     requiresApproval: false,
     pathPolicy: "workspace_only",
-    evidenceRequired: true
+    evidenceRequired: true,
+    inputSchemaHint: {
+      path: "workspace-relative file path string"
+    },
+    inputExample: {
+      path: "README.md"
+    }
   },
   async execute(context, input) {
     const absolutePath = resolveWorkspacePath(context.workspaceRoot, input.path);

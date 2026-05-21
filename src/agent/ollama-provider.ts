@@ -175,10 +175,8 @@ function parseOllamaPlanResponse(response: unknown): unknown {
 }
 
 function buildOllamaPlannerPrompt(userPrompt: string): string {
-  const toolNames = createDefaultToolRegistry()
-    .list()
-    .map((metadata) => metadata.name)
-    .join(", ");
+  const toolMetadata = createDefaultToolRegistry().list();
+  const toolNames = toolMetadata.map((metadata) => metadata.name).join(", ");
 
   return [
     "You are the planner for Guard-native Agent Harness.",
@@ -190,6 +188,16 @@ function buildOllamaPlannerPrompt(userPrompt: string): string {
     "Step ids must be step-1, step-2, step-3, and so on in order.",
     "Each tool must be one of the allowed tool names.",
     "Each input must be a JSON object.",
+    "Available tools and required input shapes:",
+    ...toolMetadata.flatMap((metadata) => [
+      `- ${metadata.name}`,
+      `  input: ${JSON.stringify(metadata.inputSchemaHint)}`,
+      `  example: ${JSON.stringify(metadata.inputExample)}`
+    ]),
+    "Use exactly these input object shapes.",
+    "Do not provide input as a string.",
+    "Do not invent fields.",
+    "Invalid input shapes fail validation and do not execute.",
     "Do not execute tools. Do not read files directly. Do not run commands directly.",
     "Do not include shell commands unless using the run_command tool.",
     "Do not request .env files, secrets, keys, tokens, private keys, git push, or destructive commands.",

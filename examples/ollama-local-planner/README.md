@@ -61,6 +61,8 @@ Both files should record the selected local model name.
 
 Ollama plans may be normalized only for safe structural fields, such as missing step IDs or provider metadata. Unknown tools, unsafe paths, and unsafe commands are not rewritten or removed.
 
+Tool input schema hints are provided to the planner, but they are not authority. The model must still produce object-shaped `input` values that match registered tool input shapes. Invalid input shapes fail validation and do not execute.
+
 Plan Validator still runs after normalization. Policy Gate still evaluates tool execution. If validation fails, no plan steps are executed.
 
 ## Confirm Final Report

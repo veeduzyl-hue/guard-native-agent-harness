@@ -186,6 +186,9 @@ Notes:
 - The harness does not pull models.
 - The harness does not run shell commands to manage Ollama.
 - Ollama proposes a plan only.
+- Tool input schema hints are provided to model planners.
+- Models must produce object-shaped `input` values that match the registered tool shape.
+- Invalid input shapes fail validation and do not execute.
 - Ollama plans are normalized only for safe structural fields such as missing step IDs or metadata.
 - Unknown tools, unsafe paths, and unsafe commands are not rewritten or removed.
 - All plan steps are validated before execution.

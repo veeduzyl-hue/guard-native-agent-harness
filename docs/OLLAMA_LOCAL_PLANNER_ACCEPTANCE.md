@@ -140,6 +140,9 @@ Generated `.evidence/` directories are local artifacts and should not be committ
 - Ollama is optional and explicitly selected with `--planner ollama`.
 - The default planner remains `mock`.
 - Ollama only proposes plans.
+- Tool input schema hints are provided to model planners.
+- Models must produce object-shaped `input` values that match registered tool input shapes.
+- Invalid input shapes fail validation and do not execute.
 - Plan normalization is limited to deterministic structural fields.
 - Unknown tools, unsafe paths, and unsafe commands are preserved for validation and policy evaluation.
 - Plan Validator must pass before orchestration.
@@ -171,7 +174,7 @@ If the run times out, the error includes the provider, model, endpoint, and time
 npx guard-agent run "Create a safe README update proposal" --planner ollama --model <local-model-name> --planner-timeout-ms 120000
 ```
 
-If the run fails with a plan validation error, inspect the error message. The model may have proposed an unknown tool, malformed input, or an unsafe direct command shape.
+If the run fails with a plan validation error, inspect the error message. The model may have proposed an unknown tool, malformed input, unsupported input field, missing required input field, or an unsafe direct command shape.
 
 The validation error should identify the provider and model, note whether normalization was attempted, and confirm that no plan steps were executed.
 
