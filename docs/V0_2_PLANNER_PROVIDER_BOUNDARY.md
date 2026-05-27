@@ -2,9 +2,9 @@
 
 ## Purpose
 
-PR 10A introduced the planner provider interface so providers can propose plans without changing the v0.1 execution boundary. PR 10B added the first optional model-backed provider for local Ollama. PR 10C adds an optional OpenAI Responses API planner provider.
+PR 10A introduced the planner provider interface so providers can propose plans without changing the v0.1 execution boundary. PR 10B added the first optional model-backed provider for local Ollama. PR 10C added an optional OpenAI Responses API planner provider. PR 10D adds an optional DeepSeek Chat Completions JSON Output planner provider.
 
-Ollama and OpenAI are explicitly selected and still produce only proposed plans. They do not change tool execution, Policy Gate, evidence capture, or Guard Adapter semantics.
+Ollama, OpenAI, and DeepSeek are explicitly selected and still produce only proposed plans. They do not change tool execution, Policy Gate, evidence capture, or Guard Adapter semantics.
 
 ## Provider Interface
 
@@ -33,7 +33,7 @@ The known provider names are:
 - `mock`: implemented and available.
 - `ollama`: implemented as an optional local-model provider in PR 10B.
 - `openai`: implemented as an optional remote-model provider in PR 10C.
-- `deepseek`: recognized but not implemented.
+- `deepseek`: implemented as an optional remote-model provider in PR 10D.
 
 The default provider remains `mock`.
 
@@ -93,6 +93,28 @@ Notes:
 
 See [OpenAI Planner Provider](OPENAI_PLANNER_PROVIDER.md) for the full boundary and failure behavior.
 
+## DeepSeek Planner Provider
+
+Example:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner deepseek --model <model-name> --planner-timeout-ms 120000
+```
+
+Notes:
+
+- DeepSeek is optional and must be selected with `--planner deepseek`.
+- PR 10D requires an explicit `--model <model-name>`.
+- The provider reads `DEEPSEEK_API_KEY` only from the process environment.
+- The harness does not load `.env` files or store API keys in evidence or reports.
+- The provider sends a JSON Output request to `https://api.deepseek.com/chat/completions` with Node built-in `fetch`.
+- The request exposes no tools and gives DeepSeek no execution authority.
+- Reasoning content returned by a DeepSeek model is not stored in evidence or final reports.
+- The same Plan Normalizer, Plan Validator, Tool Registry, Policy Gate, Evidence Writer, and Guard evidence-only boundary remain mandatory.
+- HTTP failures, empty or malformed output, validation failures, and timeouts stop before plan execution.
+
+See [DeepSeek Planner Provider](DEEPSEEK_PLANNER_PROVIDER.md) for the full boundary and failure behavior.
+
 ## Execution Boundary
 
 Provider output is only a proposed plan. A provider cannot execute tools, read files, run commands, bypass the Tool Registry, bypass the Policy Gate, grant authority, or modify Guard semantics.
@@ -120,15 +142,15 @@ For model-backed plans, the harness may apply bounded structural normalization b
 
 ## Evidence Boundary
 
-Task and plan evidence record the selected provider and model metadata. `mock` records `null` as the model. `ollama` records the explicitly requested local model name. `openai` records the explicitly requested remote model name and bounded provider diagnostics after successful validation.
+Task and plan evidence record the selected provider and model metadata. `mock` records `null` as the model. `ollama` records the explicitly requested local model name. `openai` and `deepseek` record the explicitly requested remote model name and bounded provider diagnostics after successful validation.
 
-Model providers do not store full raw model responses or full prompts. Provider output is parsed into a bounded plan shape before validation and evidence writing.
+Model providers do not store full raw model responses, full prompts, or DeepSeek reasoning output. Provider output is parsed into a bounded plan shape before validation and evidence writing.
 
 ## API Key Boundary
 
-The OpenAI provider may read only `process.env.OPENAI_API_KEY`. It does not load `.env`, add `dotenv`, read API keys through tools, log an API key, or record one in evidence, errors, final reports, or provider metadata.
+The OpenAI provider may read only `process.env.OPENAI_API_KEY`, and the DeepSeek provider may read only `process.env.DEEPSEEK_API_KEY`. Neither provider loads `.env`, adds `dotenv`, reads API keys through tools, logs an API key, or records one in evidence, errors, final reports, or provider metadata.
 
-Mock and Ollama workflows do not require an OpenAI API key. OpenAI fails cleanly if it is explicitly selected without the required environment variable.
+Mock and Ollama workflows do not require remote-provider API keys. OpenAI and DeepSeek each fail cleanly if explicitly selected without their required process-environment key.
 
 ## What Providers May Do
 
@@ -154,6 +176,6 @@ Mock and Ollama workflows do not require an OpenAI API key. OpenAI fails cleanly
 
 - PR 10B added an optional Ollama local planner provider.
 - PR 10C adds an optional OpenAI planner provider.
-- PR 10D may add an optional DeepSeek planner provider.
+- PR 10D adds an optional DeepSeek planner provider.
 
 All provider-backed planning must remain optional. The default remains `mock` until explicitly changed in a future release.

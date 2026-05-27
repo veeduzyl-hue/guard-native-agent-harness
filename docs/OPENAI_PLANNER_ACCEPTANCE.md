@@ -145,9 +145,9 @@ Provider failures do not silently fall back to `mock`.
 - It does not prove that every model response produces a valid plan.
 - It does not prove compliance or production readiness.
 - It does not replace human review.
-- It does not test DeepSeek or change the default planner.
+- It does not test the separate optional DeepSeek provider or change the default planner.
 - It does not grant OpenAI, Guard, or model output execution authority.
 
 ## Next Phase
 
-DeepSeek remains a future optional provider. Any later planner work must preserve the same validation, Tool Registry, Policy Gate, evidence, and Guard evidence-only boundaries.
+PR 10D adds DeepSeek as a separate optional planner provider. All planner work must preserve the same validation, Tool Registry, Policy Gate, evidence, and Guard evidence-only boundaries.

@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDefaultPlannerProviderRegistry,
-  PlannerProviderNotImplementedError,
   UnknownPlannerProviderError
 } from "../src/agent/provider-registry.js";
 import { GuardAdapter } from "../src/guard/adapter.js";
@@ -57,13 +56,14 @@ describe("planner provider registry", () => {
     );
   });
 
-  it("recognizes deepseek as unimplemented", () => {
+  it("registers deepseek as an available optional remote model provider", () => {
     const registry = createDefaultPlannerProviderRegistry();
 
-    expect(() => registry.get("deepseek")).toThrow(PlannerProviderNotImplementedError);
-    expect(() => registry.get("deepseek")).toThrow(
-      'Planner provider "deepseek" is recognized but not implemented.'
-    );
+    expect(registry.get("deepseek")).toMatchObject({
+      name: "deepseek",
+      kind: "remote-model",
+      available: true
+    });
   });
 });
 
@@ -121,18 +121,5 @@ describe("planner provider selection", () => {
     expect(result.task.planner_provider).toBe("mock");
     expect(result.task.planner_model).toBeNull();
     expect(result.plan.provider).toBe("mock");
-  });
-
-  it("fails with a controlled error for unimplemented deepseek provider", async () => {
-    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-provider-deepseek-"));
-
-    await expect(
-      runTask("Create a safe README update proposal", {
-        workspaceRoot,
-        plannerProvider: "deepseek",
-        plannerModel: "future-model",
-        guardAdapter: unavailableGuardAdapter
-      })
-    ).rejects.toThrow('Planner provider "deepseek" is recognized but not implemented.');
   });
 });

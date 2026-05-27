@@ -6,7 +6,7 @@ The OpenAI planner provider is an optional PR 10C path for producing a proposed 
 
 ## Status
 
-`openai` is implemented as an optional provider. The default planner remains `mock`, and DeepSeek remains recognized but unimplemented.
+`openai` is implemented as an optional provider. The default planner remains `mock`; DeepSeek is a separate optional provider implemented in PR 10D.
 
 ## Preconditions
 
@@ -89,6 +89,6 @@ OpenAI proposes a plan only. The harness alone may orchestrate validated registe
 - No web search, file search, or code interpreter.
 - No direct file reads or command execution by OpenAI.
 - No `.env` loading or API key evidence.
-- No DeepSeek integration.
+- No DeepSeek calls or DeepSeek execution authority through the OpenAI provider.
 - No new tools, command allowlist entries, Policy Gate semantics, or Guard semantics.
 - No SaaS, dashboard, OAuth, pricing, checkout, license, or entitlement behavior.
