@@ -252,8 +252,15 @@ export DEEPSEEK_API_KEY="..."
 npx guard-agent run "Create a safe README update proposal" --planner deepseek --model <model-name> --planner-timeout-ms 120000
 ```
 
+Optional local acceptance helper for users with a process-environment API key:
+
+```bash
+npm run verify:deepseek:planner -- --model <model-name>
+```
+
 Notes:
 
+- DeepSeek is optional, and `mock` remains the default provider.
 - The harness does not load `.env` files or add a dotenv dependency.
 - The API key is read only from the process environment and is not written to evidence.
 - The DeepSeek provider uses Chat Completions JSON Output through Node built-in `fetch`; it adds no DeepSeek SDK dependency.
@@ -264,6 +271,10 @@ Notes:
 - Missing model, missing API key, timeout, HTTP failure, malformed output, empty content, or failed plan validation stops the DeepSeek path without plan execution.
 
 Boundary guide: [DeepSeek Planner Provider](docs/DEEPSEEK_PLANNER_PROVIDER.md)
+
+Manual acceptance guide: [DeepSeek Planner Acceptance](docs/DEEPSEEK_PLANNER_ACCEPTANCE.md)
+
+Evidence inspection example: [DeepSeek Planner Evidence Inspection](examples/deepseek-planner/README.md)
 
 ## Ollama E2E Local Acceptance
 
