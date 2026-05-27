@@ -214,9 +214,17 @@ export OPENAI_API_KEY="..."
 npx guard-agent run "Create a safe README update proposal" --planner openai --model <model-name> --planner-timeout-ms 120000
 ```
 
+Optional local acceptance helper for users with a process-environment API key:
+
+```bash
+npm run verify:openai:planner -- --model <model-name>
+```
+
 Notes:
 
+- OpenAI is optional, and `mock` remains the default provider.
 - The harness does not load `.env` files or add a dotenv dependency.
+- The API key is read only from the process environment and is not written to evidence.
 - The OpenAI provider uses the Responses API through Node built-in `fetch`; it adds no OpenAI SDK dependency.
 - OpenAI returns a structured proposed plan only and is not given tools to call.
 - Plan Normalizer and Plan Validator run before a valid plan can be written or executed.
@@ -225,6 +233,10 @@ Notes:
 - Missing model, missing API key, timeout, HTTP failure, malformed output, refusal, or failed plan validation stops the OpenAI path without plan execution.
 
 Boundary guide: [OpenAI Planner Provider](docs/OPENAI_PLANNER_PROVIDER.md)
+
+Manual acceptance guide: [OpenAI Planner Acceptance](docs/OPENAI_PLANNER_ACCEPTANCE.md)
+
+Evidence inspection example: [OpenAI Planner Evidence Inspection](examples/openai-planner/README.md)
 
 ## Ollama E2E Local Acceptance
 
