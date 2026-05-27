@@ -45,7 +45,9 @@ async function main() {
 }
 
 async function runDemo(repoRoot, prompt) {
-  const result = await runCommand(process.execPath, ["dist/cli.js", "run", prompt], repoRoot);
+  const result = await runCommand(process.execPath, ["dist/cli.js", "run", prompt], repoRoot, {
+    omitEnvironmentVariables: ["OPENAI_API_KEY"]
+  });
   const evidencePack = parseEvidencePackPath(result.stdout);
 
   if (!evidencePack) {
@@ -99,16 +101,28 @@ async function verifyUnsafeDemo(repoRoot, relativeEvidencePack) {
   }
 
   if (commandResults.length !== 0) {
-    throw new Error("Unsafe demo recorded command results, which would imply a blocked command executed.");
+    throw new Error(
+      "Unsafe demo recorded command results, which would imply a blocked command executed."
+    );
   }
 
   const rules = new Set(blockedActions.map((event) => event.matched_rule));
   if (!rules.has("block-env-read") || !rules.has("block-git-push")) {
-    throw new Error("Unsafe demo did not record the expected blocked .env read and git push request.");
+    throw new Error(
+      "Unsafe demo did not record the expected blocked .env read and git push request."
+    );
   }
 
-  assertIncludes(finalReport, "Blocked Actions", "Unsafe final report should include Blocked Actions.");
-  assertIncludes(finalReport, "Total blocked actions", "Unsafe final report should include blocked action summary.");
+  assertIncludes(
+    finalReport,
+    "Blocked Actions",
+    "Unsafe final report should include Blocked Actions."
+  );
+  assertIncludes(
+    finalReport,
+    "Total blocked actions",
+    "Unsafe final report should include blocked action summary."
+  );
 
   checks.push("unsafe demo has blocked-action evidence and no command execution results");
 }
@@ -119,11 +133,13 @@ async function verifyNoExternalModelRequirement(repoRoot) {
     ...packageJson.dependencies,
     ...packageJson.devDependencies
   };
-  const forbiddenPackages = ["openai", "@anthropic-ai/sdk", "@google/generative-ai"];
+  const forbiddenPackages = ["openai", "dotenv", "@anthropic-ai/sdk", "@google/generative-ai"];
 
   for (const packageName of forbiddenPackages) {
     if (dependencies[packageName]) {
-      throw new Error(`External model package is present but v0.1 acceptance must remain no-LLM: ${packageName}`);
+      throw new Error(
+        `External model package is present but v0.1 acceptance must remain no-LLM: ${packageName}`
+      );
     }
   }
 
@@ -132,13 +148,20 @@ async function verifyNoExternalModelRequirement(repoRoot) {
     throw new Error(`External model requirement found in source: ${sourceMatches.join(", ")}`);
   }
 
-  checks.push("no OpenAI/API key, external model package, or .env requirement is present");
+  checks.push("mock verification requires no API key, OpenAI SDK, or dotenv dependency");
 }
 
 async function grepSourceForForbiddenModelRequirements(repoRoot) {
   const result = await runCommand(
     "git",
-    ["grep", "-n", "-E", "OPENAI_API_KEY|from ['\"]openai['\"]|@anthropic-ai|generative-ai", "--", "src"],
+    [
+      "grep",
+      "-n",
+      "-E",
+      "from ['\"]openai['\"]|from ['\"]dotenv['\"]|@anthropic-ai|generative-ai",
+      "--",
+      "src"
+    ],
     repoRoot,
     { allowFailure: true }
   );
@@ -167,11 +190,16 @@ function assertIncludes(value, expected, message) {
 
 function runCommand(executable, args, cwd, options = {}) {
   return new Promise((resolve, reject) => {
+    const env = { ...process.env };
+    for (const variableName of options.omitEnvironmentVariables ?? []) {
+      delete env[variableName];
+    }
+
     const child = spawn(executable, args, {
       cwd,
       shell: false,
       windowsHide: true,
-      env: process.env
+      env
     });
     let stdout = "";
     let stderr = "";

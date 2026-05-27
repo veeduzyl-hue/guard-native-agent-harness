@@ -16,7 +16,7 @@ program
   .command("run")
   .argument("<task>", "task prompt to initialize evidence for")
   .option("--planner <provider>", "planner provider to use", "mock")
-  .option("--model <model>", "planner model metadata for future provider compatibility")
+  .option("--model <model>", "model name for model-backed planner providers")
   .option(
     "--planner-timeout-ms <milliseconds>",
     "planner provider timeout in milliseconds",

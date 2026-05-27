@@ -2,9 +2,9 @@
 
 ## Purpose
 
-PR 10A introduced the planner provider interface so future providers can propose plans without changing the v0.1 execution boundary. PR 10B adds the first optional model-backed provider for local Ollama.
+PR 10A introduced the planner provider interface so providers can propose plans without changing the v0.1 execution boundary. PR 10B added the first optional model-backed provider for local Ollama. PR 10C adds an optional OpenAI Responses API planner provider.
 
-Ollama support is local-only, explicitly selected, and still produces only a proposed plan. It does not change tool execution, Policy Gate, evidence capture, or Guard Adapter semantics.
+Ollama and OpenAI are explicitly selected and still produce only proposed plans. They do not change tool execution, Policy Gate, evidence capture, or Guard Adapter semantics.
 
 ## Provider Interface
 
@@ -32,7 +32,7 @@ The known provider names are:
 
 - `mock`: implemented and available.
 - `ollama`: implemented as an optional local-model provider in PR 10B.
-- `openai`: recognized but not implemented.
+- `openai`: implemented as an optional remote-model provider in PR 10C.
 - `deepseek`: recognized but not implemented.
 
 The default provider remains `mock`.
@@ -72,6 +72,27 @@ Notes:
 - Normalization does not grant execution authority.
 - Evidence capture remains unchanged.
 
+## OpenAI Planner Provider
+
+Example:
+
+```bash
+npx guard-agent run "Create a safe README update proposal" --planner openai --model <model-name> --planner-timeout-ms 120000
+```
+
+Notes:
+
+- OpenAI is optional and must be selected with `--planner openai`.
+- PR 10C requires an explicit `--model <model-name>`.
+- The provider reads `OPENAI_API_KEY` only from the process environment.
+- The harness does not load `.env` files or store API keys in evidence or reports.
+- The provider sends a structured JSON plan request to `https://api.openai.com/v1/responses` with Node built-in `fetch`.
+- The request exposes no tools and gives OpenAI no execution authority.
+- The same Plan Normalizer, Plan Validator, Tool Registry, Policy Gate, Evidence Writer, and Guard evidence-only boundary remain mandatory.
+- HTTP failures, malformed output, refusals, validation failures, and timeouts stop before plan execution.
+
+See [OpenAI Planner Provider](OPENAI_PLANNER_PROVIDER.md) for the full boundary and failure behavior.
+
 ## Execution Boundary
 
 Provider output is only a proposed plan. A provider cannot execute tools, read files, run commands, bypass the Tool Registry, bypass the Policy Gate, grant authority, or modify Guard semantics.
@@ -99,15 +120,15 @@ For model-backed plans, the harness may apply bounded structural normalization b
 
 ## Evidence Boundary
 
-Task and plan evidence record the selected provider and model metadata. `mock` records `null` as the model. `ollama` records the explicitly requested local model name.
+Task and plan evidence record the selected provider and model metadata. `mock` records `null` as the model. `ollama` records the explicitly requested local model name. `openai` records the explicitly requested remote model name and bounded provider diagnostics after successful validation.
 
-PR 10B does not store full raw model responses. Provider output is parsed into a bounded plan shape before validation and evidence writing.
+Model providers do not store full raw model responses or full prompts. Provider output is parsed into a bounded plan shape before validation and evidence writing.
 
 ## API Key Boundary
 
-PR 10A and PR 10B introduce no API key handling, no `.env` loading, and no external model credentials.
+The OpenAI provider may read only `process.env.OPENAI_API_KEY`. It does not load `.env`, add `dotenv`, read API keys through tools, log an API key, or record one in evidence, errors, final reports, or provider metadata.
 
-Future provider work must handle API keys explicitly and avoid leaking keys into evidence, logs, final reports, or provider metadata.
+Mock and Ollama workflows do not require an OpenAI API key. OpenAI fails cleanly if it is explicitly selected without the required environment variable.
 
 ## What Providers May Do
 
@@ -131,8 +152,8 @@ Future provider work must handle API keys explicitly and avoid leaking keys into
 
 ## Future Provider Roadmap
 
-- PR 10B adds an optional Ollama local planner provider.
-- PR 10C may add an optional OpenAI planner provider.
+- PR 10B added an optional Ollama local planner provider.
+- PR 10C adds an optional OpenAI planner provider.
 - PR 10D may add an optional DeepSeek planner provider.
 
 All provider-backed planning must remain optional. The default remains `mock` until explicitly changed in a future release.

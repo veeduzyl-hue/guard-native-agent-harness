@@ -2,7 +2,7 @@
 
 Guard-native Agent Harness is a bounded local AI agent harness for simple AI-assisted workflows through registered tools, tool-call evidence capture, lightweight policy gates, and governance-ready evidence packs that MindForge Guard can validate.
 
-The current CLI runs a deterministic mock workflow through the local Tool Registry, Policy Gate, evidence writer, optional Guard Adapter, and final report renderer. It still does not implement autonomous planning, OpenAI integration, general shell execution, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
+The current CLI defaults to a deterministic mock workflow through the local Tool Registry, Policy Gate, evidence writer, optional Guard Adapter, and final report renderer. Optional model-backed planners can propose plans only when explicitly selected; they do not gain tool or execution authority. The harness still does not implement autonomous execution, general shell execution, dashboards, SaaS behavior, OAuth connectors, or background daemon behavior.
 
 ## Relationship To MindForge Guard
 
@@ -19,10 +19,11 @@ This repository currently contains:
 - TypeScript project metadata
 - Build, test, lint, and format scripts
 - README, PRD, architecture, and governance boundary documentation
-- A `guard-agent run` command that executes deterministic mock workflow templates
-- Tests for scaffold and evidence initialization
+- A `guard-agent run` command that executes deterministic mock workflow templates by default
+- Optional Ollama and OpenAI planner providers that propose validated plans only
+- Tests for scaffold, provider boundaries, and evidence initialization
 
-No autonomous or model-backed agent execution exists yet.
+No model provider executes tools directly or bypasses validation, the Tool Registry, or the Policy Gate.
 
 ## Current Runnable Command
 
@@ -52,7 +53,7 @@ The command creates:
   final-report.md
 ```
 
-This command uses a deterministic mock planner and registered tools. It does not call OpenAI, call external APIs, perform autonomous planning, bypass the Policy Gate, or grant execution authority from Guard output.
+This default command uses the deterministic mock planner and registered tools. It does not call OpenAI, call external APIs, bypass the Policy Gate, or grant execution authority from Guard output.
 
 ## PR 3: Tool Registry + Safe Tools
 
@@ -153,9 +154,9 @@ The default planner provider is `mock`:
 npx guard-agent run "Create a safe README update proposal" --planner mock
 ```
 
-PR 10A added the planner provider interface and local plan validation. PR 10B adds optional local Ollama planning. OpenAI and DeepSeek remain future optional providers.
+PR 10A added the planner provider interface and local plan validation. PR 10B added optional local Ollama planning. PR 10C adds optional OpenAI planning. DeepSeek remains a future optional provider.
 
-No API key is required and no `.env` file is loaded.
+The default `mock` provider and local Ollama path require no OpenAI API key. The explicitly selected OpenAI path requires `OPENAI_API_KEY` from the process environment only. No provider loads a `.env` file.
 
 ## Ollama Planner Provider
 
@@ -198,6 +199,32 @@ Notes:
 - Evidence capture remains unchanged.
 
 Manual acceptance guide: [Ollama Local Planner Acceptance](docs/OLLAMA_LOCAL_PLANNER_ACCEPTANCE.md)
+
+## OpenAI Planner Provider
+
+OpenAI is an optional planner provider. The default remains `mock`; selecting OpenAI requires an explicit model and an API key supplied only through the process environment.
+
+```bash
+# PowerShell
+$env:OPENAI_API_KEY="..."
+
+# Git Bash
+export OPENAI_API_KEY="..."
+
+npx guard-agent run "Create a safe README update proposal" --planner openai --model <model-name> --planner-timeout-ms 120000
+```
+
+Notes:
+
+- The harness does not load `.env` files or add a dotenv dependency.
+- The OpenAI provider uses the Responses API through Node built-in `fetch`; it adds no OpenAI SDK dependency.
+- OpenAI returns a structured proposed plan only and is not given tools to call.
+- Plan Normalizer and Plan Validator run before a valid plan can be written or executed.
+- Valid steps still go only through the Tool Registry and Policy Gate.
+- API keys, full raw responses, and full prompts are not written to evidence or final reports.
+- Missing model, missing API key, timeout, HTTP failure, malformed output, refusal, or failed plan validation stops the OpenAI path without plan execution.
+
+Boundary guide: [OpenAI Planner Provider](docs/OPENAI_PLANNER_PROVIDER.md)
 
 ## Ollama E2E Local Acceptance
 
@@ -267,8 +294,8 @@ Future PRs may extend this structure with additional artifacts and hashes.
 
 ## Non-goals
 
-- Autonomous or model-backed agent execution
-- OpenAI API calls
+- Autonomous or model-granted execution authority
+- OpenAI tool calling, Agents SDK behavior, or required OpenAI use
 - Arbitrary tool execution or arbitrary command execution
 - Required Guard CLI installation
 - Policy authority outside the local harness boundary

@@ -38,6 +38,16 @@ describe("planner provider registry", () => {
     });
   });
 
+  it("registers openai as an available optional remote model provider", () => {
+    const registry = createDefaultPlannerProviderRegistry();
+
+    expect(registry.get("openai")).toMatchObject({
+      name: "openai",
+      kind: "remote-model",
+      available: true
+    });
+  });
+
   it("rejects unknown provider names", () => {
     const registry = createDefaultPlannerProviderRegistry();
 
@@ -47,12 +57,12 @@ describe("planner provider registry", () => {
     );
   });
 
-  it.each(["openai", "deepseek"])("recognizes %s as unimplemented", (providerName) => {
+  it("recognizes deepseek as unimplemented", () => {
     const registry = createDefaultPlannerProviderRegistry();
 
-    expect(() => registry.get(providerName)).toThrow(PlannerProviderNotImplementedError);
-    expect(() => registry.get(providerName)).toThrow(
-      `Planner provider "${providerName}" is recognized but not implemented.`
+    expect(() => registry.get("deepseek")).toThrow(PlannerProviderNotImplementedError);
+    expect(() => registry.get("deepseek")).toThrow(
+      'Planner provider "deepseek" is recognized but not implemented.'
     );
   });
 });
@@ -113,21 +123,16 @@ describe("planner provider selection", () => {
     expect(result.plan.provider).toBe("mock");
   });
 
-  it.each(["openai", "deepseek"])(
-    "fails with a controlled error for unimplemented provider %s",
-    async (providerName) => {
-      const workspaceRoot = await mkdtemp(
-        path.join(tmpdir(), `guard-agent-provider-${providerName}-`)
-      );
+  it("fails with a controlled error for unimplemented deepseek provider", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-provider-deepseek-"));
 
-      await expect(
-        runTask("Create a safe README update proposal", {
-          workspaceRoot,
-          plannerProvider: providerName,
-          plannerModel: "future-model",
-          guardAdapter: unavailableGuardAdapter
-        })
-      ).rejects.toThrow(`Planner provider "${providerName}" is recognized but not implemented.`);
-    }
-  );
+    await expect(
+      runTask("Create a safe README update proposal", {
+        workspaceRoot,
+        plannerProvider: "deepseek",
+        plannerModel: "future-model",
+        guardAdapter: unavailableGuardAdapter
+      })
+    ).rejects.toThrow('Planner provider "deepseek" is recognized but not implemented.');
+  });
 });

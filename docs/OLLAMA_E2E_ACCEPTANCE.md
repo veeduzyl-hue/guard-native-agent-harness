@@ -138,4 +138,4 @@ These failures do not silently fall back to `mock`.
 
 ## Next Phase
 
-Future provider work can use this guide as a local reference point while keeping model-backed planning optional and policy-gated. OpenAI and DeepSeek remain future optional providers.
+Future provider work can use this guide as a local reference point while keeping model-backed planning optional and policy-gated. PR 10C adds optional OpenAI planning; DeepSeek remains a future optional provider.
