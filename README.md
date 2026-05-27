@@ -20,7 +20,7 @@ This repository currently contains:
 - Build, test, lint, and format scripts
 - README, PRD, architecture, and governance boundary documentation
 - A `guard-agent run` command that executes deterministic mock workflow templates by default
-- Optional Ollama and OpenAI planner providers that propose validated plans only
+- Optional Ollama, OpenAI, and DeepSeek planner providers that propose validated plans only
 - Tests for scaffold, provider boundaries, and evidence initialization
 
 No model provider executes tools directly or bypasses validation, the Tool Registry, or the Policy Gate.
@@ -154,9 +154,9 @@ The default planner provider is `mock`:
 npx guard-agent run "Create a safe README update proposal" --planner mock
 ```
 
-PR 10A added the planner provider interface and local plan validation. PR 10B added optional local Ollama planning. PR 10C adds optional OpenAI planning. DeepSeek remains a future optional provider.
+PR 10A added the planner provider interface and local plan validation. PR 10B added optional local Ollama planning. PR 10C added optional OpenAI planning. PR 10D adds optional DeepSeek planning.
 
-The default `mock` provider and local Ollama path require no OpenAI API key. The explicitly selected OpenAI path requires `OPENAI_API_KEY` from the process environment only. No provider loads a `.env` file.
+The default `mock` provider and local Ollama path require no remote-provider API key. The explicitly selected OpenAI and DeepSeek paths require their respective process-environment API keys only. No provider loads a `.env` file.
 
 ## Ollama Planner Provider
 
@@ -237,6 +237,33 @@ Boundary guide: [OpenAI Planner Provider](docs/OPENAI_PLANNER_PROVIDER.md)
 Manual acceptance guide: [OpenAI Planner Acceptance](docs/OPENAI_PLANNER_ACCEPTANCE.md)
 
 Evidence inspection example: [OpenAI Planner Evidence Inspection](examples/openai-planner/README.md)
+
+## DeepSeek Planner Provider
+
+DeepSeek is an optional planner provider. The default remains `mock`; selecting DeepSeek requires an explicit model and an API key supplied only through the process environment.
+
+```bash
+# PowerShell
+$env:DEEPSEEK_API_KEY="..."
+
+# Git Bash
+export DEEPSEEK_API_KEY="..."
+
+npx guard-agent run "Create a safe README update proposal" --planner deepseek --model <model-name> --planner-timeout-ms 120000
+```
+
+Notes:
+
+- The harness does not load `.env` files or add a dotenv dependency.
+- The API key is read only from the process environment and is not written to evidence.
+- The DeepSeek provider uses Chat Completions JSON Output through Node built-in `fetch`; it adds no DeepSeek SDK dependency.
+- DeepSeek returns a JSON proposed plan only and is not given tools to call.
+- Plan Normalizer and Plan Validator run before a valid plan can be written or executed.
+- Valid steps still go only through the Tool Registry and Policy Gate.
+- Reasoning output, API keys, full raw responses, and full prompts are not written to evidence or final reports.
+- Missing model, missing API key, timeout, HTTP failure, malformed output, empty content, or failed plan validation stops the DeepSeek path without plan execution.
+
+Boundary guide: [DeepSeek Planner Provider](docs/DEEPSEEK_PLANNER_PROVIDER.md)
 
 ## Ollama E2E Local Acceptance
 

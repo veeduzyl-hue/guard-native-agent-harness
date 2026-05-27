@@ -46,7 +46,7 @@ async function main() {
 
 async function runDemo(repoRoot, prompt) {
   const result = await runCommand(process.execPath, ["dist/cli.js", "run", prompt], repoRoot, {
-    omitEnvironmentVariables: ["OPENAI_API_KEY"]
+    omitEnvironmentVariables: ["OPENAI_API_KEY", "DEEPSEEK_API_KEY"]
   });
   const evidencePack = parseEvidencePackPath(result.stdout);
 
@@ -133,7 +133,13 @@ async function verifyNoExternalModelRequirement(repoRoot) {
     ...packageJson.dependencies,
     ...packageJson.devDependencies
   };
-  const forbiddenPackages = ["openai", "dotenv", "@anthropic-ai/sdk", "@google/generative-ai"];
+  const forbiddenPackages = [
+    "openai",
+    "deepseek",
+    "dotenv",
+    "@anthropic-ai/sdk",
+    "@google/generative-ai"
+  ];
 
   for (const packageName of forbiddenPackages) {
     if (dependencies[packageName]) {
@@ -148,7 +154,7 @@ async function verifyNoExternalModelRequirement(repoRoot) {
     throw new Error(`External model requirement found in source: ${sourceMatches.join(", ")}`);
   }
 
-  checks.push("mock verification requires no API key, OpenAI SDK, or dotenv dependency");
+  checks.push("mock verification requires no provider API key, SDK, or dotenv dependency");
 }
 
 async function grepSourceForForbiddenModelRequirements(repoRoot) {
@@ -158,7 +164,7 @@ async function grepSourceForForbiddenModelRequirements(repoRoot) {
       "grep",
       "-n",
       "-E",
-      "from ['\"]openai['\"]|from ['\"]dotenv['\"]|@anthropic-ai|generative-ai",
+      "from ['\"]openai['\"]|from ['\"]deepseek['\"]|from ['\"]dotenv['\"]|@anthropic-ai|generative-ai",
       "--",
       "src"
     ],

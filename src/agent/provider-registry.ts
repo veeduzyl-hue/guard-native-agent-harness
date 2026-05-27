@@ -1,9 +1,10 @@
+import { createDeepSeekPlannerProvider } from "./deepseek-provider.js";
 import { createOpenAIPlannerProvider } from "./openai-provider.js";
 import { createOllamaPlannerProvider } from "./ollama-provider.js";
 import { mockPlannerProvider } from "./planner.js";
 import type { PlannerProvider, PlannerProviderName } from "./provider.js";
 
-const futureProviderNames = new Set<PlannerProviderName>(["deepseek"]);
+const futureProviderNames = new Set<PlannerProviderName>();
 
 export class PlannerProviderRegistry {
   private readonly providers = new Map<PlannerProviderName, PlannerProvider>();
@@ -54,6 +55,7 @@ export function createDefaultPlannerProviderRegistry(): PlannerProviderRegistry 
   registry.register(mockPlannerProvider);
   registry.register(createOllamaPlannerProvider());
   registry.register(createOpenAIPlannerProvider());
+  registry.register(createDeepSeekPlannerProvider());
 
   return registry;
 }
