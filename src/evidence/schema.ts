@@ -32,6 +32,8 @@ export interface PlanEvidence {
 }
 
 export interface PlanProviderDiagnostics {
+  provider?: PlannerType;
+  model?: string | null;
   normalization_applied: boolean;
   normalization_changes: string[];
   normalization_warnings: string[];

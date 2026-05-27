@@ -58,7 +58,9 @@ describe("task runner evidence initialization", () => {
       executePlan: false
     });
 
-    const task = JSON.parse(await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")) as TaskEvidence;
+    const task = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "task.json"), "utf8")
+    ) as TaskEvidence;
 
     expect(task).toEqual({
       task_id: "task-20260520-010203-abc123",
@@ -84,7 +86,9 @@ describe("task runner evidence initialization", () => {
       executePlan: false
     });
 
-    const plan = JSON.parse(await readFile(path.join(result.evidenceDirectory, "plan.json"), "utf8")) as PlanEvidence;
+    const plan = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "plan.json"), "utf8")
+    ) as PlanEvidence;
 
     expect(plan.task_id).toBe("task-20260520-010203-abc123");
     expect(plan.planner).toBe("mock");
@@ -121,8 +125,12 @@ describe("task runner evidence initialization", () => {
     expect(report).toContain("## 3. Evidence Pack Contents");
     expect(report).toContain("## 10. Runtime Boundary");
     expect(report).toContain("## 11. Limitations");
-    expect(report).toContain("Guard results are recorded as evidence only. They do not grant execution authority.");
-    expect(report).toContain("- No OpenAI or external LLM integration in the current phase.");
+    expect(report).toContain(
+      "Guard results are recorded as evidence only. They do not grant execution authority."
+    );
+    expect(report).toContain(
+      "- Optional model providers propose plans only and do not grant execution authority."
+    );
   });
 
   it("can initialize evidence without executing the mock plan when requested", async () => {
@@ -137,12 +145,21 @@ describe("task runner evidence initialization", () => {
     });
 
     const files = await readdir(result.evidenceDirectory);
-    const blockedActions = await readFile(path.join(result.evidenceDirectory, "blocked-actions.jsonl"), "utf8");
-    const commandResults = await readFile(path.join(result.evidenceDirectory, "command-results.jsonl"), "utf8");
+    const blockedActions = await readFile(
+      path.join(result.evidenceDirectory, "blocked-actions.jsonl"),
+      "utf8"
+    );
+    const commandResults = await readFile(
+      path.join(result.evidenceDirectory, "command-results.jsonl"),
+      "utf8"
+    );
     const guardResults = JSON.parse(
       await readFile(path.join(result.evidenceDirectory, "guard-results.json"), "utf8")
     ) as GuardAdapterResult;
-    const toolCalls = await readFile(path.join(result.evidenceDirectory, "tool-calls.jsonl"), "utf8");
+    const toolCalls = await readFile(
+      path.join(result.evidenceDirectory, "tool-calls.jsonl"),
+      "utf8"
+    );
 
     expect(files).toContain("blocked-actions.jsonl");
     expect(blockedActions).toBe("");

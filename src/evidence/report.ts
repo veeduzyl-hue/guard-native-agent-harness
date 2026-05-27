@@ -110,7 +110,7 @@ ${renderGovernanceNotes({
 - Policy-gated tool execution.
 - Command allowlist only.
 - Guard Adapter output is evidence-only.
-- No OpenAI or external LLM integration in the current phase.
+- Optional model providers propose plans only and do not grant execution authority.
 - No SaaS, dashboard, OAuth, or background-agent behavior.
 
 ## 11. Limitations
@@ -180,6 +180,8 @@ function renderProviderDiagnostics(plan: PlanEvidence): string[] {
 
   const diagnostics = plan.provider_diagnostics;
   return [
+    ...(diagnostics.provider ? [`- Provider: ${diagnostics.provider}`] : []),
+    ...(diagnostics.model !== undefined ? [`- Model: ${diagnostics.model ?? "none"}`] : []),
     `- Normalization applied: ${diagnostics.normalization_applied ? "yes" : "no"}`,
     `- Plan validated: ${diagnostics.plan_validated ? "yes" : "no"}`,
     `- Normalization changes: ${
