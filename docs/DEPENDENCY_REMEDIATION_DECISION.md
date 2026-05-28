@@ -83,3 +83,5 @@ PR 11C does not run `npm audit fix --force`, does not change runtime behavior, d
 ## Follow-up
 
 A future dependency remediation PR may review explicit version bumps, such as an ESLint update or a Vitest major upgrade, with changelog review and full validation. Forced fixes require explicit approval before use.
+
+PR 11D defines the future sandbox approach in [Dependency Upgrade Sandbox Plan](DEPENDENCY_UPGRADE_SANDBOX_PLAN.md). It remains planning-only and does not change dependencies.

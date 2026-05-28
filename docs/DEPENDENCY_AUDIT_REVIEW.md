@@ -56,6 +56,8 @@ The Vitest path has a fix candidate at `vitest@4.1.7`, but npm marks it as semve
 
 PR 11C ran `npm audit fix --dry-run`; npm reported that both available remediation paths require `npm audit fix --force`. The bounded decision is documented in [Dependency Remediation Decision](DEPENDENCY_REMEDIATION_DECISION.md).
 
+PR 11D adds a future sandbox plan in [Dependency Upgrade Sandbox Plan](DEPENDENCY_UPGRADE_SANDBOX_PLAN.md). It does not upgrade dependencies.
+
 ## Force Upgrade Risk
 
 `npm audit fix --force` would likely attempt the semver-major Vitest upgrade. That can change test runner behavior and transitive tooling behavior, so it should not be applied automatically.

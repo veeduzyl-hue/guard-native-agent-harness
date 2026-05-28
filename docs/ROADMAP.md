@@ -71,6 +71,8 @@ PR 11B performs a bounded dependency audit review and documents remediation opti
 
 PR 11C checks non-forced remediation with `npm audit fix --dry-run`. No safe non-forced remediation is available, so dependency versions remain unchanged and forced fixes remain deferred for explicit review.
 
+PR 11D defines the dependency upgrade sandbox plan. Actual dependency upgrades are deferred to a separate sandbox PR, where package and lockfile changes must be isolated, reviewed, and fully validated.
+
 ## v0.3: External Runtime Trace Experiments
 
 v0.3 may explore trace and evidence interoperability with external runtime experiments:
