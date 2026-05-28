@@ -6,25 +6,25 @@ import path from "node:path";
 import process from "node:process";
 
 const releaseVersion = "0.2.0";
-const requiredDocs = [
+const v02Docs = [
   "docs/RELEASE_NOTES_v0.2.md",
   "docs/V0_2_FINAL_RELEASE_GATE.md",
   "docs/V0_2_TAG_PREP.md",
   "docs/V0_2_PROVIDER_BASELINE.md",
   "docs/V0_2_RELEASE_PREP.md"
 ];
+const postReleaseDocs = [
+  "docs/POST_V0_2_MAINTENANCE.md",
+  "docs/DEPENDENCY_AUDIT_TRIAGE.md"
+];
 const requiredScripts = [
   "verify:v0.1",
   "verify:v0.1:release",
   "verify:v0.2:providers",
-  "verify:v0.2:release"
+  "verify:v0.2:release",
+  "verify:post-v0.2"
 ];
-const providerScripts = [
-  "verify:ollama:e2e",
-  "verify:openai:planner",
-  "verify:deepseek:planner"
-];
-const requiredProviders = ["mock", "ollama", "openai", "deepseek"];
+const optionalProviders = ["ollama", "openai", "deepseek"];
 const forbiddenDependencyNames = [
   "dotenv",
   "openai",
@@ -37,47 +37,39 @@ const forbiddenDependencyNames = [
 async function main() {
   const repoRoot = process.cwd();
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
-  const packageLock = JSON.parse(await readFile(path.join(repoRoot, "package-lock.json"), "utf8"));
   const registry = await readFile(path.join(repoRoot, "src/agent/provider-registry.ts"), "utf8");
   const cli = await readFile(path.join(repoRoot, "src/cli.ts"), "utf8");
 
-  verifyPackageVersion(packageJson, packageLock);
-  verifyDocs(repoRoot);
+  verifyPackageVersion(packageJson);
+  verifyDocs(repoRoot, v02Docs, "v0.2 release doc");
+  verifyDocs(repoRoot, postReleaseDocs, "post-v0.2 maintenance doc");
   verifyScripts(packageJson);
-  verifyDefaultPlanner(registry, cli);
-  verifyProviders(registry);
+  verifyDefaultProvider(registry, cli);
+  verifyOptionalProviders(registry);
   verifyDependencies(packageJson);
   await verifyNoEnvLoading(repoRoot);
   await verifyEvidenceNotTracked(repoRoot);
-  await verifyTagState(repoRoot);
-  await verifyReadme(repoRoot);
-  await verifyReleaseNotes(repoRoot);
-  await verifyReleaseVerifierDoesNotRequireKeys(repoRoot);
+  await verifyLocalReleaseTag(repoRoot);
+  await verifyPostReleaseVerifierDoesNotRequireKeys(repoRoot);
 
-  console.log("v0.2.0 release readiness verification passed.");
+  console.log("post-v0.2 baseline verification passed.");
   console.log("");
   console.log("- package version: 0.2.0");
-  console.log("- provider baseline docs present");
-  console.log("- final release gate docs present");
+  console.log("- v0.2 release docs present");
+  console.log("- post-v0.2 maintenance docs present");
   console.log("- mock remains default");
-  console.log("- optional providers registered");
+  console.log("- optional providers remain registered");
   console.log("- no .env / dotenv / provider SDK dependency detected");
   console.log("- no real provider call required");
-  console.log("- v0.2.0 tag state accepted locally");
 }
 
-function verifyPackageVersion(packageJson, packageLock) {
+function verifyPackageVersion(packageJson) {
   assert(packageJson.version === releaseVersion, "package.json version must be 0.2.0.");
-  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.2.0.");
-  assert(
-    packageLock.packages?.[""]?.version === releaseVersion,
-    "package-lock.json root package version must be 0.2.0."
-  );
 }
 
-function verifyDocs(repoRoot) {
-  for (const filePath of requiredDocs) {
-    assert(existsSync(path.join(repoRoot, filePath)), `Missing required v0.2 release doc: ${filePath}`);
+function verifyDocs(repoRoot, filePaths, label) {
+  for (const filePath of filePaths) {
+    assert(existsSync(path.join(repoRoot, filePath)), `Missing required ${label}: ${filePath}`);
   }
 }
 
@@ -87,17 +79,13 @@ function verifyScripts(packageJson) {
   }
 
   assert(
-    packageJson.scripts?.["verify:v0.2:release"] ===
-      "node scripts/verify_v0_2_release_ready.mjs",
-    "package.json verify:v0.2:release must run scripts/verify_v0_2_release_ready.mjs."
+    packageJson.scripts?.["verify:post-v0.2"] ===
+      "node scripts/verify_post_v0_2_baseline.mjs",
+    "package.json verify:post-v0.2 must run scripts/verify_post_v0_2_baseline.mjs."
   );
-
-  for (const scriptName of providerScripts) {
-    assert(packageJson.scripts?.[scriptName], `package.json must include ${scriptName}.`);
-  }
 }
 
-function verifyDefaultPlanner(registry, cli) {
+function verifyDefaultProvider(registry, cli) {
   assert(
     registry.includes('return this.get("mock")'),
     "Provider registry defaultProvider() must return mock."
@@ -108,15 +96,16 @@ function verifyDefaultPlanner(registry, cli) {
   );
 }
 
-function verifyProviders(registry) {
-  for (const provider of requiredProviders) {
+function verifyOptionalProviders(registry) {
+  assert(registry.includes("registry.register(mockPlannerProvider)"), "Mock provider is not registered.");
+
+  for (const provider of optionalProviders) {
     assert(
       registry.includes(`"${provider}"`) || registry.includes(`'${provider}'`),
-      `Provider registry does not include provider name: ${provider}`
+      `Provider registry does not include optional provider name: ${provider}`
     );
   }
 
-  assert(registry.includes("registry.register(mockPlannerProvider)"), "Mock provider is not registered.");
   assert(
     registry.includes("registry.register(createOllamaPlannerProvider())"),
     "Ollama provider is not registered."
@@ -169,7 +158,8 @@ async function verifyNoEnvLoading(repoRoot) {
     .split(/\r?\n/)
     .filter(Boolean)
     .filter((line) => !line.includes("scripts/verify_v0_2_provider_baseline.mjs"))
-    .filter((line) => !line.includes("scripts/verify_v0_2_release_ready.mjs"));
+    .filter((line) => !line.includes("scripts/verify_v0_2_release_ready.mjs"))
+    .filter((line) => !line.includes("scripts/verify_post_v0_2_baseline.mjs"));
 
   assert(matches.length === 0, `.env loading or dotenv usage detected:\n${matches.join("\n")}`);
 }
@@ -179,45 +169,27 @@ async function verifyEvidenceNotTracked(repoRoot) {
   assert(trackedEvidence.stdout.trim() === "", ".evidence/ must not be tracked by git.");
 }
 
-async function verifyTagState(repoRoot) {
-  const tag = await runCommand("git", ["tag", "--list", "v0.2.0"], repoRoot);
-  const tagName = tag.stdout.trim();
-  assert(tagName === "" || tagName === "v0.2.0", "Unexpected local v0.2.0 tag state.");
+async function verifyLocalReleaseTag(repoRoot) {
+  const tag = await runCommand("git", ["tag", "--list", "v0.2.0"], repoRoot, {
+    allowFailure: true
+  });
+  assert(tag.stdout.trim() === "v0.2.0", "local v0.2.0 tag should exist for post-v0.2 baseline verification.");
 }
 
-async function verifyReadme(repoRoot) {
-  const readme = await readFile(path.join(repoRoot, "README.md"), "utf8");
-  assert(readme.includes("## v0.2.0 Release Gate"), "README must include v0.2.0 Release Gate section.");
-  assert(readme.includes("npm run verify:v0.2:release"), "README must mention verify:v0.2:release.");
-  assert(readme.includes("docs/V0_2_TAG_PREP.md"), "README must link to docs/V0_2_TAG_PREP.md.");
-}
-
-async function verifyReleaseNotes(repoRoot) {
-  const releaseNotes = await readFile(path.join(repoRoot, "docs/RELEASE_NOTES_v0.2.md"), "utf8");
-  assert(
-    releaseNotes.includes("provider baseline release"),
-    "Release notes must state that v0.2.0 is a provider baseline release."
-  );
-  assert(
-    releaseNotes.includes("not an autonomous agent release"),
-    "Release notes must state that v0.2.0 is not an autonomous-agent release."
-  );
-}
-
-async function verifyReleaseVerifierDoesNotRequireKeys(repoRoot) {
+async function verifyPostReleaseVerifierDoesNotRequireKeys(repoRoot) {
   const script = await readFile(
-    path.join(repoRoot, "scripts/verify_v0_2_release_ready.mjs"),
+    path.join(repoRoot, "scripts/verify_post_v0_2_baseline.mjs"),
     "utf8"
   );
   const processEnvPrefix = "process.env.";
 
   assert(
     !script.includes(`${processEnvPrefix}OPENAI_API_KEY`),
-    "v0.2 release verification must not read OPENAI_API_KEY."
+    "post-v0.2 baseline verification must not read OPENAI_API_KEY."
   );
   assert(
     !script.includes(`${processEnvPrefix}DEEPSEEK_API_KEY`),
-    "v0.2 release verification must not read DEEPSEEK_API_KEY."
+    "post-v0.2 baseline verification must not read DEEPSEEK_API_KEY."
   );
 }
 
@@ -258,7 +230,7 @@ function runCommand(executable, args, cwd, options = {}) {
 }
 
 main().catch((error) => {
-  console.error("v0.2.0 release readiness verification failed.");
+  console.error("post-v0.2 baseline verification failed.");
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 });

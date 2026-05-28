@@ -338,6 +338,23 @@ Release gate docs:
 - [v0.2 Provider Baseline](docs/V0_2_PROVIDER_BASELINE.md)
 - [v0.2 Release Preparation](docs/V0_2_RELEASE_PREP.md)
 
+## Post-v0.2 Maintenance
+
+Run the post-v0.2 maintenance baseline check with:
+
+```bash
+npm run verify:post-v0.2
+```
+
+This verifier is CI-safe. It does not call real providers, require API keys, require Ollama, run audit fixes, create tags, or publish packages.
+
+Dependency audit triage is documented separately, and PR 11A applies no dependency fixes.
+
+Maintenance docs:
+
+- [Post-v0.2 Maintenance](docs/POST_V0_2_MAINTENANCE.md)
+- [Dependency Audit Triage](docs/DEPENDENCY_AUDIT_TRIAGE.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
