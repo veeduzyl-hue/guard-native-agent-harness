@@ -24,7 +24,7 @@ async function main() {
 
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
   assert(
-    ["0.1.0", "0.2.0"].includes(packageJson.version),
+    ["0.1.0", "0.2.0", "0.2.1"].includes(packageJson.version),
     "package.json version must be a supported release-prep version"
   );
   assert(packageJson.scripts?.["verify:v0.1"], "package.json must include npm run verify:v0.1");

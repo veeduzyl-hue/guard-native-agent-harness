@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const releaseVersion = "0.2.0";
+const supportedReleaseVersions = ["0.2.0", "0.2.1"];
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.2.md",
   "docs/V0_2_FINAL_RELEASE_GATE.md",
@@ -54,9 +54,9 @@ async function main() {
   await verifyReleaseNotes(repoRoot);
   await verifyReleaseVerifierDoesNotRequireKeys(repoRoot);
 
-  console.log("v0.2.0 release readiness verification passed.");
+  console.log("v0.2 release readiness verification passed.");
   console.log("");
-  console.log("- package version: 0.2.0");
+  console.log(`- package version: ${packageJson.version}`);
   console.log("- provider baseline docs present");
   console.log("- final release gate docs present");
   console.log("- mock remains default");
@@ -67,11 +67,17 @@ async function main() {
 }
 
 function verifyPackageVersion(packageJson, packageLock) {
-  assert(packageJson.version === releaseVersion, "package.json version must be 0.2.0.");
-  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.2.0.");
   assert(
-    packageLock.packages?.[""]?.version === releaseVersion,
-    "package-lock.json root package version must be 0.2.0."
+    supportedReleaseVersions.includes(packageJson.version),
+    "package.json version must be a supported v0.2 release version."
+  );
+  assert(
+    packageLock.version === packageJson.version,
+    "package-lock.json top-level version must match package.json."
+  );
+  assert(
+    packageLock.packages?.[""]?.version === packageJson.version,
+    "package-lock.json root package version must match package.json."
   );
 }
 
@@ -258,7 +264,7 @@ function runCommand(executable, args, cwd, options = {}) {
 }
 
 main().catch((error) => {
-  console.error("v0.2.0 release readiness verification failed.");
+  console.error("v0.2 release readiness verification failed.");
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 });

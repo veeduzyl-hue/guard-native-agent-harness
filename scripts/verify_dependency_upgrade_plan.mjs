@@ -35,7 +35,7 @@ async function main() {
   console.log("- remediation decision docs present");
   console.log("- dependency upgrade plan boundary checks passed");
   console.log("- no provider SDK / dotenv dependency detected");
-  console.log("- package version remains 0.2.0");
+  console.log(`- package version remains ${packageJson.version}`);
 }
 
 function verifyDocs(repoRoot) {
@@ -55,7 +55,10 @@ function verifyScripts(packageJson) {
 }
 
 function verifyPackageMetadata(repoRoot, packageJson) {
-  assert(packageJson.version === "0.2.0", "package.json version must remain 0.2.0.");
+  assert(
+    ["0.2.0", "0.2.1"].includes(packageJson.version),
+    "package.json version must remain in the supported v0.2 patch line."
+  );
   assert(existsSync(path.join(repoRoot, "package-lock.json")), "package-lock.json must exist.");
 }
 

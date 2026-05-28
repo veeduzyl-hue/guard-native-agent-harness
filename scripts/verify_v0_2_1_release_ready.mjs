@@ -5,24 +5,26 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const supportedReleaseVersions = ["0.2.0", "0.2.1"];
-const v02Docs = [
+const releaseVersion = "0.2.1";
+const requiredV021Docs = [
+  "docs/RELEASE_NOTES_v0.2.1.md",
+  "docs/V0_2_1_FINAL_RELEASE_GATE.md",
+  "docs/V0_2_1_TAG_PREP.md"
+];
+const requiredV02Docs = [
   "docs/RELEASE_NOTES_v0.2.md",
   "docs/V0_2_FINAL_RELEASE_GATE.md",
-  "docs/V0_2_TAG_PREP.md",
-  "docs/V0_2_PROVIDER_BASELINE.md",
-  "docs/V0_2_RELEASE_PREP.md"
-];
-const postReleaseDocs = [
-  "docs/POST_V0_2_MAINTENANCE.md",
-  "docs/DEPENDENCY_AUDIT_TRIAGE.md"
+  "docs/V0_2_PROVIDER_BASELINE.md"
 ];
 const requiredScripts = [
   "verify:v0.1",
   "verify:v0.1:release",
   "verify:v0.2:providers",
   "verify:v0.2:release",
-  "verify:post-v0.2"
+  "verify:post-v0.2",
+  "verify:dependency-upgrade-plan",
+  "audit:summary",
+  "verify:v0.2.1:release"
 ];
 const optionalProviders = ["ollama", "openai", "deepseek"];
 const forbiddenDependencyNames = [
@@ -33,46 +35,57 @@ const forbiddenDependencyNames = [
   "@ai-sdk/openai",
   "@deepseek/sdk"
 ];
+const expectedDevDependencies = {
+  "@eslint/js": "9.39.4",
+  eslint: "9.39.4",
+  vite: "6.4.2",
+  vitest: "4.1.7"
+};
 
 async function main() {
   const repoRoot = process.cwd();
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
+  const packageLock = JSON.parse(await readFile(path.join(repoRoot, "package-lock.json"), "utf8"));
   const registry = await readFile(path.join(repoRoot, "src/agent/provider-registry.ts"), "utf8");
   const cli = await readFile(path.join(repoRoot, "src/cli.ts"), "utf8");
 
-  verifyPackageVersion(packageJson);
-  verifyDocs(repoRoot, v02Docs, "v0.2 release doc");
-  verifyDocs(repoRoot, postReleaseDocs, "post-v0.2 maintenance doc");
+  verifyPackageVersion(packageJson, packageLock);
+  verifyDocs(repoRoot);
   verifyScripts(packageJson);
   verifyDefaultProvider(registry, cli);
   verifyOptionalProviders(registry);
   verifyDependencies(packageJson);
+  verifyDependencyRemediation(packageJson, packageLock);
   await verifyNoEnvLoading(repoRoot);
   await verifyEvidenceNotTracked(repoRoot);
-  await verifyLocalReleaseTag(repoRoot);
-  await verifyPostReleaseVerifierDoesNotRequireKeys(repoRoot);
+  await verifyTagState(repoRoot);
+  await verifyReleaseNotes(repoRoot);
+  await verifyReleaseVerifierDoesNotRequireKeys(repoRoot);
 
-  console.log("post-v0.2 baseline verification passed.");
+  console.log("v0.2.1 release readiness verification passed.");
   console.log("");
-  console.log(`- package version: ${packageJson.version}`);
-  console.log("- v0.2 release docs present");
-  console.log("- post-v0.2 maintenance docs present");
+  console.log("- package version: 0.2.1");
+  console.log("- v0.2.1 release docs present");
   console.log("- mock remains default");
-  console.log("- optional providers remain registered");
+  console.log("- optional providers registered");
   console.log("- no .env / dotenv / provider SDK dependency detected");
+  console.log("- dependency remediation release boundary confirmed");
   console.log("- no real provider call required");
+  console.log("- v0.2.1 tag not present locally");
 }
 
-function verifyPackageVersion(packageJson) {
+function verifyPackageVersion(packageJson, packageLock) {
+  assert(packageJson.version === releaseVersion, "package.json version must be 0.2.1.");
+  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.2.1.");
   assert(
-    supportedReleaseVersions.includes(packageJson.version),
-    "package.json version must be a supported post-v0.2 version."
+    packageLock.packages?.[""]?.version === releaseVersion,
+    "package-lock.json root package version must be 0.2.1."
   );
 }
 
-function verifyDocs(repoRoot, filePaths, label) {
-  for (const filePath of filePaths) {
-    assert(existsSync(path.join(repoRoot, filePath)), `Missing required ${label}: ${filePath}`);
+function verifyDocs(repoRoot) {
+  for (const filePath of [...requiredV021Docs, ...requiredV02Docs]) {
+    assert(existsSync(path.join(repoRoot, filePath)), `Missing required release doc: ${filePath}`);
   }
 }
 
@@ -82,9 +95,9 @@ function verifyScripts(packageJson) {
   }
 
   assert(
-    packageJson.scripts?.["verify:post-v0.2"] ===
-      "node scripts/verify_post_v0_2_baseline.mjs",
-    "package.json verify:post-v0.2 must run scripts/verify_post_v0_2_baseline.mjs."
+    packageJson.scripts?.["verify:v0.2.1:release"] ===
+      "node scripts/verify_v0_2_1_release_ready.mjs",
+    "package.json verify:v0.2.1:release must run scripts/verify_v0_2_1_release_ready.mjs."
   );
 }
 
@@ -139,6 +152,18 @@ function verifyDependencies(packageJson) {
   }
 }
 
+function verifyDependencyRemediation(packageJson, packageLock) {
+  for (const [packageName, expectedVersion] of Object.entries(expectedDevDependencies)) {
+    assert(
+      packageJson.devDependencies?.[packageName] === expectedVersion,
+      `${packageName} must be pinned to ${expectedVersion}.`
+    );
+
+    const lockEntry = packageLock.packages?.[`node_modules/${packageName}`];
+    assert(lockEntry?.version === expectedVersion, `${packageName} lock entry must be ${expectedVersion}.`);
+  }
+}
+
 async function verifyNoEnvLoading(repoRoot) {
   const forbiddenMatches = await runCommand(
     "git",
@@ -162,7 +187,8 @@ async function verifyNoEnvLoading(repoRoot) {
     .filter(Boolean)
     .filter((line) => !line.includes("scripts/verify_v0_2_provider_baseline.mjs"))
     .filter((line) => !line.includes("scripts/verify_v0_2_release_ready.mjs"))
-    .filter((line) => !line.includes("scripts/verify_post_v0_2_baseline.mjs"));
+    .filter((line) => !line.includes("scripts/verify_post_v0_2_baseline.mjs"))
+    .filter((line) => !line.includes("scripts/verify_v0_2_1_release_ready.mjs"));
 
   assert(matches.length === 0, `.env loading or dotenv usage detected:\n${matches.join("\n")}`);
 }
@@ -172,27 +198,45 @@ async function verifyEvidenceNotTracked(repoRoot) {
   assert(trackedEvidence.stdout.trim() === "", ".evidence/ must not be tracked by git.");
 }
 
-async function verifyLocalReleaseTag(repoRoot) {
-  const tag = await runCommand("git", ["tag", "--list", "v0.2.0"], repoRoot, {
+async function verifyTagState(repoRoot) {
+  const v020Tag = await runCommand("git", ["tag", "--list", "v0.2.0"], repoRoot, {
     allowFailure: true
   });
-  assert(tag.stdout.trim() === "v0.2.0", "local v0.2.0 tag should exist for post-v0.2 baseline verification.");
+  assert(
+    v020Tag.stdout.trim() === "" || v020Tag.stdout.trim() === "v0.2.0",
+    "Unexpected local v0.2.0 tag state."
+  );
+
+  const v021Tag = await runCommand("git", ["tag", "--list", "v0.2.1"], repoRoot);
+  assert(v021Tag.stdout.trim() === "", "v0.2.1 tag must not be created before the final release gate.");
 }
 
-async function verifyPostReleaseVerifierDoesNotRequireKeys(repoRoot) {
+async function verifyReleaseNotes(repoRoot) {
+  const releaseNotes = await readFile(path.join(repoRoot, "docs/RELEASE_NOTES_v0.2.1.md"), "utf8");
+  assert(
+    releaseNotes.includes("patch release for dev-tooling dependency remediation"),
+    "Release notes must state that v0.2.1 is dependency remediation only."
+  );
+  assert(
+    releaseNotes.includes("It does not change runtime behavior"),
+    "Release notes must state that runtime behavior is unchanged."
+  );
+}
+
+async function verifyReleaseVerifierDoesNotRequireKeys(repoRoot) {
   const script = await readFile(
-    path.join(repoRoot, "scripts/verify_post_v0_2_baseline.mjs"),
+    path.join(repoRoot, "scripts/verify_v0_2_1_release_ready.mjs"),
     "utf8"
   );
   const processEnvPrefix = "process.env.";
 
   assert(
     !script.includes(`${processEnvPrefix}OPENAI_API_KEY`),
-    "post-v0.2 baseline verification must not read OPENAI_API_KEY."
+    "v0.2.1 release verification must not read OPENAI_API_KEY."
   );
   assert(
     !script.includes(`${processEnvPrefix}DEEPSEEK_API_KEY`),
-    "post-v0.2 baseline verification must not read DEEPSEEK_API_KEY."
+    "v0.2.1 release verification must not read DEEPSEEK_API_KEY."
   );
 }
 
@@ -233,7 +277,7 @@ function runCommand(executable, args, cwd, options = {}) {
 }
 
 main().catch((error) => {
-  console.error("post-v0.2 baseline verification failed.");
+  console.error("v0.2.1 release readiness verification failed.");
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 });

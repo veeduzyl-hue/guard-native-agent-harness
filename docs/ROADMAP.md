@@ -75,6 +75,10 @@ PR 11D defines the dependency upgrade sandbox plan. Actual dependency upgrades a
 
 PR 11E executes the dependency upgrade sandbox experiment for audit-affected dev tooling. Targeted ESLint and Vitest upgrades are kept after the full validation baseline passes and the audit summary reports zero vulnerabilities.
 
+Status: v0.2.1 Dependency Remediation Patch: final release gate prepared in PR 11F.
+
+PR 11F prepares the final patch release gate. The actual `v0.2.1` tag happens only after merge and final validation on `main`. v0.2.1 does not change runtime or provider behavior, does not switch the default provider, does not add autonomous execution, and does not introduce SaaS, dashboard, or OAuth behavior.
+
 ## v0.3: External Runtime Trace Experiments
 
 v0.3 may explore trace and evidence interoperability with external runtime experiments:
