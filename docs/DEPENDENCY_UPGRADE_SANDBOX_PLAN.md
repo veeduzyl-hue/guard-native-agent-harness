@@ -129,3 +129,5 @@ PR 11D does not upgrade dependencies, run `npm audit fix`, run `npm audit fix --
 ## Recommended Next PR
 
 Open a separate sandbox PR to evaluate explicit ESLint and Vitest/Vite candidate versions. That PR should include exact candidate versions, package and lockfile diffs, changelog notes, validation results, residual audit summary, and a clear accept/reject decision.
+
+PR 11E performs this sandbox experiment and records the outcome in [Dependency Upgrade Sandbox Experiment](DEPENDENCY_UPGRADE_EXPERIMENT.md).

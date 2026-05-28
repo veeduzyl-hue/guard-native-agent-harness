@@ -33,7 +33,7 @@ async function main() {
   console.log("");
   console.log("- sandbox plan docs present");
   console.log("- remediation decision docs present");
-  console.log("- no dependency upgrade performed");
+  console.log("- dependency upgrade plan boundary checks passed");
   console.log("- no provider SDK / dotenv dependency detected");
   console.log("- package version remains 0.2.0");
 }

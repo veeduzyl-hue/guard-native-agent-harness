@@ -58,6 +58,8 @@ PR 11C ran `npm audit fix --dry-run`; npm reported that both available remediati
 
 PR 11D adds a future sandbox plan in [Dependency Upgrade Sandbox Plan](DEPENDENCY_UPGRADE_SANDBOX_PLAN.md). It does not upgrade dependencies.
 
+PR 11E executes that sandbox path and records the result in [Dependency Upgrade Sandbox Experiment](DEPENDENCY_UPGRADE_EXPERIMENT.md). The kept changes are limited to audit-affected dev tooling declarations.
+
 ## Force Upgrade Risk
 
 `npm audit fix --force` would likely attempt the semver-major Vitest upgrade. That can change test runner behavior and transitive tooling behavior, so it should not be applied automatically.
@@ -79,4 +81,4 @@ Dependency remediation must not change runtime behavior, provider behavior, tool
 
 ## Next Decision
 
-Open a separate reviewed remediation PR for explicit dependency updates, or explicitly decide to review the Vitest major upgrade path. Forced fixes require explicit approval.
+Use [Dependency Upgrade Sandbox Experiment](DEPENDENCY_UPGRADE_EXPERIMENT.md) as the current remediation record. Forced fixes remain forbidden unless a future reviewed PR explicitly approves them.

@@ -381,6 +381,8 @@ PR 11D is documentation and planning only. It does not upgrade dependencies, and
 
 Plan doc: [Dependency Upgrade Sandbox Plan](docs/DEPENDENCY_UPGRADE_SANDBOX_PLAN.md)
 
+Experiment result: [Dependency Upgrade Sandbox Experiment](docs/DEPENDENCY_UPGRADE_EXPERIMENT.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
