@@ -367,6 +367,8 @@ This command summarizes audit findings only. It does not fix dependencies, modif
 
 Review doc: [Dependency Audit Review](docs/DEPENDENCY_AUDIT_REVIEW.md)
 
+Remediation decision: [Dependency Remediation Decision](docs/DEPENDENCY_REMEDIATION_DECISION.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:

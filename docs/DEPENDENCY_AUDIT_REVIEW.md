@@ -54,6 +54,8 @@ The ESLint path has a non-major fix candidate: update `eslint` to `9.39.4`.
 
 The Vitest path has a fix candidate at `vitest@4.1.7`, but npm marks it as semver-major. That should be handled in a separate reviewed PR with changelog review and full validation.
 
+PR 11C ran `npm audit fix --dry-run`; npm reported that both available remediation paths require `npm audit fix --force`. The bounded decision is documented in [Dependency Remediation Decision](DEPENDENCY_REMEDIATION_DECISION.md).
+
 ## Force Upgrade Risk
 
 `npm audit fix --force` would likely attempt the semver-major Vitest upgrade. That can change test runner behavior and transitive tooling behavior, so it should not be applied automatically.
@@ -75,4 +77,4 @@ Dependency remediation must not change runtime behavior, provider behavior, tool
 
 ## Next Decision
 
-Open a separate reviewed remediation PR for the ESLint patch candidate first, or explicitly decide to review the Vitest major upgrade path. Forced fixes require explicit approval.
+Open a separate reviewed remediation PR for explicit dependency updates, or explicitly decide to review the Vitest major upgrade path. Forced fixes require explicit approval.

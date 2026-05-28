@@ -12,6 +12,8 @@ npm install reported 6 vulnerabilities: 2 low, 4 moderate.
 
 PR 11B adds a bounded review in [Dependency Audit Review](DEPENDENCY_AUDIT_REVIEW.md). It summarizes the affected packages and remediation options without changing dependencies.
 
+PR 11C adds [Dependency Remediation Decision](DEPENDENCY_REMEDIATION_DECISION.md). The dry run showed no safe non-forced remediation path, so no dependencies were upgraded.
+
 ## What We Know
 
 - The audit warning exists after the v0.2.0 release baseline.

@@ -69,6 +69,8 @@ Future work may include provider quality comparison, prompt hardening, evidence 
 
 PR 11B performs a bounded dependency audit review and documents remediation options without dependency upgrades, audit fixes, or runtime changes. Dependency remediation should happen in separate reviewed PRs, with forced fixes avoided unless explicitly approved.
 
+PR 11C checks non-forced remediation with `npm audit fix --dry-run`. No safe non-forced remediation is available, so dependency versions remain unchanged and forced fixes remain deferred for explicit review.
+
 ## v0.3: External Runtime Trace Experiments
 
 v0.3 may explore trace and evidence interoperability with external runtime experiments:
