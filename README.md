@@ -296,6 +296,27 @@ This does not change the default provider. `mock` remains the default, and `npm 
 
 Guide: [Ollama Local Planner E2E Acceptance](docs/OLLAMA_E2E_ACCEPTANCE.md)
 
+## v0.2 Provider Baseline
+
+Validate the v0.2 provider baseline with:
+
+```bash
+npm run verify:v0.2:providers
+```
+
+`mock` remains the default provider, and v0.1 verification remains mock-based. Ollama is an optional local provider. OpenAI and DeepSeek are optional remote providers. Remote providers require process-environment API keys only; `.env` is not read.
+
+No provider bypasses the Plan Validator, Tool Registry, or Policy Gate. Provider output is a proposed plan only, and Guard output remains evidence only.
+
+Provider baseline docs:
+
+- [v0.2 Provider Baseline](docs/V0_2_PROVIDER_BASELINE.md)
+- [v0.2 Release Preparation](docs/V0_2_RELEASE_PREP.md)
+- [v0.2 Planner Provider Boundary](docs/V0_2_PLANNER_PROVIDER_BOUNDARY.md)
+- [Ollama E2E Acceptance](docs/OLLAMA_E2E_ACCEPTANCE.md)
+- [OpenAI Planner Acceptance](docs/OPENAI_PLANNER_ACCEPTANCE.md)
+- [DeepSeek Planner Acceptance](docs/DEEPSEEK_PLANNER_ACCEPTANCE.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
