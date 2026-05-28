@@ -1,0 +1,9 @@
+{
+  "guard_available": false,
+  "reason": "Guard CLI not available for fixture.",
+  "commands_attempted": [],
+  "status_result": null,
+  "audit_result": null,
+  "drift_result": null,
+  "errors": []
+}

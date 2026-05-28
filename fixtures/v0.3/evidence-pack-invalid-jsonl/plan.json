@@ -1,0 +1,22 @@
+{
+  "task_id": "task-v0-3-invalid-jsonl",
+  "planner": "mock",
+  "provider": "mock",
+  "model": null,
+  "steps": [
+    {
+      "id": "step-1",
+      "tool": "list_files",
+      "input": {
+        "path": "."
+      },
+      "description": "Inspect local files for a review artifact."
+    }
+  ],
+  "risk_notes": [
+    "Evidence-first local review only."
+  ],
+  "expected_outputs": [
+    "final-report.md"
+  ]
+}

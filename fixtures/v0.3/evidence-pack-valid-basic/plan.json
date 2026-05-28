@@ -1,0 +1,30 @@
+{
+  "task_id": "task-v0-3-valid-basic",
+  "planner": "mock",
+  "provider": "mock",
+  "model": null,
+  "steps": [
+    {
+      "id": "step-1",
+      "tool": "list_files",
+      "input": {
+        "path": "."
+      },
+      "description": "Inspect local files for a review artifact."
+    }
+  ],
+  "risk_notes": [
+    "Evidence-first local review only."
+  ],
+  "expected_outputs": [
+    "final-report.md"
+  ],
+  "provider_diagnostics": {
+    "provider": "mock",
+    "model": null,
+    "normalization_applied": false,
+    "normalization_changes": [],
+    "normalization_warnings": [],
+    "plan_validated": true
+  }
+}
