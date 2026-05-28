@@ -383,6 +383,26 @@ Plan doc: [Dependency Upgrade Sandbox Plan](docs/DEPENDENCY_UPGRADE_SANDBOX_PLAN
 
 Experiment result: [Dependency Upgrade Sandbox Experiment](docs/DEPENDENCY_UPGRADE_EXPERIMENT.md)
 
+## v0.2.1 Patch Release Gate
+
+Run the v0.2.1 patch release gate with:
+
+```bash
+npm run audit:summary
+npm run verify:v0.2.1:release
+```
+
+v0.2.1 is dependency-remediation-only and is not tagged until the final gate passes on `main`. No runtime/provider behavior changed, no provider API key is required for the release gate, and the release gate makes no real provider calls.
+
+Tag instructions live in [v0.2.1 Tag Preparation](docs/V0_2_1_TAG_PREP.md).
+
+Patch release docs:
+
+- [v0.2.1 Release Notes](docs/RELEASE_NOTES_v0.2.1.md)
+- [v0.2.1 Final Release Gate](docs/V0_2_1_FINAL_RELEASE_GATE.md)
+- [v0.2.1 Tag Preparation](docs/V0_2_1_TAG_PREP.md)
+- [Dependency Upgrade Sandbox Experiment](docs/DEPENDENCY_UPGRADE_EXPERIMENT.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
