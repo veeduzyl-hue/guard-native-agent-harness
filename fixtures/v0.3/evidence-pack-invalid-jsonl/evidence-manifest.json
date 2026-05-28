@@ -1,0 +1,50 @@
+{
+  "schema_version": "guard-native-evidence-pack-manifest.v1",
+  "evidence_pack_version": "v0.3",
+  "created_by": "guard-native-agent-harness",
+  "task_id": "task-v0-3-invalid-jsonl",
+  "files": [
+    {
+      "path": "blocked-actions.jsonl",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "role": "blocked_actions"
+    },
+    {
+      "path": "command-results.jsonl",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "role": "command_results"
+    },
+    {
+      "path": "final-report.md",
+      "size_bytes": 124,
+      "sha256": "27dac3f62fe2d24b5830c6e3589357c9146b69d8fba4aa61f3487e1292463005",
+      "role": "final_report"
+    },
+    {
+      "path": "guard-results.json",
+      "size_bytes": 200,
+      "sha256": "e805c2623b9d04d3dbb7b59eafc2fb0859108c67483bda5b4f77d6153d445f1a",
+      "role": "guard_results"
+    },
+    {
+      "path": "plan.json",
+      "size_bytes": 409,
+      "sha256": "7fd91316f87988b9196c62a7bb2c94fd5bed12d4f1c6e4886133c4606113db0f",
+      "role": "plan"
+    },
+    {
+      "path": "task.json",
+      "size_bytes": 354,
+      "sha256": "c4584b6a555c453ae9748f8dfbf2fb2bc8bfb239af515563c422f796736ad608",
+      "role": "task"
+    },
+    {
+      "path": "tool-calls.jsonl",
+      "size_bytes": 275,
+      "sha256": "3943b11e78c5a6cacf590be636af61fb18e86558facda39a4a2838a11cd050a9",
+      "role": "tool_calls"
+    }
+  ]
+}

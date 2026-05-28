@@ -1,0 +1,11 @@
+{
+  "task_id": "task-v0-3-invalid-missing-required-file",
+  "created_at": "2026-05-28T00:00:00.000Z",
+  "user_prompt": "Review a local evidence pack with a missing required file.",
+  "workspace_root": "D:\\AI project\\guard-native-agent-harness",
+  "harness_version": "0.2.1",
+  "mode": "local",
+  "planner_type": "mock",
+  "planner_provider": "mock",
+  "planner_model": null
+}
