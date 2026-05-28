@@ -10,6 +10,8 @@ This document captures the dependency audit signal observed after `v0.2.0` and d
 npm install reported 6 vulnerabilities: 2 low, 4 moderate.
 ```
 
+PR 11B adds a bounded review in [Dependency Audit Review](DEPENDENCY_AUDIT_REVIEW.md). It summarizes the affected packages and remediation options without changing dependencies.
+
 ## What We Know
 
 - The audit warning exists after the v0.2.0 release baseline.

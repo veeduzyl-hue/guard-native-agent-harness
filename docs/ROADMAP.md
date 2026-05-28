@@ -67,6 +67,8 @@ Post-v0.2 maintenance should prioritize stability and boundary preservation:
 
 Future work may include provider quality comparison, prompt hardening, evidence comparison, optional external trace integrations, and dependency audit remediation after review.
 
+PR 11B performs a bounded dependency audit review and documents remediation options without dependency upgrades, audit fixes, or runtime changes. Dependency remediation should happen in separate reviewed PRs, with forced fixes avoided unless explicitly approved.
+
 ## v0.3: External Runtime Trace Experiments
 
 v0.3 may explore trace and evidence interoperability with external runtime experiments:
