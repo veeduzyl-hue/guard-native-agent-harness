@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "verify:v0.1": "node scripts/verify_v0_1_acceptance.mjs",
     "verify:v0.1:release": "node scripts/verify_v0_1_release_ready.mjs",
+    "verify:v0.2:providers": "node scripts/verify_v0_2_provider_baseline.mjs",
     "check:ollama": "node scripts/check_ollama_local.mjs",
     "verify:ollama:e2e": "node scripts/verify_ollama_e2e_local.mjs",
     "verify:openai:planner": "node scripts/verify_openai_planner_local.mjs",
