@@ -369,6 +369,18 @@ Review doc: [Dependency Audit Review](docs/DEPENDENCY_AUDIT_REVIEW.md)
 
 Remediation decision: [Dependency Remediation Decision](docs/DEPENDENCY_REMEDIATION_DECISION.md)
 
+## Dependency Upgrade Sandbox Plan
+
+Verify the dependency upgrade sandbox plan with:
+
+```bash
+npm run verify:dependency-upgrade-plan
+```
+
+PR 11D is documentation and planning only. It does not upgrade dependencies, and future upgrade work must happen in a separate sandbox PR. `npm audit fix --force` remains forbidden without explicit approval.
+
+Plan doc: [Dependency Upgrade Sandbox Plan](docs/DEPENDENCY_UPGRADE_SANDBOX_PLAN.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
