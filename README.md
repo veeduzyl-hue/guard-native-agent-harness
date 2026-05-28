@@ -355,6 +355,18 @@ Maintenance docs:
 - [Post-v0.2 Maintenance](docs/POST_V0_2_MAINTENANCE.md)
 - [Dependency Audit Triage](docs/DEPENDENCY_AUDIT_TRIAGE.md)
 
+## Dependency Audit Review
+
+Summarize current audit findings with:
+
+```bash
+npm run audit:summary
+```
+
+This command summarizes audit findings only. It does not fix dependencies, modify `package.json`, modify `package-lock.json`, or run `npm audit fix`. Dependency remediation is deferred to a separate reviewed PR.
+
+Review doc: [Dependency Audit Review](docs/DEPENDENCY_AUDIT_REVIEW.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
