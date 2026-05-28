@@ -12,7 +12,12 @@ import {
 } from "../agent/provider-registry.js";
 import { HARNESS_VERSION } from "../index.js";
 import { renderFinalReportFromEvidence } from "../evidence/report.js";
-import { writeEvidencePack, writeFinalReport, writeGuardResults } from "../evidence/writer.js";
+import {
+  writeEvidenceManifest,
+  writeEvidencePack,
+  writeFinalReport,
+  writeGuardResults
+} from "../evidence/writer.js";
 import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
 import type { EvidencePack, PlanEvidence, TaskEvidence } from "../evidence/schema.js";
@@ -101,6 +106,7 @@ export async function runTask(
     evidencePack.evidenceDirectory,
     await renderFinalReportFromEvidence(evidencePack.evidenceDirectory)
   );
+  await writeEvidenceManifest(evidencePack.evidenceDirectory, taskId);
 
   return {
     ...evidencePack,

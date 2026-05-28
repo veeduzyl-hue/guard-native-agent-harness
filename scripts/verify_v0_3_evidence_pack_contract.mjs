@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 const manifestFileName = "evidence-manifest.json";
 const schemaVersion = "guard-native-evidence-pack-manifest.v1";
@@ -56,7 +57,7 @@ const forbiddenReviewClaims = [
   ["authorization", "granted"].join(" ")
 ];
 
-async function main() {
+export async function main() {
   const repoRoot = process.cwd();
   const requestedPacks = process.argv.slice(2);
 
@@ -143,7 +144,7 @@ async function verifyFixtureContract(repoRoot) {
   console.log("- no Guard runtime semantic change");
 }
 
-async function verifyEvidencePack(evidenceDirectory) {
+export async function verifyEvidencePack(evidenceDirectory) {
   const errors = [];
 
   if (!existsSync(evidenceDirectory)) {
@@ -422,8 +423,10 @@ function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-main().catch((error) => {
-  console.error("v0.3 evidence pack contract verification failed.");
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exitCode = 1;
-});
+if (path.resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error("v0.3 evidence pack contract verification failed.");
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  });
+}
