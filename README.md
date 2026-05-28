@@ -317,6 +317,27 @@ Provider baseline docs:
 - [OpenAI Planner Acceptance](docs/OPENAI_PLANNER_ACCEPTANCE.md)
 - [DeepSeek Planner Acceptance](docs/DEEPSEEK_PLANNER_ACCEPTANCE.md)
 
+## v0.2.0 Release Gate
+
+Run the final v0.2.0 release gate with:
+
+```bash
+npm run verify:v0.2:providers
+npm run verify:v0.2:release
+```
+
+`v0.2.0` is not tagged until the final gate passes on `main`. `mock` remains the default provider, optional providers remain optional, no provider API key is required for the release gate, and the release gate makes no real provider calls.
+
+Tag instructions live in [v0.2.0 Tag Preparation](docs/V0_2_TAG_PREP.md).
+
+Release gate docs:
+
+- [v0.2.0 Release Notes](docs/RELEASE_NOTES_v0.2.md)
+- [v0.2.0 Final Release Gate](docs/V0_2_FINAL_RELEASE_GATE.md)
+- [v0.2.0 Tag Preparation](docs/V0_2_TAG_PREP.md)
+- [v0.2 Provider Baseline](docs/V0_2_PROVIDER_BASELINE.md)
+- [v0.2 Release Preparation](docs/V0_2_RELEASE_PREP.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:

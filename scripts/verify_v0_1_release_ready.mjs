@@ -23,7 +23,10 @@ async function main() {
   checks.push("required v0.1 release documents exist");
 
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
-  assert(packageJson.version === "0.1.0", "package.json version must be 0.1.0");
+  assert(
+    ["0.1.0", "0.2.0"].includes(packageJson.version),
+    "package.json version must be a supported release-prep version"
+  );
   assert(packageJson.scripts?.["verify:v0.1"], "package.json must include npm run verify:v0.1");
   assert(packageJson.scripts?.["verify:v0.1:release"], "package.json must include npm run verify:v0.1:release");
   checks.push("package metadata and v0.1 scripts are present");
