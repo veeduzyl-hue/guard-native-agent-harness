@@ -2,6 +2,11 @@
 import { Command } from "commander";
 
 import { parsePlannerTimeoutMs } from "./agent/planner-timeout.js";
+import {
+  inspectEvidencePack,
+  renderEvidenceInspectionJson,
+  renderEvidenceInspectionMarkdown
+} from "./evidence/inspector.js";
 import { PROJECT_NAME } from "./index.js";
 import { runTask } from "./task/runner.js";
 
@@ -54,5 +59,34 @@ program
       }
     }
   );
+
+program
+  .command("inspect-evidence")
+  .requiredOption("--evidence-dir <path>", "existing evidence directory to inspect")
+  .option("--json", "emit deterministic JSON inspection output")
+  .option("--markdown", "emit deterministic Markdown inspection output")
+  .description("inspect an existing local evidence pack without executing it")
+  .action(async (options: { evidenceDir: string; json?: boolean; markdown?: boolean }) => {
+    try {
+      if (options.json && options.markdown) {
+        throw new Error("Choose either --json or --markdown, not both.");
+      }
+
+      const inspection = await inspectEvidencePack({
+        evidenceDirectory: options.evidenceDir,
+        displayPath: options.evidenceDir
+      });
+      const output =
+        options.markdown && !options.json
+          ? renderEvidenceInspectionMarkdown(inspection)
+          : renderEvidenceInspectionJson(inspection);
+
+      process.stdout.write(output);
+    } catch (error) {
+      console.error(`${PROJECT_NAME}: failed to inspect evidence`);
+      console.error(error instanceof Error ? error.message : String(error));
+      process.exitCode = 1;
+    }
+  });
 
 await program.parseAsync(process.argv);
