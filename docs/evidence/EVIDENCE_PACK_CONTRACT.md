@@ -32,6 +32,8 @@ The verifier must treat the pack as a review artifact. It must not execute tools
 
 `evidence-manifest.json` is a deterministic local index of evidence artifacts.
 
+Runtime task runs write the manifest after the expected evidence files have been finalized, including `final-report.md`, so file sizes and hashes are stable for local verification.
+
 Required manifest fields:
 
 - `schema_version`: `guard-native-evidence-pack-manifest.v1`

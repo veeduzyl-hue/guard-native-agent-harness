@@ -55,6 +55,8 @@ export interface EvidencePack {
   relativeCommandResultsPath: string;
   guardResultsPath: string;
   relativeGuardResultsPath: string;
+  manifestPath: string;
+  relativeManifestPath: string;
   guardAvailable: boolean;
   executionSummary: ExecutionSummary;
 }

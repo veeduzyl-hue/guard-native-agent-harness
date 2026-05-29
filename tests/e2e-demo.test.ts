@@ -38,6 +38,7 @@ describe("end-to-end mock planner demo", () => {
       "blocked-actions.jsonl",
       "command-results.jsonl",
       "guard-results.json",
+      "evidence-manifest.json",
       "final-report.md"
     ]) {
       await expect(stat(path.join(result.evidenceDirectory, fileName))).resolves.toBeDefined();
