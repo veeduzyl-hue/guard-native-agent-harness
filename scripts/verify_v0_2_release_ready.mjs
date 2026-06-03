@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const supportedReleaseVersions = ["0.2.0", "0.2.1"];
+const supportedReleaseVersions = ["0.2.0", "0.2.1", "0.3.0"];
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.2.md",
   "docs/V0_2_FINAL_RELEASE_GATE.md",
@@ -69,7 +69,7 @@ async function main() {
 function verifyPackageVersion(packageJson, packageLock) {
   assert(
     supportedReleaseVersions.includes(packageJson.version),
-    "package.json version must be a supported v0.2 release version."
+    "package.json version must be a supported v0.2 or later release-prep version."
   );
   assert(
     packageLock.version === packageJson.version,

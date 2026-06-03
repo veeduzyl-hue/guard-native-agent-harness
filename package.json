@@ -1,6 +1,6 @@
 {
   "name": "guard-native-agent-harness",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Bounded local AI agent harness scaffold for governance-ready evidence packs.",
   "type": "module",
   "private": true,
@@ -23,6 +23,7 @@
     "verify:v0.3:evidence": "node scripts/verify_v0_3_evidence_pack_contract.mjs",
     "verify:v0.3:runtime-evidence": "node scripts/verify_v0_3_runtime_evidence_manifest.mjs",
     "verify:v0.3:inspect-evidence": "node scripts/verify_v0_3_inspect_evidence.mjs",
+    "verify:v0.3:release": "node scripts/verify_v0_3_release_ready.mjs",
     "check:ollama": "node scripts/check_ollama_local.mjs",
     "verify:ollama:e2e": "node scripts/verify_ollama_e2e_local.mjs",
     "verify:openai:planner": "node scripts/verify_openai_planner_local.mjs",

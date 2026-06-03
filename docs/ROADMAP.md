@@ -79,17 +79,21 @@ Status: v0.2.1 Dependency Remediation Patch: final release gate prepared in PR 1
 
 PR 11F prepares the final patch release gate. The actual `v0.2.1` tag happens only after merge and final validation on `main`. v0.2.1 does not change runtime or provider behavior, does not switch the default provider, does not add autonomous execution, and does not introduce SaaS, dashboard, or OAuth behavior.
 
-## v0.3: External Runtime Trace Experiments
+## v0.3: Replayable Evidence Pack Baseline
 
-v0.3 may explore trace and evidence interoperability with external runtime experiments:
+Status: v0.3.0 release gate prepared in PR 15.
 
-- OpenHuman-like workflows.
-- OpenClaw-like workflows.
-- Hermes-like workflows.
-- Evidence completeness comparison.
-- Trace-to-Evidence-Pack conversion.
+v0.3 establishes a replayable evidence pack baseline:
 
-These experiments should compare evidence quality and trace completeness. They should not grant external runtimes production authority.
+- v0.3 evidence pack contract.
+- Deterministic manifest rules.
+- Fixture-based evidence verifier.
+- Runtime generation of `evidence-manifest.json`.
+- Runtime generated-pack verifier.
+- Deterministic evidence inspector.
+- JSON and Markdown inspection output.
+
+v0.3 remains evidence-first, local, deterministic, replayable, and review-oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
 
 ## Deferred / Explicit Non-goals
 

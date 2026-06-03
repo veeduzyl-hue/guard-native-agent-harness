@@ -50,6 +50,7 @@ The command creates:
   blocked-actions.jsonl
   command-results.jsonl
   guard-results.json
+  evidence-manifest.json
   final-report.md
 ```
 
@@ -402,6 +403,30 @@ Patch release docs:
 - [v0.2.1 Final Release Gate](docs/V0_2_1_FINAL_RELEASE_GATE.md)
 - [v0.2.1 Tag Preparation](docs/V0_2_1_TAG_PREP.md)
 - [Dependency Upgrade Sandbox Experiment](docs/DEPENDENCY_UPGRADE_EXPERIMENT.md)
+
+## v0.3.0 Replayable Evidence Pack Baseline
+
+Run the v0.3 evidence checks with:
+
+```bash
+npm run verify:v0.3:evidence
+npm run verify:v0.3:runtime-evidence
+npm run verify:v0.3:inspect-evidence
+npm run verify:v0.3:release
+```
+
+v0.3.0 is the Replayable Evidence Pack Baseline. It adds the v0.3 evidence contract, deterministic `evidence-manifest.json`, runtime generated-pack verification, and deterministic local evidence inspection.
+
+The v0.3 baseline remains evidence-first, local, deterministic, replayable, read-only verification oriented, and a review artifact. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
+
+Tag instructions live in [v0.3.0 Tag Preparation](docs/V0_3_TAG_PREP.md).
+
+v0.3 release docs:
+
+- [v0.3.0 Release Notes](docs/RELEASE_NOTES_v0.3.md)
+- [v0.3.0 Final Release Gate](docs/V0_3_FINAL_RELEASE_GATE.md)
+- [v0.3.0 Tag Preparation](docs/V0_3_TAG_PREP.md)
+- [v0.3 Evidence Pack Contract](docs/evidence/EVIDENCE_PACK_CONTRACT.md)
 
 ## v0.1 Intended Workflow
 

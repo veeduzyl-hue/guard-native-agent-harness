@@ -6,6 +6,7 @@ import path from "node:path";
 import process from "node:process";
 
 const releaseVersion = "0.2.1";
+const supportedPackageVersions = [releaseVersion, "0.3.0"];
 const requiredV021Docs = [
   "docs/RELEASE_NOTES_v0.2.1.md",
   "docs/V0_2_1_FINAL_RELEASE_GATE.md",
@@ -64,7 +65,7 @@ async function main() {
 
   console.log("v0.2.1 release readiness verification passed.");
   console.log("");
-  console.log("- package version: 0.2.1");
+  console.log(`- package version: ${packageJson.version}`);
   console.log("- v0.2.1 release docs present");
   console.log("- mock remains default");
   console.log("- optional providers registered");
@@ -75,11 +76,17 @@ async function main() {
 }
 
 function verifyPackageVersion(packageJson, packageLock) {
-  assert(packageJson.version === releaseVersion, "package.json version must be 0.2.1.");
-  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.2.1.");
   assert(
-    packageLock.packages?.[""]?.version === releaseVersion,
-    "package-lock.json root package version must be 0.2.1."
+    supportedPackageVersions.includes(packageJson.version),
+    "package.json version must be 0.2.1 or the current v0.3.0 release-prep version."
+  );
+  assert(
+    packageLock.version === packageJson.version,
+    "package-lock.json top-level version must match package.json."
+  );
+  assert(
+    packageLock.packages?.[""]?.version === packageJson.version,
+    "package-lock.json root package version must match package.json."
   );
 }
 
