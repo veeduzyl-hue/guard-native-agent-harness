@@ -81,7 +81,7 @@ PR 11F prepares the final patch release gate. The actual `v0.2.1` tag happens on
 
 ## v0.3: Replayable Evidence Pack Baseline
 
-Status: v0.3.0 release gate prepared in PR 15.
+Status: released in `v0.3.0`.
 
 v0.3 establishes a replayable evidence pack baseline:
 
@@ -94,6 +94,14 @@ v0.3 establishes a replayable evidence pack baseline:
 - JSON and Markdown inspection output.
 
 v0.3 remains evidence-first, local, deterministic, replayable, and review-oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
+
+## v0.4: CI Evidence Readiness Baseline
+
+Status: planning begins in PR 16.
+
+v0.4 should make Guard-native Agent Harness easier to validate in pull requests and CI while preserving local deterministic semantics. The tentative sequence is PR 16 planning, PR 17 GitHub Actions verification workflow, PR 18 CI generated evidence artifact smoke check, and PR 19 v0.4 release gate and tag prep.
+
+v0.4 remains evidence-first, local, deterministic, CI-verifiable, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
 
 ## Deferred / Explicit Non-goals
 
