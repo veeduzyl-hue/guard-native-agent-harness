@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
+const releaseVersion = "0.3.0";
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.3.md",
   "docs/V0_3_FINAL_RELEASE_GATE.md",
@@ -72,7 +73,8 @@ const forbiddenReleaseClaims = [
 async function main() {
   const repoRoot = process.cwd();
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
-  const packageLock = JSON.parse(await readFile(path.join(repoRoot, "package-lock.json"), "utf8"));
+  const packageLockPath = path.join(repoRoot, "package-lock.json");
+  const packageLock = existsSync(packageLockPath) ? JSON.parse(await readFile(packageLockPath, "utf8")) : null;
 
   verifyPackageVersion(packageJson, packageLock);
   verifyFiles(repoRoot, requiredDocs, "v0.3 release doc");
@@ -89,17 +91,21 @@ async function main() {
   console.log("- v0.3 release docs present");
   console.log("- v0.3 evidence contract, manifest, and inspector surfaces present");
   console.log("- v0.3 verification scripts present");
+  console.log("- package root metadata pinned to 0.3.0");
   console.log("- boundary language preserved");
   console.log("- no new dependency versions detected");
   console.log("- no provider, Guard CLI, network, .env, tag, or publish action required");
 }
 
 function verifyPackageVersion(packageJson, packageLock) {
-  assert(packageJson.version, "package.json version must be present.");
-  assert(packageLock.version === packageJson.version, "package-lock.json top-level version must match package.json.");
+  assert(packageJson.version === releaseVersion, "package.json version must be 0.3.0.");
+  if (!packageLock) {
+    return;
+  }
+  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.3.0.");
   assert(
-    packageLock.packages?.[""]?.version === packageJson.version,
-    "package-lock.json root package version must match package.json."
+    packageLock.packages?.[""]?.version === releaseVersion,
+    "package-lock.json root package version must be 0.3.0."
   );
 }
 
@@ -128,6 +134,14 @@ function verifyDependencies(packageJson, packageLock) {
     assert(!dependencies[packageName], `Forbidden dependency detected: ${packageName}`);
   }
 
+  if (!packageLock) {
+    return;
+  }
+
+  const rootPackage = packageLock.packages?.[""] ?? {};
+  assertExactVersions(rootPackage.dependencies ?? {}, expectedDependencies, "package-lock.json root dependencies");
+  assertExactVersions(rootPackage.devDependencies ?? {}, expectedDevDependencies, "package-lock.json root devDependencies");
+
   for (const [packageName, expectedVersion] of Object.entries({
     ...expectedDependencies,
     ...expectedDevDependencies
@@ -140,7 +154,7 @@ function verifyDependencies(packageJson, packageLock) {
 function assertExactVersions(actual, expected, label) {
   assert(
     JSON.stringify(sortRecord(actual)) === JSON.stringify(sortRecord(expected)),
-    `package.json ${label} must match the v0.3 release baseline.`
+    `${label} must match the v0.3 release baseline.`
   );
 }
 

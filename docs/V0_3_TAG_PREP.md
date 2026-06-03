@@ -10,7 +10,7 @@ Do not create the tag in PR 15.
 
 - PR 15 is merged into `main`.
 - The working tree on `main` is clean.
-- Package metadata has been reviewed for the v0.3.0 tag flow.
+- Package metadata is at version `0.3.0` for the v0.3.0 tag flow.
 - The final v0.3.0 release gate has passed without real provider calls or API keys.
 
 ## Boundary

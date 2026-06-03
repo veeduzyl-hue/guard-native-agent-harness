@@ -11,7 +11,7 @@ PR 15 prepares the release gate. It does not create the tag and does not publish
 - PR 12 is merged into `main`.
 - PR 13 is merged into `main`.
 - PR 14 is merged into `main`.
-- Package metadata is reviewed for the v0.3.0 tag flow.
+- Package metadata is updated to version `0.3.0` for the v0.3.0 tag flow.
 - The v0.3 evidence contract, runtime manifest generation, runtime verifier, and evidence inspector are present.
 - No generated `.evidence/` directories or API keys are tracked.
 
@@ -52,6 +52,7 @@ The gate checks:
 - Runtime generated-pack verification.
 - Deterministic evidence inspector output.
 - Package scripts for all v0.3 verification commands.
+- Package metadata version `0.3.0`.
 
 ## Runtime Boundary Gate
 

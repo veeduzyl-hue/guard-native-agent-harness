@@ -12,6 +12,7 @@ This release remains evidence-first, local, deterministic, replayable, and revie
 
 Since v0.2.1, the v0.3 work added:
 
+- Release-prep package metadata updated to `0.3.0`.
 - v0.3 evidence pack contract documentation.
 - Deterministic manifest rules for local evidence artifacts.
 - Fixture-based v0.3 evidence verifier.
