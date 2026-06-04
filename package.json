@@ -25,6 +25,7 @@
     "verify:v0.3:inspect-evidence": "node scripts/verify_v0_3_inspect_evidence.mjs",
     "verify:v0.3:release": "node scripts/verify_v0_3_release_ready.mjs",
     "verify:v0.4:ci-workflow": "node scripts/verify_v0_4_ci_workflow.mjs",
+    "verify:v0.4:ci-evidence-artifact": "node scripts/verify_v0_4_ci_evidence_artifact_smoke.mjs",
     "check:ollama": "node scripts/check_ollama_local.mjs",
     "verify:ollama:e2e": "node scripts/verify_ollama_e2e_local.mjs",
     "verify:openai:planner": "node scripts/verify_openai_planner_local.mjs",

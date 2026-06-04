@@ -3,6 +3,7 @@ node_modules/
 .evidence/
 coverage/
 dist/
+.artifacts/
 .env
 .env.*
 *.log
