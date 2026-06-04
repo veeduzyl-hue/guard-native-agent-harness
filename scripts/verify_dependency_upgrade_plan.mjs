@@ -56,7 +56,7 @@ function verifyScripts(packageJson) {
 
 function verifyPackageMetadata(repoRoot, packageJson) {
   assert(
-    ["0.2.0", "0.2.1", "0.3.0"].includes(packageJson.version),
+    ["0.2.0", "0.2.1", "0.3.0", "0.4.0"].includes(packageJson.version),
     "package.json version must remain in a supported post-v0.2 release-prep line."
   );
   assert(existsSync(path.join(repoRoot, "package-lock.json")), "package-lock.json must exist.");
