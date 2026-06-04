@@ -15,7 +15,8 @@ const requiredCommands = [
   "npm run verify:v0.3:inspect-evidence",
   "npm run verify:v0.3:release",
   "npm run audit:summary",
-  "npm run verify:v0.4:ci-workflow"
+  "npm run verify:v0.4:ci-workflow",
+  "npm run verify:v0.4:ci-evidence-artifact"
 ];
 
 const forbiddenFragments = [
@@ -58,6 +59,7 @@ async function main() {
   verifyTagAvailability(workflow);
   verifyForbiddenFragments(workflow);
   verifyCommands(workflow);
+  verifyArtifactUploadBoundary(workflow);
 
   console.log("v0.4 CI workflow verification passed.");
   console.log("");
@@ -66,6 +68,7 @@ async function main() {
   console.log("- contents: read permission confirmed");
   console.log("- checkout fetches full history and tags for historical baseline checks");
   console.log("- deterministic local verification commands present");
+  console.log("- bounded v0.4 CI evidence artifact smoke command present");
   console.log("- no secrets, provider calls, release actions, tag pushes, or npm publish commands detected");
   console.log("- evidence-first local deterministic CI-verifiable review artifact boundary preserved");
   console.log("- not approval, not enforcement, not autonomous execution");
@@ -115,6 +118,25 @@ function verifyCommands(workflow) {
   for (const command of requiredCommands) {
     assert(workflow.includes(command), `workflow must include deterministic command: ${command}`);
   }
+}
+
+function verifyArtifactUploadBoundary(workflow) {
+  if (!workflow.includes("actions/upload-artifact")) {
+    return;
+  }
+
+  assert(
+    workflow.includes("name: v0.4-ci-evidence-smoke"),
+    "workflow artifact upload must use v0.4-ci-evidence-smoke as artifact name."
+  );
+  assert(
+    workflow.includes("path: .artifacts/v0.4-ci-evidence-smoke/"),
+    "workflow artifact upload path must be restricted to .artifacts/v0.4-ci-evidence-smoke/."
+  );
+  assert(workflow.includes("retention-days: 7"), "workflow artifact upload retention must be 7 days.");
+  assert(!/^\s{10}path: \.\s*$/m.test(workflow), "workflow must not upload the full repository.");
+  assert(!workflow.includes("node_modules"), "workflow must not upload node_modules.");
+  assert(!workflow.includes("HOME"), "workflow must not upload hidden home directories.");
 }
 
 function assert(condition, message) {

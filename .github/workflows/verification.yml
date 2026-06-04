@@ -67,3 +67,13 @@ jobs:
 
       - name: Verify v0.4 CI workflow boundary
         run: npm run verify:v0.4:ci-workflow
+
+      - name: Verify v0.4 CI evidence artifact smoke
+        run: npm run verify:v0.4:ci-evidence-artifact
+
+      - name: Upload v0.4 CI evidence smoke review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0.4-ci-evidence-smoke
+          path: .artifacts/v0.4-ci-evidence-smoke/
+          retention-days: 7
