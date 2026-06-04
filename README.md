@@ -428,6 +428,29 @@ v0.3 release docs:
 - [v0.3.0 Tag Preparation](docs/V0_3_TAG_PREP.md)
 - [v0.3 Evidence Pack Contract](docs/evidence/EVIDENCE_PACK_CONTRACT.md)
 
+## v0.4.0 CI Evidence Readiness Baseline
+
+Run the v0.4 CI evidence readiness checks with:
+
+```bash
+npm run verify:v0.4:ci-workflow
+npm run verify:v0.4:ci-evidence-artifact
+npm run verify:v0.4:release
+```
+
+v0.4.0 is the CI Evidence Readiness Baseline. It adds deterministic GitHub Actions verification, tag-aware checkout for historical baseline checks, a CI generated evidence artifact smoke check, bounded inspection artifact upload, and local release readiness verification.
+
+The v0.4 baseline remains evidence-first, local, deterministic, CI-verifiable, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
+
+Tag instructions live in [v0.4.0 Tag Preparation](docs/V0_4_TAG_PREP.md).
+
+v0.4 release docs:
+
+- [v0.4.0 Release Notes](docs/RELEASE_NOTES_v0.4.md)
+- [v0.4.0 Final Release Gate](docs/V0_4_FINAL_RELEASE_GATE.md)
+- [v0.4.0 Tag Preparation](docs/V0_4_TAG_PREP.md)
+- [v0.4 CI Evidence Readiness Plan](docs/planning/v0.4-ci-evidence-readiness.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
