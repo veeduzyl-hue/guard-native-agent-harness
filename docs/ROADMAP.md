@@ -97,11 +97,21 @@ v0.3 remains evidence-first, local, deterministic, replayable, and review-orient
 
 ## v0.4: CI Evidence Readiness Baseline
 
-Status: v0.4.0 release gate prepared in PR 19.
+Status: released in `v0.4.0`.
 
 v0.4 makes Guard-native Agent Harness easier to validate in pull requests and CI while preserving local deterministic semantics. The sequence is PR 16 planning, PR 17 GitHub Actions verification workflow, PR 18 CI generated evidence artifact smoke check, and PR 19 v0.4 release gate and tag prep.
 
 v0.4 remains evidence-first, local, deterministic, CI-verifiable, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
+
+## v0.5: Evidence Review Profile Baseline
+
+Status: planning started in PR 20.
+
+v0.5 should define bounded evidence review profiles for local development, pull request CI, release preparation, and audit review. Profiles should describe expected verifier commands, required evidence files, inspector outputs, and review boundaries without changing runtime behavior or granting execution authority.
+
+The tentative sequence is PR 20 planning, PR 21 profile schema and fixtures, PR 22 profile verifier, PR 23 inspect-evidence profile option, and PR 24 v0.5 release gate and tag prep.
+
+v0.5 remains evidence-first, local, deterministic, review profile oriented, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
 
 ## Deferred / Explicit Non-goals
 
