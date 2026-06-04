@@ -55,6 +55,7 @@ async function main() {
   verifyPackageScript(packageJson);
   verifyTriggers(workflow);
   verifyPermissions(workflow);
+  verifyTagAvailability(workflow);
   verifyForbiddenFragments(workflow);
   verifyCommands(workflow);
 
@@ -63,6 +64,7 @@ async function main() {
   console.log("- workflow exists: .github/workflows/verification.yml");
   console.log("- pull_request and main push triggers present");
   console.log("- contents: read permission confirmed");
+  console.log("- checkout fetches full history and tags for historical baseline checks");
   console.log("- deterministic local verification commands present");
   console.log("- no secrets, provider calls, release actions, tag pushes, or npm publish commands detected");
   console.log("- evidence-first local deterministic CI-verifiable review artifact boundary preserved");
@@ -89,6 +91,16 @@ function verifyTriggers(workflow) {
 function verifyPermissions(workflow) {
   assert(/^permissions:\s*$/m.test(workflow), "workflow must define permissions.");
   assert(/^\s{2}contents: read\s*$/m.test(workflow), "workflow must set contents: read.");
+}
+
+function verifyTagAvailability(workflow) {
+  const fetchDepthZero = /^\s{10}fetch-depth: 0\s*$/m.test(workflow);
+  const readOnlyTagFetch = workflow.includes("git fetch --force --tags");
+
+  assert(
+    fetchDepthZero || readOnlyTagFetch,
+    "workflow must prevent shallow checkout tag loss with fetch-depth: 0 or git fetch --force --tags."
+  );
 }
 
 function verifyForbiddenFragments(workflow) {
