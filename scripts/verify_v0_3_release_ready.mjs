@@ -35,7 +35,7 @@ const expectedDevDependencies = {
   prettier: "3.4.2",
   typescript: "5.7.2",
   "typescript-eslint": "8.18.2",
-  vite: "6.4.2",
+  vite: "6.4.3",
   vitest: "4.1.7"
 };
 const forbiddenDependencyNames = [

@@ -27,6 +27,7 @@
     "verify:v0.4:ci-workflow": "node scripts/verify_v0_4_ci_workflow.mjs",
     "verify:v0.4:ci-evidence-artifact": "node scripts/verify_v0_4_ci_evidence_artifact_smoke.mjs",
     "verify:v0.4:release": "node scripts/verify_v0_4_release_ready.mjs",
+    "verify:post-v0.4:dependencies": "node scripts/verify_post_v0_4_dependency_remediation.mjs",
     "check:ollama": "node scripts/check_ollama_local.mjs",
     "verify:ollama:e2e": "node scripts/verify_ollama_e2e_local.mjs",
     "verify:openai:planner": "node scripts/verify_openai_planner_local.mjs",
@@ -42,7 +43,7 @@
     "prettier": "3.4.2",
     "typescript": "5.7.2",
     "typescript-eslint": "8.18.2",
-    "vite": "6.4.2",
+    "vite": "6.4.3",
     "vitest": "4.1.7"
   },
   "dependencies": {
