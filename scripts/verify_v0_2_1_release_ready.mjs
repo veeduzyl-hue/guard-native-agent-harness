@@ -39,7 +39,7 @@ const forbiddenDependencyNames = [
 const expectedDevDependencies = {
   "@eslint/js": "9.39.4",
   eslint: "9.39.4",
-  vite: "6.4.2",
+  vite: "6.4.3",
   vitest: "4.1.7"
 };
 
