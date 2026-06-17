@@ -451,6 +451,23 @@ v0.4 release docs:
 - [v0.4.0 Tag Preparation](docs/V0_4_TAG_PREP.md)
 - [v0.4 CI Evidence Readiness Plan](docs/planning/v0.4-ci-evidence-readiness.md)
 
+## v0.4.1 Dependency Remediation Patch
+
+Run the v0.4.1 dependency remediation release gate with:
+
+```bash
+npm run verify:v0.4.1:release
+```
+
+v0.4.1 is dependency-remediation-only. It documents the bounded `vite` and `js-yaml` advisory remediation while preserving the v0.4 CI Evidence Readiness Baseline. It does not change runtime behavior, CLI behavior, workflow behavior, provider behavior, planner behavior, Tool Registry semantics, Policy Gate semantics, Guard Adapter semantics, or Guard runtime semantics.
+
+v0.4.1 release docs:
+
+- [v0.4.1 Release Notes](docs/RELEASE_NOTES_v0.4.1.md)
+- [v0.4.1 Final Release Gate](docs/V0_4_1_FINAL_RELEASE_GATE.md)
+- [v0.4.1 Tag Preparation](docs/V0_4_1_TAG_PREP.md)
+- [Post-v0.4 Dependency Remediation](docs/security/POST_V0_4_DEPENDENCY_REMEDIATION.md)
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:

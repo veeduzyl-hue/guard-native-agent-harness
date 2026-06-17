@@ -6,7 +6,7 @@ import path from "node:path";
 import process from "node:process";
 
 const releaseVersion = "0.2.1";
-const supportedPackageVersions = [releaseVersion, "0.3.0", "0.4.0"];
+const supportedPackageVersions = [releaseVersion, "0.3.0", "0.4.0", "0.4.1"];
 const requiredV021Docs = [
   "docs/RELEASE_NOTES_v0.2.1.md",
   "docs/V0_2_1_FINAL_RELEASE_GATE.md",

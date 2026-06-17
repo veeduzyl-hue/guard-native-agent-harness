@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const packageVersion = "0.4.0";
+const supportedPackageVersions = ["0.4.0", "0.4.1"];
 const expectedViteVersion = "6.4.3";
 const expectedJsYamlVersion = "4.2.0";
 const remediationDocPath = "docs/security/POST_V0_4_DEPENDENCY_REMEDIATION.md";
@@ -46,7 +46,7 @@ async function main() {
 
   console.log("post-v0.4 dependency remediation verification passed.");
   console.log("");
-  console.log(`- package version remains ${packageVersion}`);
+  console.log(`- package version accepted: ${packageJson.version}`);
   console.log(`- direct Vite version is ${expectedViteVersion}`);
   console.log(`- lockfile contains js-yaml ${expectedJsYamlVersion}`);
   console.log("- no Vite 7 or Vite 8 dependency detected");
@@ -56,11 +56,14 @@ async function main() {
 }
 
 function verifyPackageMetadata(packageJson, packageLock) {
-  assert(packageJson.version === packageVersion, "package.json version must remain 0.4.0.");
-  assert(packageLock.version === packageVersion, "package-lock.json top-level version must remain 0.4.0.");
   assert(
-    packageLock.packages?.[""]?.version === packageVersion,
-    "package-lock.json root package version must remain 0.4.0."
+    supportedPackageVersions.includes(packageJson.version),
+    "package.json version must remain in the v0.4 remediation release line."
+  );
+  assert(packageLock.version === packageJson.version, "package-lock.json top-level version must match package.json.");
+  assert(
+    packageLock.packages?.[""]?.version === packageJson.version,
+    "package-lock.json root package version must match package.json."
   );
   assert(
     packageJson.devDependencies?.vite === expectedViteVersion,
