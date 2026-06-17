@@ -1,0 +1,90 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "ci-pr",
+  "display_name": "Pull Request CI Review",
+  "description": "Deterministic pull request CI review profile for bounded evidence artifact inspection. This review artifact is not approval.",
+  "intended_context": "Use in pull request review to describe expected CI verifiers and bounded generated review artifacts.",
+  "required_evidence_files": [
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/evidence-manifest.json",
+      "role": "manifest",
+      "required": true
+    },
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/final-report.md",
+      "role": "final_report",
+      "required": true
+    },
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/guard-results.json",
+      "role": "guard_results",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run verify:v0.4:ci-workflow",
+    "npm run verify:v0.4:ci-evidence-artifact",
+    "npm run audit:summary"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/inspection.json",
+      "format": "json",
+      "description": "Bounded CI evidence inspection output for pull request review."
+    },
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/inspection.md",
+      "format": "markdown",
+      "description": "Bounded CI Markdown review artifact for human inspection."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "ci-verifiers",
+      "display_name": "CI Verifiers",
+      "focus": "Review deterministic CI workflow, CI evidence artifact, and audit summary command expectations."
+    },
+    {
+      "section_id": "review-artifacts",
+      "display_name": "Review Artifacts",
+      "focus": "Review bounded pull request CI evidence artifacts without treating them as enforcement."
+    },
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm the profile remains a local deterministic review artifact, not autonomous execution and not a runtime control plane."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "pricing changes",
+    "license changes",
+    "checkout/Paddle changes",
+    "API key persistence",
+    ".env loading",
+    "SDK dependency",
+    "cloud model requirement",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}
