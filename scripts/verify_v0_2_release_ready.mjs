@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const supportedReleaseVersions = ["0.2.0", "0.2.1", "0.3.0", "0.4.0"];
+const supportedReleaseVersions = ["0.2.0", "0.2.1", "0.3.0", "0.4.0", "0.4.1"];
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.2.md",
   "docs/V0_2_FINAL_RELEASE_GATE.md",

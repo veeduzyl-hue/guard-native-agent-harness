@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const releaseVersion = "0.4.0";
+const supportedPackageVersions = ["0.4.0", "0.4.1"];
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.4.md",
   "docs/V0_4_FINAL_RELEASE_GATE.md",
@@ -98,7 +98,7 @@ async function main() {
 
   console.log("v0.4 release readiness verification passed.");
   console.log("");
-  console.log("- package root metadata pinned to 0.4.0");
+  console.log(`- package root metadata accepted: ${packageJson.version}`);
   console.log("- v0.4 release docs present");
   console.log("- v0.4 workflow, workflow verifier, and smoke verifier present");
   console.log("- v0.4 package scripts present");
@@ -109,15 +109,18 @@ async function main() {
 }
 
 function verifyPackageVersion(packageJson, packageLock) {
-  assert(packageJson.version === releaseVersion, "package.json version must be 0.4.0.");
+  assert(
+    supportedPackageVersions.includes(packageJson.version),
+    "package.json version must be 0.4.0 or the current v0.4 patch release-prep version."
+  );
   if (!packageLock) {
     return;
   }
 
-  assert(packageLock.version === releaseVersion, "package-lock.json top-level version must be 0.4.0.");
+  assert(packageLock.version === packageJson.version, "package-lock.json top-level version must match package.json.");
   assert(
-    packageLock.packages?.[""]?.version === releaseVersion,
-    "package-lock.json root package version must be 0.4.0."
+    packageLock.packages?.[""]?.version === packageJson.version,
+    "package-lock.json root package version must match package.json."
   );
 }
 

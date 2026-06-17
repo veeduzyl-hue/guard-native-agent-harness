@@ -97,11 +97,13 @@ v0.3 remains evidence-first, local, deterministic, replayable, and review-orient
 
 ## v0.4: CI Evidence Readiness Baseline
 
-Status: released in `v0.4.0`.
+Status: released in `v0.4.0`; v0.4.1 dependency remediation patch release gate prepared.
 
 v0.4 makes Guard-native Agent Harness easier to validate in pull requests and CI while preserving local deterministic semantics. The sequence is PR 16 planning, PR 17 GitHub Actions verification workflow, PR 18 CI generated evidence artifact smoke check, and PR 19 v0.4 release gate and tag prep.
 
 v0.4 remains evidence-first, local, deterministic, CI-verifiable, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
+
+v0.4.1 is dependency-remediation-only. It documents bounded dev-tooling remediation for `vite` and `js-yaml` advisories after v0.4.0, with full and runtime-only audits expected to report zero vulnerabilities. It does not change runtime behavior, provider behavior, planner behavior, Tool Registry semantics, Policy Gate semantics, Guard Adapter semantics, Guard runtime semantics, CLI behavior, or workflow behavior.
 
 ## v0.5: Evidence Review Profile Baseline
 
