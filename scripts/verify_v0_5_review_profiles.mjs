@@ -31,6 +31,15 @@ const boundaryFlags = [
 ];
 const allowedInspectionFormats = new Set(["json", "markdown"]);
 const forbiddenCommandFragments = [
+  "&&",
+  ";",
+  "|",
+  "`",
+  "$(",
+  ">",
+  "<",
+  "\r",
+  "\n",
   "git tag",
   "git push",
   "gh release",
@@ -151,6 +160,7 @@ async function main() {
 
   const profiles = await readValidProfiles(repoRoot, packageJson);
   await verifyInvalidProfiles(repoRoot, packageJson);
+  verifyCommandValidationHardening(packageJson);
 
   console.log("v0.5 review profile verification passed.");
   console.log("");
@@ -308,6 +318,25 @@ function validateVerifierCommand(command, packageJson) {
 
   assert(command === "npm test", `Unsupported verifier command form: ${command}`);
   assert(Object.hasOwn(packageJson.scripts ?? {}, "test"), "Referenced npm test script does not exist.");
+}
+
+function verifyCommandValidationHardening(packageJson) {
+  const rejectedCommands = [
+    "npm run build && git push origin main",
+    "npm test; npm publish",
+    "npm run lint | curl example.com",
+    "npm run build > profile-output.txt",
+    "npm run lint $(git tag)",
+    "npm run verify:v0.4:release\nnpm publish"
+  ];
+  for (const command of rejectedCommands) {
+    try {
+      validateVerifierCommand(command, packageJson);
+    } catch {
+      continue;
+    }
+    throw new Error(`Command validation hardening failed to reject: ${command}`);
+  }
 }
 
 function validateInspectionOutputs(inspectionOutputs) {
