@@ -1,0 +1,93 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "release-prep",
+  "display_name": "Release Preparation Review",
+  "description": "Release readiness review profile for deterministic release gate checks. This review artifact is not deployment approval.",
+  "intended_context": "Use during release preparation to describe expected verifier commands and release review artifacts before tag or release publication steps.",
+  "required_evidence_files": [
+    {
+      "path": "docs/RELEASE_NOTES_v0.4.md",
+      "role": "release_notes",
+      "required": true
+    },
+    {
+      "path": "docs/V0_4_TAG_PREP.md",
+      "role": "tag_prep",
+      "required": true
+    },
+    {
+      "path": "docs/V0_4_FINAL_RELEASE_GATE.md",
+      "role": "release_gate",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run build",
+    "npm test",
+    "npm run lint",
+    "npm run verify:v0.3:release",
+    "npm run verify:v0.4:release",
+    "npm run audit:summary"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/release-prep/inspection.json",
+      "format": "json",
+      "description": "Release preparation inspection output for deterministic review."
+    },
+    {
+      "path": ".artifacts/release-prep/inspection.md",
+      "format": "markdown",
+      "description": "Release preparation Markdown review artifact for human inspection."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "release-verifiers",
+      "display_name": "Release Verifiers",
+      "focus": "Review build, test, lint, release verifier, and audit summary command expectations."
+    },
+    {
+      "section_id": "release-artifacts",
+      "display_name": "Release Artifacts",
+      "focus": "Review release notes, tag preparation notes, and release gate documents as bounded artifacts."
+    },
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm the profile creates no authority grant, no release tag, no GitHub Release, and no npm publish."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "pricing changes",
+    "license changes",
+    "checkout/Paddle changes",
+    "API key persistence",
+    ".env loading",
+    "SDK dependency",
+    "cloud model requirement",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}

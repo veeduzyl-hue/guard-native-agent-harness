@@ -1,0 +1,92 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "local-dev",
+  "display_name": "Local Development Review",
+  "description": "Lightweight local deterministic review profile for development iteration. This review artifact does not imply approval.",
+  "intended_context": "Use during local development to review nearby evidence expectations before pull request or release preparation.",
+  "required_evidence_files": [
+    {
+      "path": "fixtures/v0.3/evidence-pack-valid-basic/evidence-manifest.json",
+      "role": "manifest",
+      "required": true
+    },
+    {
+      "path": "fixtures/v0.3/evidence-pack-valid-basic/final-report.md",
+      "role": "final_report",
+      "required": true
+    },
+    {
+      "path": "fixtures/v0.3/evidence-pack-valid-basic/guard-results.json",
+      "role": "guard_results",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run build",
+    "npm test",
+    "npm run lint",
+    "npm run verify:v0.3:evidence",
+    "npm run verify:v0.3:inspect-evidence"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/inspect-evidence/local-dev.json",
+      "format": "json",
+      "description": "Local deterministic inspection output for evidence review."
+    },
+    {
+      "path": ".artifacts/inspect-evidence/local-dev.md",
+      "format": "markdown",
+      "description": "Local Markdown review artifact for human inspection."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "expected-verifiers",
+      "display_name": "Expected Verifiers",
+      "focus": "Review local build, test, lint, evidence, and inspect-evidence command expectations."
+    },
+    {
+      "section_id": "evidence-files",
+      "display_name": "Evidence Files",
+      "focus": "Review deterministic fixture evidence files needed during local development."
+    },
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm the profile remains local, evidence-first, not approval, not enforcement, and no authority grant."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "pricing changes",
+    "license changes",
+    "checkout/Paddle changes",
+    "API key persistence",
+    ".env loading",
+    "SDK dependency",
+    "cloud model requirement",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}

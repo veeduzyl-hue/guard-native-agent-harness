@@ -1,0 +1,106 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "audit-review",
+  "display_name": "Audit Review",
+  "description": "Deeper evidence review profile for manifests, inspections, blocked actions, policy decisions, command results, and guard results. This review artifact is not compliance certification.",
+  "intended_context": "Use for deeper local deterministic evidence review where artifact completeness and boundary language need focused inspection.",
+  "required_evidence_files": [
+    {
+      "path": "evidence-manifest.json",
+      "role": "manifest",
+      "required": true
+    },
+    {
+      "path": "blocked-actions.jsonl",
+      "role": "blocked_actions",
+      "required": true
+    },
+    {
+      "path": "command-results.jsonl",
+      "role": "command_results",
+      "required": true
+    },
+    {
+      "path": "guard-results.json",
+      "role": "guard_results",
+      "required": true
+    },
+    {
+      "path": "policy-decisions.jsonl",
+      "role": "policy_decisions",
+      "required": false
+    }
+  ],
+  "expected_verifiers": [
+    "npm run verify:v0.3:evidence",
+    "npm run verify:v0.3:runtime-evidence",
+    "npm run verify:v0.3:inspect-evidence",
+    "npm run verify:v0.4:ci-evidence-artifact"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/audit-review/inspection.json",
+      "format": "json",
+      "description": "Audit review JSON inspection output for manifest and evidence completeness."
+    },
+    {
+      "path": ".artifacts/audit-review/inspection.md",
+      "format": "markdown",
+      "description": "Audit review Markdown artifact for human inspection of evidence boundaries."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "manifest",
+      "display_name": "Manifest",
+      "focus": "Review deterministic manifest paths, roles, sizes, and hashes."
+    },
+    {
+      "section_id": "event-streams",
+      "display_name": "Event Streams",
+      "focus": "Review blocked actions, policy decisions, command results, tool calls, and guard results as evidence."
+    },
+    {
+      "section_id": "inspection",
+      "display_name": "Inspection",
+      "focus": "Review JSON and Markdown inspection outputs as bounded review artifacts."
+    },
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm no profile output can authorize execution and no provider output can authorize execution."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "pricing changes",
+    "license changes",
+    "checkout/Paddle changes",
+    "API key persistence",
+    ".env loading",
+    "SDK dependency",
+    "cloud model requirement",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}
