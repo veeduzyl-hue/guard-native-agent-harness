@@ -1,0 +1,58 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "ci-pr",
+  "display_name": "Invalid Authority Grant",
+  "description": "Invalid fixture used only to prove boundary flag rejection.",
+  "intended_context": "Invalid fixture for deterministic review-profile verifier coverage.",
+  "required_evidence_files": [
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/evidence-manifest.json",
+      "role": "manifest",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run verify:v0.4:ci-workflow"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/v0.4/ci-evidence-artifact-smoke/inspection.json",
+      "format": "json",
+      "description": "Invalid fixture inspection output."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm boundary flag rejection remains deterministic."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": true,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "API key persistence",
+    ".env loading",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}

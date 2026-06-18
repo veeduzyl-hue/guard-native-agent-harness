@@ -1,0 +1,59 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "release-prep",
+  "display_name": "Invalid Forbidden Command",
+  "description": "Invalid fixture used only to prove forbidden command rejection.",
+  "intended_context": "Invalid fixture for deterministic review-profile verifier coverage.",
+  "required_evidence_files": [
+    {
+      "path": "docs/RELEASE_NOTES_v0.4.md",
+      "role": "release_notes",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run build",
+    "git push origin main"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/release-prep/inspection.json",
+      "format": "json",
+      "description": "Invalid fixture inspection output."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "release-verifiers",
+      "display_name": "Release Verifiers",
+      "focus": "Confirm forbidden command rejection remains deterministic."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "API key persistence",
+    ".env loading",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}
