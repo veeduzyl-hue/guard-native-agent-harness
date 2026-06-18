@@ -1,0 +1,57 @@
+{
+  "schema_version": "guard-native-evidence-review-profile.v0.5",
+  "profile_id": "local-dev",
+  "display_name": "Invalid Missing Required Field",
+  "intended_context": "Invalid fixture used only to prove required-field rejection.",
+  "required_evidence_files": [
+    {
+      "path": "fixtures/v0.3/evidence-pack-valid-basic/evidence-manifest.json",
+      "role": "manifest",
+      "required": true
+    }
+  ],
+  "expected_verifiers": [
+    "npm run build"
+  ],
+  "inspection_outputs": [
+    {
+      "path": ".artifacts/inspect-evidence/local-dev.json",
+      "format": "json",
+      "description": "Invalid fixture inspection output."
+    }
+  ],
+  "review_sections": [
+    {
+      "section_id": "boundary",
+      "display_name": "Boundary",
+      "focus": "Confirm required-field rejection remains deterministic."
+    }
+  ],
+  "boundary": {
+    "approval": false,
+    "enforcement": false,
+    "autonomous_execution": false,
+    "runtime_control_plane": false,
+    "authority_grant": false,
+    "provider_output_authorizes_execution": false
+  },
+  "non_goals": [
+    "SaaS",
+    "dashboard",
+    "OAuth",
+    "database",
+    "telemetry service",
+    "API key persistence",
+    ".env loading",
+    "autonomous execution expansion",
+    "provider behavior changes",
+    "planner behavior changes",
+    "Tool Registry semantic changes",
+    "Policy Gate semantic changes",
+    "Guard Adapter semantic changes",
+    "Guard runtime semantic changes",
+    "compliance certification",
+    "deployment approval",
+    "merge approval"
+  ]
+}
