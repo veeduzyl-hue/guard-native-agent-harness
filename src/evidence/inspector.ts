@@ -19,12 +19,14 @@ import type {
   TaskEvidence,
   ToolCallEvidenceEvent
 } from "./schema.js";
+import type { ReviewProfileMetadata } from "./review-profile.js";
 
 export interface EvidenceInspection {
   schema_version: "v0.3";
   inspector_version: "v0.3";
   review_posture: "review_artifact_only";
   evidence_dir: string;
+  review_profile: ReviewProfileMetadata | null;
   manifest: {
     present: boolean;
     valid: boolean;
@@ -78,6 +80,7 @@ export class EvidenceInspectionError extends Error {
 export async function inspectEvidencePack(input: {
   evidenceDirectory: string;
   displayPath?: string;
+  reviewProfile?: ReviewProfileMetadata | null;
 }): Promise<EvidenceInspection> {
   const evidenceDirectory = path.resolve(input.evidenceDirectory);
   const displayPath = input.displayPath ?? input.evidenceDirectory;
@@ -131,6 +134,7 @@ export async function inspectEvidencePack(input: {
     inspector_version: "v0.3",
     review_posture: "review_artifact_only",
     evidence_dir: displayPath,
+    review_profile: input.reviewProfile ?? null,
     manifest: {
       present: true,
       valid: manifestErrors.length === 0,
@@ -188,6 +192,8 @@ This summary is a local deterministic read-only review artifact. It is not appro
 
 No provider output can authorize execution. There is no Guard runtime semantic change.
 
+${renderReviewProfileMarkdown(inspection)}
+
 ## Manifest
 
 - Present: ${inspection.manifest.present ? "yes" : "no"}
@@ -244,6 +250,39 @@ No provider output can authorize execution. There is no Guard runtime semantic c
 - No provider output can authorize execution.
 - No Guard runtime semantic change.
 `;
+}
+
+function renderReviewProfileMarkdown(inspection: EvidenceInspection): string {
+  const profile = inspection.review_profile;
+  if (!profile) {
+    return "## Review Profile\n\n- Selected: none";
+  }
+
+  const verifierList = profile.expected_verifiers.map((command) => `  - ${command}`).join("\n");
+  const evidenceList = profile.required_evidence_files
+    .map((entry) => `  - ${entry.path} (${entry.required ? "required" : "optional"}): ${entry.role}`)
+    .join("\n");
+  const sectionList = profile.review_sections
+    .map((section) => `  - ${section.section_id}: ${section.focus}`)
+    .join("\n");
+
+  return `## Review Profile
+
+- Selected: ${profile.profile_id}
+- Display name: ${profile.display_name}
+- Description: ${profile.description}
+- Intended context: ${profile.intended_context}
+- Expected verifiers are declarative references only and are not executed by inspection.
+- Profile boundaries: not approval, not enforcement, not blocking, not deployment authority, not runtime execution control, not a runtime control plane, and no authority grant.
+
+Expected verifiers:
+${verifierList}
+
+Required evidence files:
+${evidenceList}
+
+Review sections:
+${sectionList}`;
 }
 
 async function verifyManifestForInspection(

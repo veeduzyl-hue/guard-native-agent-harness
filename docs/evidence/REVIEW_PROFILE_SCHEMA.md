@@ -104,3 +104,31 @@ npm.cmd run verify:v0.5:profiles
 ```
 
 The verifier validates the schema, the four valid profile fixtures, the invalid fixtures, declared verifier command boundaries, review sections, inspection outputs, non-goals, and explicit false authority flags. Expected verifier commands are declarative references only; the profile verifier does not execute those commands.
+
+## Inspect Evidence Profile Option
+
+`inspect-evidence` can include v0.5 review profile metadata in deterministic JSON or Markdown inspection output:
+
+```text
+guard-agent inspect-evidence --evidence-dir .evidence/<task-id> --profile local-dev --json
+guard-agent inspect-evidence --evidence-dir .evidence/<task-id> --profile audit-review --markdown
+```
+
+The accepted profile IDs are:
+
+- `local-dev`
+- `ci-pr`
+- `release-prep`
+- `audit-review`
+
+Unknown profile IDs are rejected deterministically with stable error wording. The inspector does not fall back silently and does not infer a profile from environment variables, CI, branch names, or Git state.
+
+The selected profile adds review metadata only. It may change review framing and the profile metadata shown in the inspection result, but it does not change runtime execution, command execution, provider authority, planner authority, tool permissions, policy enforcement, approval decisions, blocking decisions, deployment authority, or authority grants.
+
+Review profiles are review artifacts only. They do not approve, enforce, block, deploy, grant authority, control runtime execution, or act as a runtime control plane.
+
+The deterministic verifier for this CLI option is:
+
+```text
+npm.cmd run verify:v0.5:inspect-profile
+```

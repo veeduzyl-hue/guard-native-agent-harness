@@ -7,6 +7,7 @@ import {
   renderEvidenceInspectionJson,
   renderEvidenceInspectionMarkdown
 } from "./evidence/inspector.js";
+import { loadReviewProfile } from "./evidence/review-profile.js";
 import { PROJECT_NAME } from "./index.js";
 import { runTask } from "./task/runner.js";
 
@@ -65,16 +66,19 @@ program
   .requiredOption("--evidence-dir <path>", "existing evidence directory to inspect")
   .option("--json", "emit deterministic JSON inspection output")
   .option("--markdown", "emit deterministic Markdown inspection output")
+  .option("--profile <profile-id>", "v0.5 review profile metadata to include")
   .description("inspect an existing local evidence pack without executing it")
-  .action(async (options: { evidenceDir: string; json?: boolean; markdown?: boolean }) => {
+  .action(async (options: { evidenceDir: string; json?: boolean; markdown?: boolean; profile?: string }) => {
     try {
       if (options.json && options.markdown) {
         throw new Error("Choose either --json or --markdown, not both.");
       }
 
+      const reviewProfile = options.profile ? await loadReviewProfile(options.profile) : null;
       const inspection = await inspectEvidencePack({
         evidenceDirectory: options.evidenceDir,
-        displayPath: options.evidenceDir
+        displayPath: options.evidenceDir,
+        reviewProfile
       });
       const output =
         options.markdown && !options.json

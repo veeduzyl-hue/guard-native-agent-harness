@@ -468,6 +468,26 @@ v0.4.1 release docs:
 - [v0.4.1 Tag Preparation](docs/V0_4_1_TAG_PREP.md)
 - [Post-v0.4 Dependency Remediation](docs/security/POST_V0_4_DEPENDENCY_REMEDIATION.md)
 
+## v0.5 Evidence Review Profiles
+
+Inspect an existing Evidence Pack with optional v0.5 review profile metadata:
+
+```bash
+guard-agent inspect-evidence --evidence-dir .evidence/<task-id> --profile local-dev --json
+guard-agent inspect-evidence --evidence-dir .evidence/<task-id> --profile audit-review --markdown
+```
+
+Valid profile IDs are `local-dev`, `ci-pr`, `release-prep`, and `audit-review`. Unknown profile IDs are rejected deterministically and are not inferred from environment, CI, branch, or Git state.
+
+The selected profile only adds review metadata and framing to the inspection output. Review profiles are review artifacts only. They do not approve, enforce, block, deploy, grant authority, control runtime execution, or act as a runtime control plane.
+
+Validate the v0.5 profile surface with:
+
+```bash
+npm run verify:v0.5:profiles
+npm run verify:v0.5:inspect-profile
+```
+
 ## v0.1 Intended Workflow
 
 The intended v0.1 workflow is:
