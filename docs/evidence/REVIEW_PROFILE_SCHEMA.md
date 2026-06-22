@@ -87,4 +87,20 @@ The v0.5 fixture baseline is:
 - `fixtures/v0.5/review-profiles/release-prep.profile.json`
 - `fixtures/v0.5/review-profiles/audit-review.profile.json`
 
-The fixtures are deterministic JSON examples for the planned profile types. They do not implement profile verification, runtime profile loading, CLI profile selection, workflow behavior, or package version changes.
+The invalid fixture baseline is:
+
+- `fixtures/v0.5/review-profiles-invalid/missing-required-field.profile.json`
+- `fixtures/v0.5/review-profiles-invalid/forbidden-command.profile.json`
+- `fixtures/v0.5/review-profiles-invalid/authority-grant-true.profile.json`
+
+The fixtures are deterministic JSON examples for the profile types and negative validation cases. They do not implement runtime profile loading, CLI profile selection, workflow behavior, or package version changes.
+
+## Profile Verifier
+
+The deterministic v0.5 verifier is:
+
+```text
+npm.cmd run verify:v0.5:profiles
+```
+
+The verifier validates the schema, the four valid profile fixtures, the invalid fixtures, declared verifier command boundaries, review sections, inspection outputs, non-goals, and explicit false authority flags. Expected verifier commands are declarative references only; the profile verifier does not execute those commands.

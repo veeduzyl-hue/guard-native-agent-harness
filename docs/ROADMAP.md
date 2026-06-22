@@ -107,11 +107,23 @@ v0.4.1 is dependency-remediation-only. It documents bounded dev-tooling remediat
 
 ## v0.5: Evidence Review Profile Baseline
 
-Status: planning started in PR 20.
+Status: in progress. Planning is complete, review profile schema and fixtures were merged in GitHub PR #40, and the deterministic review profile verifier was merged in GitHub PR #41.
 
-v0.5 should define bounded evidence review profiles for local development, pull request CI, release preparation, and audit review. Profiles should describe expected verifier commands, required evidence files, inspector outputs, and review boundaries without changing runtime behavior or granting execution authority.
+v0.5 defines bounded evidence review profiles for local development, pull request CI, release preparation, and audit review. Profiles describe expected verifier commands, required evidence files, inspector outputs, and review boundaries without changing runtime behavior or granting execution authority.
 
-The tentative sequence is PR 20 planning, PR 21 profile schema and fixtures, PR 22 profile verifier, PR 23 inspect-evidence profile option, and PR 24 v0.5 release gate and tag prep.
+Completed v0.5 work:
+
+- Roadmap Step 20: v0.5 evidence review profile planning doc.
+- Roadmap Step 21 / GitHub PR #40: profile schema and fixtures.
+- Roadmap Step 22 / GitHub PR #41: deterministic profile verifier.
+- Valid profile fixtures exist for `local-dev`, `ci-pr`, `release-prep`, and `audit-review`.
+- Invalid profile fixtures exist for negative validation.
+- `npm.cmd run verify:v0.5:profiles` passes and executes no profile commands.
+
+Remaining v0.5 work:
+
+- Roadmap Step 23: `inspect-evidence` profile option.
+- Roadmap Step 24: v0.5 release gate and tag-prep verification.
 
 v0.5 remains evidence-first, local, deterministic, review profile oriented, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
 
