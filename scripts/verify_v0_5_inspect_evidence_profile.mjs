@@ -7,6 +7,11 @@ import process from "node:process";
 const validProfileIds = ["local-dev", "ci-pr", "release-prep", "audit-review"];
 const evidenceFixture = "fixtures/v0.3/evidence-pack-valid-basic";
 const authorityClaimPatterns = [
+  /"?approval"?\s*:\s*true/i,
+  /"?enforcement"?\s*:\s*true/i,
+  /"?authority_grant"?\s*:\s*true/i,
+  /"?runtime_control_plane"?\s*:\s*true/i,
+  /"?provider_output_authorizes_execution"?\s*:\s*true/i,
   /\bis approval\b/i,
   /\bis enforcement\b/i,
   /\bblocks deployment\b/i,
@@ -36,6 +41,23 @@ async function main() {
   const defaultInspection = JSON.parse(defaultJson.stdout);
   assert(defaultInspection.review_profile === null, "Default inspection must not infer a review profile.");
 
+  const profileJsonOutputs = new Map();
+  for (const profileId of validProfileIds) {
+    const profileJson = await runCli(repoRoot, [
+      cliPath,
+      "inspect-evidence",
+      "--evidence-dir",
+      evidenceDirectory,
+      "--profile",
+      profileId,
+      "--json"
+    ]);
+    const inspection = JSON.parse(profileJson.stdout);
+    verifyProfileMetadata(inspection, profileId);
+    assertNoAuthorityClaims(profileJson.stdout, `${profileId} JSON output`);
+    profileJsonOutputs.set(profileId, profileJson.stdout);
+  }
+
   const localDevJson = await runCli(repoRoot, [
     cliPath,
     "inspect-evidence",
@@ -45,6 +67,10 @@ async function main() {
     "local-dev",
     "--json"
   ]);
+  assert(
+    localDevJson.stdout === profileJsonOutputs.get("local-dev"),
+    "Profile JSON inspection output must be deterministic."
+  );
   const secondLocalDevJson = await runCli(repoRoot, [
     cliPath,
     "inspect-evidence",
@@ -57,14 +83,9 @@ async function main() {
   assert(localDevJson.stdout === secondLocalDevJson.stdout, "Profile JSON inspection output must be deterministic.");
 
   const localDevInspection = JSON.parse(localDevJson.stdout);
-  verifyProfileMetadata(localDevInspection, "local-dev");
   assert(
     localDevInspection.review_profile.expected_verifiers.includes("npm run verify:v0.3:inspect-evidence"),
     "local-dev profile metadata must include inspect-evidence verifier reference."
-  );
-  assert(
-    localDevInspection.review_profile.boundary.authority_grant === false,
-    "Profile metadata must not grant authority."
   );
 
   const markdown = await runCli(repoRoot, [
@@ -140,6 +161,7 @@ function verifyProfileMetadata(inspection, profileId) {
   assert(inspection.schema_version === "v0.3", "Inspection schema version must remain v0.3.");
   assert(inspection.review_posture === "review_artifact_only", "Inspection must remain a review artifact.");
   assert(inspection.review_profile?.profile_id === profileId, "Selected profile ID must be present.");
+  assert(inspection.review_profile, "Profile metadata must be present.");
   assert(typeof inspection.review_profile.display_name === "string", "Profile display name must be present.");
   assert(typeof inspection.review_profile.description === "string", "Profile description must be present.");
   assert(
@@ -147,12 +169,29 @@ function verifyProfileMetadata(inspection, profileId) {
     "Profile required evidence files must be present."
   );
   assert(Array.isArray(inspection.review_profile.review_sections), "Profile review sections must be present.");
-  assert(inspection.boundary.approval === false, "Inspection boundary must not imply approval.");
-  assert(inspection.boundary.enforcement === false, "Inspection boundary must not imply enforcement.");
-  assert(
-    inspection.boundary.runtime_control_plane === false,
-    "Inspection boundary must not imply runtime control-plane behavior."
+  assertFalseBoundary(
+    inspection.review_profile.boundary,
+    [
+      "approval",
+      "enforcement",
+      "autonomous_execution",
+      "runtime_control_plane",
+      "authority_grant",
+      "provider_output_authorizes_execution"
+    ],
+    "review_profile.boundary"
   );
+  assertFalseBoundary(
+    inspection.boundary,
+    ["approval", "enforcement", "autonomous_execution", "authority_grant", "runtime_control_plane"],
+    "inspection.boundary"
+  );
+}
+
+function assertFalseBoundary(boundary, fields, label) {
+  for (const field of fields) {
+    assert(boundary?.[field] === false, `${label}.${field} must be false.`);
+  }
 }
 
 function assertNoAuthorityClaims(content, label) {
