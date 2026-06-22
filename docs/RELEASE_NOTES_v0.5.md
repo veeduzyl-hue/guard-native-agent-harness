@@ -37,15 +37,13 @@ v0.5.0 does not include:
 - `.env` loading.
 - API key persistence.
 - SDK dependency additions.
-- Release tag creation in this release-prep PR.
-- GitHub Release publication in this release-prep PR.
 - npm publishing.
 
-This release note is factual release-preparation evidence only. It does not claim certification, production readiness, deployment approval, merge approval, or compliance.
+This release note is factual release evidence only. It does not claim certification, production readiness, deployment approval, merge approval, or compliance.
 
 ## Verification
 
-The final v0.5.0 pre-tag release gate is:
+The final v0.5.0 pre-tag release gate passed before tag creation:
 
 ```bash
 npm install
@@ -57,6 +55,19 @@ npm run verify:v0.5:inspect-profile
 npm run verify:v0.5:release
 ```
 
-## Tag Status
+Post-tag sanity passed after tag creation:
 
-The `v0.5.0` tag is not created by this release gate PR. It should be created only after this PR is merged into `main` and the final v0.5.0 pre-tag release gate passes on `main`.
+```bash
+git fetch origin --tags
+git tag --list "v0.5.0"
+git tag --points-at HEAD
+npm pack --dry-run
+git status
+```
+
+## Publication Status
+
+- The GitHub tag `v0.5.0` exists and points to the v0.5.0 release commit.
+- The GitHub Release remains a draft until it is manually published.
+- No npm publish has been run.
+- No standalone npm tarball asset has been uploaded.
