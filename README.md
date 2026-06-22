@@ -486,7 +486,14 @@ Validate the v0.5 profile surface with:
 ```bash
 npm run verify:v0.5:profiles
 npm run verify:v0.5:inspect-profile
+npm run verify:v0.5:release
 ```
+
+v0.5 release docs:
+
+- [v0.5.0 Release Notes](docs/RELEASE_NOTES_v0.5.md)
+- [v0.5.0 Final Release Gate](docs/V0_5_FINAL_RELEASE_GATE.md)
+- [v0.5.0 Tag Preparation](docs/V0_5_TAG_PREP.md)
 
 ## v0.1 Intended Workflow
 
