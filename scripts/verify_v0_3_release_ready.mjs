@@ -5,7 +5,7 @@ import path from "node:path";
 import process from "node:process";
 
 const releaseVersion = "0.3.0";
-const supportedPackageVersions = [releaseVersion, "0.4.0", "0.4.1"];
+const supportedPackageVersions = [releaseVersion, "0.4.0", "0.4.1", "0.5.0"];
 const requiredDocs = [
   "docs/RELEASE_NOTES_v0.3.md",
   "docs/V0_3_FINAL_RELEASE_GATE.md",
@@ -101,7 +101,7 @@ async function main() {
 function verifyPackageVersion(packageJson, packageLock) {
   assert(
     supportedPackageVersions.includes(packageJson.version),
-    "package.json version must be 0.3.0 or a current v0.4 release-prep version."
+    "package.json version must be 0.3.0 or a current later release-prep version."
   );
   if (!packageLock) {
     return;
