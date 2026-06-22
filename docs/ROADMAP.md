@@ -107,7 +107,7 @@ v0.4.1 is dependency-remediation-only. It documents bounded dev-tooling remediat
 
 ## v0.5: Evidence Review Profile Baseline
 
-Status: in progress. Planning is complete, review profile schema and fixtures were merged in GitHub PR #40, and the deterministic review profile verifier was merged in GitHub PR #41.
+Status: in progress. Planning is complete, review profile schema and fixtures were merged in GitHub PR #40, the deterministic review profile verifier was merged in GitHub PR #41, and the `inspect-evidence` profile option is implemented.
 
 v0.5 defines bounded evidence review profiles for local development, pull request CI, release preparation, and audit review. Profiles describe expected verifier commands, required evidence files, inspector outputs, and review boundaries without changing runtime behavior or granting execution authority.
 
@@ -119,10 +119,10 @@ Completed v0.5 work:
 - Valid profile fixtures exist for `local-dev`, `ci-pr`, `release-prep`, and `audit-review`.
 - Invalid profile fixtures exist for negative validation.
 - `npm.cmd run verify:v0.5:profiles` passes and executes no profile commands.
+- Roadmap Step 23: `inspect-evidence --profile <profile-id>` profile metadata option.
 
 Remaining v0.5 work:
 
-- Roadmap Step 23: `inspect-evidence` profile option.
 - Roadmap Step 24: v0.5 release gate and tag-prep verification.
 
 v0.5 remains evidence-first, local, deterministic, review profile oriented, and review artifact oriented. It is not approval, not enforcement, not autonomous execution, not a runtime control plane, and no authority grant. No provider output can authorize execution, and there is no Guard runtime semantic change.
