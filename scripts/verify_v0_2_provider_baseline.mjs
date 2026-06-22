@@ -177,10 +177,19 @@ async function verifyDocs(repoRoot) {
 
 async function verifyReadme(repoRoot) {
   const readme = await readFile(path.join(repoRoot, "README.md"), "utf8");
-  assert(readme.includes("## v0.2 Provider Baseline"), "README must include v0.2 Provider Baseline section.");
   assert(
-    readme.includes("docs/V0_2_PROVIDER_BASELINE.md") || readme.includes("v0.2 Provider Baseline"),
-    "README must link or mention the v0.2 provider baseline."
+    readme.includes("Optional Planner Provider Baseline") || readme.includes("v0.2 Provider Baseline"),
+    "README must mention the v0.2 provider baseline in its public release context."
+  );
+  assert(readme.includes("The default planner provider is `mock`"), "README must document mock as default.");
+  for (const provider of ["Ollama", "OpenAI", "DeepSeek"]) {
+    assert(readme.includes(provider), `README must mention optional provider: ${provider}.`);
+  }
+  assert(readme.includes("does not load `.env` files"), "README must document that .env files are not loaded.");
+  assert(readme.includes("Providers propose plans only"), "README must document provider proposal-only boundary.");
+  assert(
+    readme.includes("they do not receive tools, call tools, or receive execution authority"),
+    "README must document that providers do not receive tools or execution authority."
   );
 }
 
