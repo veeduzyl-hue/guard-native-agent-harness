@@ -152,7 +152,7 @@ export interface GuardCompatibilityToolCall extends ToolCallEvidenceEvent {
   command_result?: CommandResultEvidenceEvent;
 }
 
-export interface GuardCompatibilityBlockedAction extends BlockedActionEvidenceEvent {}
+export type GuardCompatibilityBlockedAction = BlockedActionEvidenceEvent;
 
 export interface GuardCompatibilityArtifact {
   path: string;
