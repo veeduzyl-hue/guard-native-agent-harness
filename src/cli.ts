@@ -8,7 +8,7 @@ import {
   renderEvidenceInspectionMarkdown
 } from "./evidence/inspector.js";
 import { loadReviewProfile } from "./evidence/review-profile.js";
-import { PROJECT_NAME } from "./index.js";
+import { HARNESS_VERSION, PROJECT_NAME } from "./index.js";
 import { runTask } from "./task/runner.js";
 
 const program = new Command();
@@ -16,7 +16,7 @@ const program = new Command();
 program
   .name("guard-agent")
   .description("Guard-native Agent Harness local evidence initializer")
-  .version("0.0.0");
+  .version(HARNESS_VERSION);
 
 program
   .command("run")

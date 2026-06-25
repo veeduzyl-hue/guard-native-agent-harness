@@ -3,7 +3,10 @@ import type { PlanEvidence, PlannerType, PlanStep } from "../evidence/schema.js"
 const defaultExpectedOutputs = [
   "tool-calls.jsonl",
   "blocked-actions.jsonl",
+  "command-results.jsonl",
   "guard-results.json",
+  "evidence-manifest.json",
+  "evidence-pack.json",
   "final-report.md"
 ];
 

@@ -1,6 +1,6 @@
 # Guard-native Agent Harness
 
-Guard-native Agent Harness is a local, evidence-first harness for bounded AI-assisted workflows. It produces replayable Evidence Packs, validates bounded planner output, records tool, policy, and command evidence, and supports review-profile-based evidence inspection.
+Guard-native Agent Harness is a local, evidence-first harness for bounded AI-assisted workflows. It produces replayable Evidence Packs, emits a Guard-compatible execution-facts envelope, validates bounded planner output, records tool, policy, and command evidence, and supports review-profile-based evidence inspection.
 
 ## Current Release
 
@@ -66,10 +66,13 @@ A run writes a local Evidence Pack under `.evidence/<task-id>/`:
   command-results.jsonl
   guard-results.json
   evidence-manifest.json
+  evidence-pack.json
   final-report.md
 ```
 
 Evidence Packs are filesystem-first review artifacts. They are intended to be inspected locally and replayed through deterministic verification.
+
+Harness is an Evidence Producer only. It emits bounded execution facts for Guard ingestion and does not compute governance verdicts, reason codes, risk summaries, or evidence coverage.
 
 ## Inspect Evidence
 
@@ -164,9 +167,21 @@ npm run verify:v0.5:release
 - [Evidence Pack Contract](docs/evidence/EVIDENCE_PACK_CONTRACT.md)
 - [Governance Boundary](docs/GOVERNANCE_BOUNDARY.md)
 
+## v0.1 Release Readiness
+
+The original v0.1 release-readiness documents remain linked for baseline evidence-pack acceptance and release-history review:
+
+- [docs/RELEASE_NOTES_v0.1.md](docs/RELEASE_NOTES_v0.1.md)
+- [docs/V0_1_TAG_PREP.md](docs/V0_1_TAG_PREP.md)
+- [docs/V0_1_ACCEPTANCE.md](docs/V0_1_ACCEPTANCE.md)
+- [docs/V0_1_BASELINE.md](docs/V0_1_BASELINE.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
+
 ## Relationship To MindForge Guard
 
-This repository is separate from MindForge Guard. The harness may produce evidence that Guard can validate, but Guard remains non-executing and recommendation-only. Guard output is evidence, not execution authority.
+This repository is separate from MindForge Guard. Harness is the local evidence producer. Guard is the evidence consumer and governance authority. The harness may produce Guard-compatible evidence packs that Guard can ingest, but Harness does not compute governance verdicts, reason codes, risk summaries, or evidence coverage.
+
+Existing local Policy Gate blocks remain Harness safety controls. They are not Guard governance verdicts, and Guard output is still evidence, not execution authority.
 
 The harness must not change MindForge Guard runtime semantics, policy semantics, commercial behavior, or production control-plane behavior.
 

@@ -7,9 +7,14 @@ import { describe, expect, it } from "vitest";
 
 import { runTask } from "../src/task/runner.js";
 import { writeEvidenceManifest } from "../src/evidence/manifest.js";
-import type { PlanEvidence, TaskEvidence } from "../src/evidence/schema.js";
+import type {
+  GuardCompatibilityEvidencePack,
+  PlanEvidence,
+  TaskEvidence
+} from "../src/evidence/schema.js";
 import { GuardAdapter } from "../src/guard/adapter.js";
 import type { GuardAdapterResult } from "../src/guard/types.js";
+import { HARNESS_VERSION } from "../src/index.js";
 
 const unavailableGuardResult: GuardAdapterResult = {
   guard_available: false,
@@ -61,6 +66,7 @@ describe("task runner evidence initialization", () => {
       "blocked-actions.jsonl",
       "command-results.jsonl",
       "evidence-manifest.json",
+      "evidence-pack.json",
       "final-report.md",
       "guard-results.json",
       "plan.json",
@@ -89,7 +95,7 @@ describe("task runner evidence initialization", () => {
       created_at: "2026-05-20T01:02:03.000Z",
       user_prompt: "Create a safe README update proposal",
       workspace_root: workspaceRoot,
-      harness_version: "0.0.0",
+      harness_version: HARNESS_VERSION,
       mode: "local",
       planner_type: "mock",
       planner_provider: "mock",
@@ -126,6 +132,72 @@ describe("task runner evidence initialization", () => {
     ]);
     expect(plan.risk_notes).toContain("Mock planner uses deterministic templates only.");
     expect(plan.expected_outputs).toContain("final-report.md");
+    expect(plan.expected_outputs).toContain("evidence-manifest.json");
+    expect(plan.expected_outputs).toContain("evidence-pack.json");
+  });
+
+  it("writes a Guard-compatible execution-facts envelope with producer-only authority", async () => {
+    const workspaceRoot = await mkdtemp(path.join(tmpdir(), "guard-agent-compat-pack-"));
+
+    const result = await runTask("Create a safe README update proposal", {
+      workspaceRoot,
+      now: new Date("2026-05-20T01:02:03.000Z"),
+      randomId: "abc123",
+      guardAdapter: unavailableGuardAdapter,
+      executePlan: false
+    });
+
+    const compatibilityPack = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "evidence-pack.json"), "utf8")
+    ) as GuardCompatibilityEvidencePack;
+
+    expect(compatibilityPack).toMatchObject({
+      schema_version: "mindforge-guard-evidence.v1",
+      pack_id: "task-20260520-010203-abc123",
+      pack_type: "execution_facts",
+      producer: {
+        id: "guard-native-agent-harness",
+        version: HARNESS_VERSION,
+        role: "evidence_producer"
+      },
+      authority: {
+        boundary: "producer_only",
+        consumer_authority: "mindforge-guard-core",
+        governance_outputs_emitted: false,
+        local_safety_controls_only: true,
+        execution_authority_granted: false
+      },
+      runtime: {
+        evidence_directory: ".evidence/task-20260520-010203-abc123",
+        guard_available: false,
+        execution_summary: {
+          steps_planned: 0,
+          steps_completed: 0,
+          steps_blocked: 0,
+          steps_failed: 0
+        }
+      },
+      verification: {
+        tool_call_count: 0,
+        blocked_action_count: 0,
+        command_result_count: 0,
+        final_report_path: "final-report.md",
+        guard_results_path: "guard-results.json",
+        manifest_path: "evidence-manifest.json"
+      },
+      manifest: {
+        path: "evidence-manifest.json",
+        schema_version: "guard-native-evidence-pack-manifest.v1",
+        created_by: "guard-native-agent-harness"
+      }
+    });
+    expect(compatibilityPack.tool_calls).toEqual([]);
+    expect(compatibilityPack.blocked_actions).toEqual([]);
+    expect(compatibilityPack.artifacts).toEqual([]);
+    expect(compatibilityPack.actions).toHaveLength(6);
+    expect(compatibilityPack.actions.every((action) => action.status === "not_recorded")).toBe(true);
+    expect(compatibilityPack).not.toHaveProperty("verdict");
+    expect(JSON.stringify(compatibilityPack)).not.toContain("reason_codes");
   });
 
   it("writes a human-readable final report with runtime boundaries", async () => {
@@ -178,6 +250,7 @@ describe("task runner evidence initialization", () => {
     expect(manifestPaths).toEqual([
       "blocked-actions.jsonl",
       "command-results.jsonl",
+      "evidence-pack.json",
       "final-report.md",
       "guard-results.json",
       "plan.json",
@@ -270,6 +343,10 @@ describe("task runner evidence initialization", () => {
       path.join(result.evidenceDirectory, "evidence-manifest.json"),
       "utf8"
     );
+    const compatibilityPack = await readFile(
+      path.join(result.evidenceDirectory, "evidence-pack.json"),
+      "utf8"
+    );
     const toolCalls = await readFile(
       path.join(result.evidenceDirectory, "tool-calls.jsonl"),
       "utf8"
@@ -285,5 +362,9 @@ describe("task runner evidence initialization", () => {
     expect(manifest).not.toContain("DEEPSEEK_API_KEY");
     expect(manifest).not.toContain("reasoning_content");
     expect(manifest).not.toContain("chain-of-thought");
+    expect(compatibilityPack).not.toContain("OPENAI_API_KEY");
+    expect(compatibilityPack).not.toContain("DEEPSEEK_API_KEY");
+    expect(compatibilityPack).not.toContain("reasoning_content");
+    expect(compatibilityPack).not.toContain("chain-of-thought");
   });
 });

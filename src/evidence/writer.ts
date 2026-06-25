@@ -2,6 +2,7 @@ import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { GuardAdapterResult } from "../guard/types.js";
+import { guardCompatibilityPackFileName } from "./compatibility.js";
 import { evidenceManifestFileName, writeEvidenceManifest } from "./manifest.js";
 import type {
   BlockedActionEvidenceEvent,
@@ -35,6 +36,7 @@ export async function writeEvidencePack(
   await writeFile(commandResultsPath, "", { encoding: "utf8", flag: "a" });
   const guardResultsPath = path.join(evidenceDirectory, "guard-results.json");
   const manifestPath = path.join(evidenceDirectory, evidenceManifestFileName);
+  const guardCompatibilityPackPath = path.join(evidenceDirectory, guardCompatibilityPackFileName);
 
   return {
     task,
@@ -53,6 +55,8 @@ export async function writeEvidencePack(
     relativeGuardResultsPath: `${relativeEvidenceDirectory}/guard-results.json`,
     manifestPath,
     relativeManifestPath: `${relativeEvidenceDirectory}/${evidenceManifestFileName}`,
+    guardCompatibilityPackPath,
+    relativeGuardCompatibilityPackPath: `${relativeEvidenceDirectory}/${guardCompatibilityPackFileName}`,
     guardAvailable: false,
     executionSummary: {
       steps_planned: 0,

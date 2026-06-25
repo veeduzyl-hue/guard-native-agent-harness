@@ -11,12 +11,14 @@ export const evidenceManifestCreatedBy = "guard-native-agent-harness";
 const manifestFileRoles = new Map<string, string>([
   ["blocked-actions.jsonl", "blocked_actions"],
   ["command-results.jsonl", "command_results"],
+  ["evidence-pack.json", "guard_compatibility_pack"],
   ["file-changes.diff", "file_changes"],
   ["final-report.md", "final_report"],
   ["guard-results.json", "guard_results"],
   ["plan.json", "plan"],
   ["policy-decisions.jsonl", "policy_decisions"],
   ["task.json", "task"],
+  ["tool-report.md", "tool_report"],
   ["tool-calls.jsonl", "tool_calls"]
 ]);
 
@@ -30,7 +32,12 @@ const requiredManifestFiles = [
   "guard-results.json"
 ];
 
-const optionalManifestFiles = ["file-changes.diff", "policy-decisions.jsonl"];
+const optionalManifestFiles = [
+  "evidence-pack.json",
+  "file-changes.diff",
+  "policy-decisions.jsonl",
+  "tool-report.md"
+];
 
 export interface EvidenceManifest {
   schema_version: typeof evidenceManifestSchemaVersion;

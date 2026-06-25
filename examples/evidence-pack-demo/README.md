@@ -26,6 +26,9 @@ Inspect:
 - `plan.json`
 - `tool-calls.jsonl`
 - `guard-results.json`
+- `evidence-manifest.json`
+- `evidence-pack.json`
+- `tool-report.md`
 - `final-report.md`
 
 The safe demo uses a deterministic mock planner. It writes a README update proposal artifact rather than modifying `README.md` directly.
@@ -40,9 +43,11 @@ Inspect:
 
 - `blocked-actions.jsonl`
 - `command-results.jsonl`
+- `evidence-manifest.json`
+- `evidence-pack.json`
 - `final-report.md`
 
-A blocked action means the Policy Gate denied the request before execution. In the unsafe demo, requests such as `.env` reads and `git push` are recorded as blocked evidence and are not executed.
+A blocked action means the Policy Gate denied the request before execution. In the unsafe demo, requests such as `.env` reads and `git push` are recorded as blocked evidence and are not executed. These blocks remain local Harness safety controls, not Guard governance verdicts.
 
 ## Guard Unavailable Fallback
 
@@ -55,7 +60,7 @@ If the local `guard` CLI is unavailable, the run still succeeds. `guard-results.
 }
 ```
 
-Guard output is evidence only. It does not grant execution authority.
+Guard output is evidence only. It does not grant execution authority, compute verdicts, or override local Harness safety controls.
 
 ## Do Not Commit Generated Evidence
 

@@ -18,6 +18,7 @@ import {
   writeFinalReport,
   writeGuardResults
 } from "../evidence/writer.js";
+import { writeGuardCompatibilityEvidencePack } from "../evidence/compatibility.js";
 import { createDefaultGuardAdapter, type GuardAdapter } from "../guard/adapter.js";
 import { resolveWorkspaceRoot } from "../sandbox/workspace.js";
 import type { EvidencePack, PlanEvidence, TaskEvidence } from "../evidence/schema.js";
@@ -102,6 +103,19 @@ export async function runTask(
         );
   const guardResult = await (options.guardAdapter ?? createDefaultGuardAdapter()).collect();
   await writeGuardResults(evidencePack.evidenceDirectory, guardResult);
+  await writeGuardCompatibilityEvidencePack({
+    evidenceDirectory: evidencePack.evidenceDirectory,
+    relativeEvidenceDirectory: evidencePack.relativeEvidenceDirectory,
+    task,
+    plan,
+    guardResult,
+    executionSummary
+  });
+  await writeFinalReport(
+    evidencePack.evidenceDirectory,
+    await renderFinalReportFromEvidence(evidencePack.evidenceDirectory)
+  );
+  await writeEvidenceManifest(evidencePack.evidenceDirectory, taskId);
   await writeFinalReport(
     evidencePack.evidenceDirectory,
     await renderFinalReportFromEvidence(evidencePack.evidenceDirectory)

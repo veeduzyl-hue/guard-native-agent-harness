@@ -12,6 +12,8 @@ const requiredEvidenceFiles = [
   "blocked-actions.jsonl",
   "command-results.jsonl",
   "guard-results.json",
+  "evidence-manifest.json",
+  "evidence-pack.json",
   "final-report.md"
 ];
 
@@ -72,11 +74,25 @@ async function verifyEvidencePack(repoRoot, relativeEvidencePack, label) {
 
 async function verifySafeDemo(repoRoot, relativeEvidencePack) {
   const evidenceDirectory = path.resolve(repoRoot, relativeEvidencePack);
+  const task = JSON.parse(await readFile(path.join(evidenceDirectory, "task.json"), "utf8"));
+  const plan = JSON.parse(await readFile(path.join(evidenceDirectory, "plan.json"), "utf8"));
   const toolCalls = await readJsonl(path.join(evidenceDirectory, "tool-calls.jsonl"));
+  const compatibilityPack = JSON.parse(
+    await readFile(path.join(evidenceDirectory, "evidence-pack.json"), "utf8")
+  );
   const finalReport = await readFile(path.join(evidenceDirectory, "final-report.md"), "utf8");
 
   if (toolCalls.length < 1) {
     throw new Error("Safe demo did not record any tool-call evidence.");
+  }
+
+  verifyCompatibilityEnvelope(compatibilityPack, task, plan, "safe demo");
+  const artifactPaths = compatibilityPack.artifacts.map((artifact) => artifact.path);
+  if (
+    !artifactPaths.includes("examples/readme-update/README_UPDATE_PROPOSAL.md") ||
+    !artifactPaths.some((artifactPath) => artifactPath.endsWith("/tool-report.md"))
+  ) {
+    throw new Error("Safe demo compatibility envelope did not record the expected proposal and tool report artifacts.");
   }
 
   assertIncludes(finalReport, "Tool Calls", "Safe final report should include Tool Calls.");
@@ -92,8 +108,13 @@ async function verifySafeDemo(repoRoot, relativeEvidencePack) {
 
 async function verifyUnsafeDemo(repoRoot, relativeEvidencePack) {
   const evidenceDirectory = path.resolve(repoRoot, relativeEvidencePack);
+  const task = JSON.parse(await readFile(path.join(evidenceDirectory, "task.json"), "utf8"));
+  const plan = JSON.parse(await readFile(path.join(evidenceDirectory, "plan.json"), "utf8"));
   const blockedActions = await readJsonl(path.join(evidenceDirectory, "blocked-actions.jsonl"));
   const commandResults = await readJsonl(path.join(evidenceDirectory, "command-results.jsonl"));
+  const compatibilityPack = JSON.parse(
+    await readFile(path.join(evidenceDirectory, "evidence-pack.json"), "utf8")
+  );
   const finalReport = await readFile(path.join(evidenceDirectory, "final-report.md"), "utf8");
 
   if (blockedActions.length < 1) {
@@ -111,6 +132,17 @@ async function verifyUnsafeDemo(repoRoot, relativeEvidencePack) {
     throw new Error(
       "Unsafe demo did not record the expected blocked .env read and git push request."
     );
+  }
+
+  verifyCompatibilityEnvelope(compatibilityPack, task, plan, "unsafe demo");
+  if (compatibilityPack.tool_calls.length !== 0) {
+    throw new Error("Unsafe demo compatibility envelope should not record tool call events.");
+  }
+  if (
+    JSON.stringify(compatibilityPack.blocked_actions.map((event) => event.matched_rule)) !==
+    JSON.stringify(["block-env-read", "block-git-push"])
+  ) {
+    throw new Error("Unsafe demo compatibility envelope did not preserve blocked action facts.");
   }
 
   assertIncludes(
@@ -191,6 +223,78 @@ function parseEvidencePackPath(stdout) {
 function assertIncludes(value, expected, message) {
   if (!value.includes(expected)) {
     throw new Error(message);
+  }
+}
+
+function verifyCompatibilityEnvelope(compatibilityPack, task, plan, label) {
+  assertEqual(compatibilityPack.schema_version, "mindforge-guard-evidence.v1", `${label} schema_version`);
+  assertEqual(compatibilityPack.pack_id, task.task_id, `${label} pack_id`);
+  assertEqual(compatibilityPack.pack_type, "execution_facts", `${label} pack_type`);
+  assertEqual(
+    compatibilityPack.producer?.id,
+    "guard-native-agent-harness",
+    `${label} producer.id`
+  );
+  assertEqual(
+    compatibilityPack.producer?.role,
+    "evidence_producer",
+    `${label} producer.role`
+  );
+  assertEqual(
+    compatibilityPack.workflow?.task_id,
+    task.task_id,
+    `${label} workflow.task_id`
+  );
+  assertEqual(
+    compatibilityPack.workflow?.step_count,
+    plan.steps.length,
+    `${label} workflow.step_count`
+  );
+  assertEqual(
+    compatibilityPack.authority?.boundary,
+    "producer_only",
+    `${label} authority.boundary`
+  );
+  assertEqual(
+    compatibilityPack.authority?.consumer_authority,
+    "mindforge-guard-core",
+    `${label} authority.consumer_authority`
+  );
+  assertEqual(
+    compatibilityPack.authority?.governance_outputs_emitted,
+    false,
+    `${label} authority.governance_outputs_emitted`
+  );
+  assertEqual(
+    compatibilityPack.authority?.execution_authority_granted,
+    false,
+    `${label} authority.execution_authority_granted`
+  );
+  assertEqual(
+    compatibilityPack.manifest?.path,
+    "evidence-manifest.json",
+    `${label} manifest.path`
+  );
+
+  const serialized = JSON.stringify(compatibilityPack);
+  for (const forbiddenFragment of [
+    "\"verdict\"",
+    "\"reason_codes\"",
+    "\"risk_summary\"",
+    "\"evidence_coverage\"",
+    "GovernanceReportModel",
+    "generateGovernanceReport",
+    "generateEvidenceIndex"
+  ]) {
+    if (serialized.includes(forbiddenFragment)) {
+      throw new Error(`${label} compatibility envelope must not emit forbidden governance output: ${forbiddenFragment}`);
+    }
+  }
+}
+
+function assertEqual(actual, expected, label) {
+  if (actual !== expected) {
+    throw new Error(`${label} expected ${JSON.stringify(expected)} but received ${JSON.stringify(actual)}`);
   }
 }
 

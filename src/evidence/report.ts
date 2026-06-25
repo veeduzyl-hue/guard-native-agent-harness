@@ -8,16 +8,19 @@ import type {
 } from "./schema.js";
 import type { GuardAdapterResult } from "../guard/types.js";
 
-const expectedEvidenceFiles = [
+const requiredEvidenceFiles = [
   "task.json",
   "plan.json",
   "tool-calls.jsonl",
   "blocked-actions.jsonl",
   "command-results.jsonl",
   "guard-results.json",
-  "file-changes.diff",
+  "evidence-manifest.json",
+  "evidence-pack.json",
   "final-report.md"
 ];
+
+const optionalEvidenceFiles = ["tool-report.md", "file-changes.diff"];
 
 const diffMaxLength = 8000;
 
@@ -41,8 +44,13 @@ export async function renderFinalReportFromEvidence(evidenceDirectory: string): 
     "guard-results.json"
   );
   const fileChanges = await readTextFile(evidenceDirectory, "file-changes.diff");
-  const fileStatuses = await Promise.all(
-    expectedEvidenceFiles.map(
+  const requiredFileStatuses = await Promise.all(
+    requiredEvidenceFiles.map(
+      async (fileName) => [fileName, await evidenceFileStatus(evidenceDirectory, fileName)] as const
+    )
+  );
+  const optionalFileStatuses = await Promise.all(
+    optionalEvidenceFiles.map(
       async (fileName) => [fileName, await evidenceFileStatus(evidenceDirectory, fileName)] as const
     )
   );
@@ -69,7 +77,7 @@ ${renderPlanSummary(plan.value, plan.status)}
 
 ## 3. Evidence Pack Contents
 
-${renderEvidenceContents(fileStatuses)}
+${renderEvidenceContents(requiredFileStatuses, optionalFileStatuses)}
 
 ## 4. Tool Calls
 
@@ -99,7 +107,7 @@ ${renderGovernanceNotes({
   blockedActions: blockedActions.value ?? [],
   commandResults: commandResults.value ?? [],
   guardResults: guardResults.value,
-  fileStatuses,
+  fileStatuses: requiredFileStatuses,
   warnings
 })}
 
@@ -198,12 +206,18 @@ function renderProviderDiagnostics(plan: PlanEvidence): string[] {
 }
 
 function renderEvidenceContents(
-  fileStatuses: Array<readonly [string, "present" | "missing"]>
+  requiredFileStatuses: Array<readonly [string, "present" | "missing"]>,
+  optionalFileStatuses: Array<readonly [string, "present" | "missing"]>
 ): string {
   return [
+    "Required evidence files:",
+    "",
     "| File | Status |",
     "|---|---|",
-    ...fileStatuses.map(([fileName, status]) => `| ${fileName} | ${status} |`)
+    ...requiredFileStatuses.map(([fileName, status]) => `| ${fileName} | ${status} |`),
+    "",
+    "Optional/generated artifacts:",
+    ...optionalFileStatuses.map(([fileName, status]) => `- ${fileName}: ${status}`)
   ].join("\n");
 }
 

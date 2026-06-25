@@ -8,6 +8,8 @@ This document defines the boundary between Guard-native Agent Harness and MindFo
 
 Guard-native Agent Harness may eventually execute bounded local workflow tools. MindForge Guard must remain recommendation-only, additive-only, non-executing, deterministic, evidence-first, machine-verifiable, local-first, and protected from authority expansion or production control-plane drift.
 
+Current state: the harness produces bounded local execution facts, including a Guard-compatible Evidence Pack envelope for ingestion. The harness remains an Evidence Producer only. Guard remains the governance source of truth.
+
 ## 3. Guard Invariants To Preserve
 
 MindForge Guard remains:
@@ -52,6 +54,8 @@ Evidence must be written locally and be suitable for independent review. Planned
 
 Evidence should describe what happened or was planned. It should not hide execution, silently mutate files, or require SaaS services to be understood.
 
+Guard-compatible envelope fields must stay factual and producer-scoped. They must not turn the harness into a verdict engine, reason-code selector, risk summarizer, or coverage authority.
+
 ## 8. Guard Adapter Boundary
 
 The Guard Adapter prepares harness evidence for Guard validation. It must not:
@@ -89,7 +93,7 @@ The harness may later coordinate an agent runtime, but PR 1 has no agent runtime
 
 ## 14. Reporting Boundary
 
-Reports should summarize local evidence and policy decisions. Reports must not imply that Guard executed tools or enforced actions.
+Reports should summarize local evidence and policy decisions. Reports and compatibility envelopes must not imply that Guard executed tools, enforced actions, or delegated governance authority to the harness.
 
 ## 15. PR Boundary Rules
 
@@ -129,4 +133,4 @@ No external runtime should receive implicit workspace, shell, network, or Guard 
 
 ## 18. Boundary Summary
 
-The harness is where bounded local workflow experimentation may happen. Guard is where evidence is validated. PR 1 keeps that separation absolute by implementing only scaffold, docs, and a minimal test baseline.
+The harness is where bounded local workflow experimentation and execution-fact production may happen. Guard is where evidence is consumed and governance is determined. The harness remains producer-only, and Guard remains the governance authority.

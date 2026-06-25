@@ -36,7 +36,13 @@ async function writeCompleteEvidence(evidenceDirectory: string): Promise<void> {
       }
     ],
     risk_notes: ["No autonomous execution."],
-    expected_outputs: ["task.json", "plan.json", "final-report.md"],
+    expected_outputs: [
+      "task.json",
+      "plan.json",
+      "evidence-manifest.json",
+      "evidence-pack.json",
+      "final-report.md"
+    ],
     provider_diagnostics: {
       normalization_applied: true,
       normalization_changes: ["added missing step id for step index 0"],
@@ -101,9 +107,16 @@ async function writeCompleteEvidence(evidenceDirectory: string): Promise<void> {
   });
   await writeFile(
     path.join(evidenceDirectory, "file-changes.diff"),
-    "diff --git a/README.md b/README.md\n",
+      "diff --git a/README.md b/README.md\n",
     "utf8"
   );
+  await writeJson(path.join(evidenceDirectory, "evidence-manifest.json"), {
+    schema_version: "guard-native-evidence-pack-manifest.v1"
+  });
+  await writeJson(path.join(evidenceDirectory, "evidence-pack.json"), {
+    schema_version: "mindforge-guard-evidence.v1"
+  });
+  await writeFile(path.join(evidenceDirectory, "tool-report.md"), "# Tool Report\n", "utf8");
   await writeFile(path.join(evidenceDirectory, "final-report.md"), "", "utf8");
 }
 
@@ -128,6 +141,9 @@ describe("final report renderer", () => {
     expect(report).toContain("## 11. Limitations");
     expect(report).toContain("- Task ID: task-report-1");
     expect(report).toContain("- Step count: 1");
+    expect(report).toContain("| evidence-manifest.json | present |");
+    expect(report).toContain("| evidence-pack.json | present |");
+    expect(report).toContain("- tool-report.md: present");
     expect(report).toContain("Provider diagnostics:");
     expect(report).toContain("- Normalization applied: yes");
     expect(report).toContain("- Plan validated: yes");
@@ -174,6 +190,9 @@ describe("final report renderer", () => {
 
     expect(report).toContain("| plan.json | missing |");
     expect(report).toContain("| guard-results.json | missing |");
+    expect(report).toContain("| evidence-manifest.json | missing |");
+    expect(report).toContain("| evidence-pack.json | missing |");
+    expect(report).toContain("- tool-report.md: missing");
     expect(report).toContain("Plan evidence is missing.");
     expect(report).toContain("Guard results evidence is missing.");
     expect(report).toContain("Missing evidence files:");
