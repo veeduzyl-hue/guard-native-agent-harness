@@ -24,9 +24,10 @@ const requiredFiles = [
 
 const requiredManifestFiles = requiredFiles.filter((fileName) => fileName !== manifestFileName);
 const jsonFiles = [manifestFileName, "task.json", "plan.json", "guard-results.json"];
+const optionalJsonFiles = ["evidence-pack.json"];
 const jsonlFiles = ["tool-calls.jsonl", "blocked-actions.jsonl", "command-results.jsonl"];
 const optionalJsonlFiles = ["policy-decisions.jsonl"];
-const optionalManifestFiles = ["file-changes.diff", ...optionalJsonlFiles];
+const optionalManifestFiles = ["evidence-pack.json", "file-changes.diff", "tool-report.md", ...optionalJsonlFiles];
 const defaultFixtureChecks = [
   {
     label: "valid basic v0.3 evidence pack",
@@ -175,8 +176,15 @@ async function verifyRequiredFiles(evidenceDirectory, errors) {
 
 async function verifyJsonFiles(evidenceDirectory, errors) {
   const parsed = new Map();
+  const fileNames = [...jsonFiles];
 
-  for (const fileName of jsonFiles) {
+  for (const optionalFileName of optionalJsonFiles) {
+    if (existsSync(path.join(evidenceDirectory, optionalFileName))) {
+      fileNames.push(optionalFileName);
+    }
+  }
+
+  for (const fileName of fileNames) {
     const filePath = path.join(evidenceDirectory, fileName);
     if (!existsSync(filePath)) {
       continue;

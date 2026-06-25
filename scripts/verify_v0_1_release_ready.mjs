@@ -24,9 +24,16 @@ async function main() {
 
   const packageJson = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
   assert(
-    ["0.1.0", "0.2.0", "0.2.1", "0.3.0", "0.4.0", "0.4.1"].includes(packageJson.version),
+    ["0.1.0", "0.2.0", "0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.5.0"].includes(packageJson.version),
     "package.json version must be a supported release-prep version"
   );
+  const indexSource = await readFile(path.join(repoRoot, "src", "index.ts"), "utf8");
+  assert(
+    indexSource.includes(`HARNESS_VERSION = "${packageJson.version}"`),
+    "HARNESS_VERSION must match package.json version"
+  );
+  const cliSource = await readFile(path.join(repoRoot, "src", "cli.ts"), "utf8");
+  assert(cliSource.includes(".version(HARNESS_VERSION)"), "CLI version banner must use HARNESS_VERSION");
   assert(packageJson.scripts?.["verify:v0.1"], "package.json must include npm run verify:v0.1");
   assert(packageJson.scripts?.["verify:v0.1:release"], "package.json must include npm run verify:v0.1:release");
   checks.push("package metadata and v0.1 scripts are present");

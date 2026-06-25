@@ -28,7 +28,15 @@ describe("ollama planner provider", () => {
           }
         ],
         risk_notes: ["Model-generated plan must be validated before execution."],
-        expected_outputs: ["tool-calls.jsonl", "final-report.md"]
+        expected_outputs: [
+          "tool-calls.jsonl",
+          "blocked-actions.jsonl",
+          "command-results.jsonl",
+          "guard-results.json",
+          "evidence-manifest.json",
+          "evidence-pack.json",
+          "final-report.md"
+        ]
       })
     });
 

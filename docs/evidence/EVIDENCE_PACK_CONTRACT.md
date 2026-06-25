@@ -23,10 +23,28 @@ Required files:
 
 Optional files:
 
+- `evidence-pack.json`
 - `file-changes.diff`
+- `tool-report.md`
 - `policy-decisions.jsonl`, if a future harness version produces it
 
 The verifier must treat the pack as a review artifact. It must not execute tools, call providers or models, invoke the Guard CLI, load `.env`, persist API keys or credentials, record model reasoning or chain-of-thought, or claim approval, deployment safety, merge safety, or production readiness.
+
+## Guard Evidence Contract v1 Compatibility
+
+`evidence-pack.json` is an additive compatibility envelope for MindForge Guard Evidence Contract v1 ingestion.
+
+The harness remains an Evidence Producer only:
+
+- it emits bounded execution facts
+- it does not compute governance verdicts
+- it does not select reason codes
+- it does not compute risk summaries or evidence coverage
+- it does not generate governance reports or evidence indexes
+
+Guard remains the consumer and governance authority. Existing blocked actions remain local Harness safety controls and are recorded as execution facts, not as Guard governance verdicts.
+
+The compatibility envelope is local JSON written from existing harness evidence. It is compatibility smoke only. It is not Guard authority, not Guard validation, and not a runtime dependency on the Guard repository.
 
 ## Manifest
 

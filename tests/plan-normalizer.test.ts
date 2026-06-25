@@ -79,6 +79,8 @@ describe("plan normalizer", () => {
 
     expect(result.normalizedPlan.risk_notes).toEqual([]);
     expect(result.normalizedPlan.expected_outputs).toContain("final-report.md");
+    expect(result.normalizedPlan.expected_outputs).toContain("evidence-manifest.json");
+    expect(result.normalizedPlan.expected_outputs).toContain("evidence-pack.json");
     expect(result.changes).toContain("normalized missing risk_notes");
     expect(result.changes).toContain("normalized missing expected_outputs");
     expect(result.normalizedPlan.provider_diagnostics?.normalization_applied).toBe(true);

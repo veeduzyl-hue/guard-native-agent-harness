@@ -5,6 +5,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { GuardAdapter } from "../src/guard/adapter.js";
+import type { GuardCompatibilityEvidencePack } from "../src/evidence/schema.js";
+import { HARNESS_VERSION } from "../src/index.js";
 import { runTask } from "../src/task/runner.js";
 
 const unavailableGuardAdapter = new GuardAdapter(async () => {
@@ -39,12 +41,16 @@ describe("end-to-end mock planner demo", () => {
       "command-results.jsonl",
       "guard-results.json",
       "evidence-manifest.json",
+      "evidence-pack.json",
       "final-report.md"
     ]) {
       await expect(stat(path.join(result.evidenceDirectory, fileName))).resolves.toBeDefined();
     }
 
     const toolEvents = await readJsonl(result.toolCallsPath);
+    const compatibilityPack = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "evidence-pack.json"), "utf8")
+    ) as GuardCompatibilityEvidencePack;
     const report = await readFile(result.finalReportPath, "utf8");
     const proposal = await readFile(
       path.join(workspaceRoot, "examples", "readme-update", "README_UPDATE_PROPOSAL.md"),
@@ -59,6 +65,17 @@ describe("end-to-end mock planner demo", () => {
     expect(report).toContain("- Total tool calls:");
     expect(report).toContain("## 7. Guard Results");
     expect(report).toContain("Guard CLI was not available. The run completed with graceful fallback.");
+    expect(compatibilityPack.actions).toHaveLength(6);
+    expect(compatibilityPack.blocked_actions).toEqual([]);
+    expect(compatibilityPack.producer.version).toBe(HARNESS_VERSION);
+    expect(compatibilityPack.artifacts.map((artifact) => artifact.path)).toEqual([
+      ".evidence/task-20260520-060000-e2ereadme/tool-report.md",
+      "examples/readme-update/README_UPDATE_PROPOSAL.md"
+    ]);
+    expect(compatibilityPack.tool_calls.length).toBe(toolEvents.length);
+    expect(report).toContain("| evidence-manifest.json | present |");
+    expect(report).toContain("| evidence-pack.json | present |");
+    expect(report).toContain("- tool-report.md: present");
   });
 
   it("generates blocked-action evidence for the unsafe demo workflow", async () => {
@@ -73,6 +90,9 @@ describe("end-to-end mock planner demo", () => {
 
     const blockedEvents = await readJsonl(result.blockedActionsPath);
     const commandEvents = await readJsonl(result.commandResultsPath);
+    const compatibilityPack = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "evidence-pack.json"), "utf8")
+    ) as GuardCompatibilityEvidencePack;
     const report = await readFile(result.finalReportPath, "utf8");
 
     expect(result.executionSummary).toEqual({
@@ -87,5 +107,14 @@ describe("end-to-end mock planner demo", () => {
     expect(report).toContain("- Total blocked actions: 2");
     expect(report).toContain("block-env-read");
     expect(report).toContain("block-git-push");
+    expect(compatibilityPack.tool_calls).toEqual([]);
+    expect(compatibilityPack.blocked_actions.map((event) => event.matched_rule)).toEqual([
+      "block-env-read",
+      "block-git-push"
+    ]);
+    expect(compatibilityPack.actions.map((action) => action.status)).toEqual([
+      "blocked",
+      "blocked"
+    ]);
   });
 });

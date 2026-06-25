@@ -222,7 +222,10 @@ function buildOllamaPlannerPrompt(userPrompt: string): string {
       expected_outputs: [
         "tool-calls.jsonl",
         "blocked-actions.jsonl",
+        "command-results.jsonl",
         "guard-results.json",
+        "evidence-manifest.json",
+        "evidence-pack.json",
         "final-report.md"
       ]
     })

@@ -16,7 +16,17 @@ export function createPlaceholderPlan(taskId: string): PlanEvidence {
     risk_notes: [
       "PR 2 initializes evidence only. No files are read, written, or modified by agent tools."
     ],
-    expected_outputs: ["task.json", "plan.json", "final-report.md"]
+    expected_outputs: [
+      "task.json",
+      "plan.json",
+      "tool-calls.jsonl",
+      "blocked-actions.jsonl",
+      "command-results.jsonl",
+      "guard-results.json",
+      "evidence-manifest.json",
+      "evidence-pack.json",
+      "final-report.md"
+    ]
   };
 }
 
@@ -176,6 +186,8 @@ function createPlan(taskId: string, steps: MockPlanStep[]): MockPlanEvidence {
       "blocked-actions.jsonl",
       "command-results.jsonl",
       "guard-results.json",
+      "evidence-manifest.json",
+      "evidence-pack.json",
       "final-report.md"
     ]
   };

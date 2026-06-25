@@ -418,7 +418,15 @@ function validPlan(): Record<string, unknown> {
       }
     ],
     risk_notes: ["Model-generated plan must be validated before execution."],
-    expected_outputs: ["tool-calls.jsonl", "blocked-actions.jsonl", "final-report.md"]
+    expected_outputs: [
+      "tool-calls.jsonl",
+      "blocked-actions.jsonl",
+      "command-results.jsonl",
+      "guard-results.json",
+      "evidence-manifest.json",
+      "evidence-pack.json",
+      "final-report.md"
+    ]
   };
 }
 
